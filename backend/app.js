@@ -116,6 +116,15 @@ app.use(checkForAuthenticationCookie("token"));
 // Static files
 app.use(express.static(path.resolve('./public')));
 
+// Root route (optional – for health check / clarity)
+app.get('/', (req, res) => {
+  res.status(200).json({
+    status: 'ok',
+    message: 'BlogyAM API is running'
+  });
+});
+
+
 // API Routes
 app.use('/api', require('./routes/api')); // Mount API routes at /api
 
