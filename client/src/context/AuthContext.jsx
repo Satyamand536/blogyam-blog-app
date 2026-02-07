@@ -41,12 +41,13 @@ export const AuthProvider = ({ children }) => {
             }
             return { success: false, error: "Invalid credentials" };
         } catch (error) {
-            // We removed console.error here to keep your console clean.
-            // 401 is an expected status for wrong passwords.
-            return { 
-                success: false, 
-                error: error.response?.data?.error || "Login failed. Please check your credentials." 
-            };
+            let errorMsg = "Login failed. Please check your credentials.";
+            if (error.response?.data?.error) {
+                errorMsg = typeof error.response.data.error === 'string' 
+                    ? error.response.data.error 
+                    : (error.response.data.error.message || JSON.stringify(error.response.data.error));
+            }
+            return { success: false, error: errorMsg };
         }
     };
 
@@ -55,10 +56,13 @@ export const AuthProvider = ({ children }) => {
             const { data } = await api.post('/signup', { name, email, password });
             return { success: data.success };
         } catch (error) {
-            return { 
-                success: false, 
-                error: error.response?.data?.error || "Signup failed. Please try again." 
-            };
+            let errorMsg = "Signup failed. Please try again.";
+            if (error.response?.data?.error) {
+                errorMsg = typeof error.response.data.error === 'string' 
+                    ? error.response.data.error 
+                    : (error.response.data.error.message || JSON.stringify(error.response.data.error));
+            }
+            return { success: false, error: errorMsg };
         }
     };
 

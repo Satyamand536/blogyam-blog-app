@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { API_URL } from '../api/axios';
+import { getImageUrl } from '../utils/imageUtils';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { PenTool, User, LogOut, Menu, X, Smile, Sun, Moon, Shield } from 'lucide-react';
@@ -70,7 +71,7 @@ export default function Navbar() {
                                         <div className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden ring-2 ring-primary-500/20 group-hover:ring-primary-500/40 transition-all">
                                            {user.profileImageURL ? (
                                                 <img 
-                                                    src={`${API_URL}${user.profileImageURL}`} 
+                                                    src={getImageUrl(user.profileImageURL)} 
                                                     alt={user.name || 'User'} 
                                                     className="w-full h-full object-cover"
                                                     onError={(e) => {

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api, { API_URL } from '../api/axios';
+import { getImageUrl } from '../utils/imageUtils';
 import BlogCard from '../components/BlogCard';
 import { Loader2, Flame, BookOpen, PenTool, User as UserIcon, Mail, Calendar, Award, Bookmark, History, Trash2, Settings, Save, X, Camera } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
@@ -414,7 +415,7 @@ export default function Dashboard() {
                                     >
                                         <div className="w-1/3 overflow-hidden relative">
                                             <img 
-                                                src={historyItem.blogId.coverImageURL ? `${API_URL}${historyItem.blogId.coverImageURL}` : '/images/default-blog.png'} 
+                                                src={historyItem.blogId.coverImageURL ? getImageUrl(historyItem.blogId.coverImageURL) : '/images/default-blog.png'} 
                                                 alt={historyItem.blogId.title}
                                                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                                             />

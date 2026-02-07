@@ -50,7 +50,7 @@ export default function AuthorProfile() {
             <div className="bg-[var(--bg-card)] rounded-3xl p-8 mb-16 border border-[var(--border-color)] shadow-sm flex flex-col md:flex-row items-center md:items-start gap-8">
                 <div className="w-32 h-32 md:w-40 md:h-40 flex-shrink-0">
                     <img 
-                        src={`${API_URL}${author.profileImageURL}`} 
+                        src={getImageUrl(author.profileImageURL)} 
                         alt={author.name} 
                         className="w-full h-full rounded-full object-cover ring-4 ring-primary-100 dark:ring-primary-900/30"
                     />

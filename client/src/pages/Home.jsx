@@ -3,6 +3,7 @@ import { useNavigate, Link, useLocation } from 'react-router-dom';
 import Hero from '../components/Hero';
 import BlogCard from '../components/BlogCard';
 import api, { API_URL } from '../api/axios';
+import { getImageUrl } from '../utils/imageUtils';
 import { useAuth } from '../context/AuthContext';
 import { Loader2, Search, ArrowDown, Award, PenTool } from 'lucide-react';
 import { stripHtml } from '../utils/textUtils';
@@ -172,7 +173,7 @@ export default function Home() {
                                     <div className="mt-auto pt-8 border-t border-white/10 flex flex-col gap-6">
                                         <div className="flex items-center gap-5">
                                             <img 
-                                                src={`${API_URL}${bestOfWeek.author.profileImageURL}`} 
+                                                src={getImageUrl(bestOfWeek.author.profileImageURL)} 
                                                 alt={bestOfWeek.author.name} 
                                                 className="w-16 h-16 rounded-full border-2 border-amber-500/50 object-cover shrink-0 shadow-lg"
                                             />

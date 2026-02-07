@@ -29,7 +29,8 @@ export default function BlogReader() {
     const [unsaving, setUnsaving] = useState(false);
 
     const showNotification = (message, type = 'success', sticky = false) => {
-        setNotification({ show: true, message, type, sticky });
+        const safeMessage = typeof message === 'string' ? message : (message?.message || JSON.stringify(message) || "An unexpected error occurred");
+        setNotification({ show: true, message: safeMessage, type, sticky });
         if (!sticky) {
             setTimeout(() => setNotification(prev => ({ ...prev, show: false })), 4000);
         }
@@ -261,6 +262,12 @@ export default function BlogReader() {
         setNominating(false);
     };
 
+    const getImageUrl = (path) => {
+        if (!path) return '';
+        if (path.startsWith('http') || path.startsWith('data:')) return path;
+        return `${API_URL}${path}`;
+    };
+
     if (loading) return <div className="flex justify-center py-20"><Loader2 className="animate-spin text-primary-600" size={40} /></div>;
     if (!blog) return <div className="text-center py-20">Blog not found.</div>;
 
@@ -303,7 +310,7 @@ export default function BlogReader() {
 
                 <div className="rounded-2xl overflow-hidden shadow-lg mb-10">
                     <img 
-                        src={blog.coverImageURL ? `${API_URL}${blog.coverImageURL}` : '/images/default-blog.png'} 
+                        src={blog.coverImageURL ? getImageUrl(blog.coverImageURL) : '/images/default-blog.png'} 
                         alt={blog.title} 
                         className="w-full h-80 object-cover"
                     />
@@ -319,7 +326,7 @@ export default function BlogReader() {
                 <div className="mt-12 p-8 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-3xl flex items-center gap-6 animate-fade-in">
                     <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-primary-100 flex-shrink-0 shadow-inner">
                         <img 
-                            src={blog.author?.profileImageURL ? `${API_URL}${blog.author.profileImageURL}` : '/images/hacker.png'} 
+                            src={blog.author?.profileImageURL ? getImageUrl(blog.author.profileImageURL) : '/images/hacker.png'} 
                             alt={blog.author?.name} 
                             className="w-full h-full object-cover"
                         />
@@ -545,7 +552,7 @@ export default function BlogReader() {
                                 <div className="w-10 h-10 rounded-full bg-primary-100 flex-shrink-0 overflow-hidden flex items-center justify-center">
                                     {user.profileImageURL ? (
                                         <img 
-                                            src={`${API_URL}${user.profileImageURL}`} 
+                                            src={getImageUrl(user.profileImageURL)} 
                                             alt={user.name || 'You'} 
                                             className="w-full h-full object-cover"
                                             onError={(e) => {
@@ -587,7 +594,7 @@ export default function BlogReader() {
                                 <div className="w-10 h-10 rounded-full bg-primary-100 flex-shrink-0 overflow-hidden flex items-center justify-center">
                                      {comment.author?.profileImageURL ? (
                                          <img 
-                                             src={`${API_URL}${comment.author.profileImageURL}`} 
+                                             src={getImageUrl(comment.author.profileImageURL)} 
                                              alt={comment.author.name || 'User'} 
                                              className="w-full h-full object-cover"
                                              onError={(e) => {

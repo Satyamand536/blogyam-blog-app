@@ -195,6 +195,12 @@ export default function CreateBlog() {
         'code-block'
     ];
 
+    const getImageUrl = (path) => {
+        if (!path) return '';
+        if (path.startsWith('http') || path.startsWith('data:')) return path;
+        return `${API_URL}${path}`;
+    };
+
     if (!user) return null; // Or generic loading
 
     return (
@@ -285,7 +291,7 @@ export default function CreateBlog() {
                         {(file || (existingBanner && !removeBanner)) && (
                             <div className="relative group/preview w-24 h-14 rounded-lg overflow-hidden border border-[var(--border-color)] shadow-sm">
                                 <img 
-                                    src={file ? URL.createObjectURL(file) : `${API_URL}${existingBanner}`} 
+                                    src={file ? URL.createObjectURL(file) : getImageUrl(existingBanner)} 
                                     className="w-full h-full object-cover" 
                                     alt="Preview"
                                 />

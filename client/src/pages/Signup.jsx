@@ -72,7 +72,11 @@ export default function Signup() {
                     </p>
                 </div>
                 <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-                    {errors.submit && <div className="text-red-500 text-sm text-center">{errors.submit}</div>}
+                    {errors.submit && (
+                        <div className="text-red-500 text-sm text-center">
+                            {typeof errors.submit === 'string' ? errors.submit : "An unexpected error occurred"}
+                        </div>
+                    )}
                     <div className="space-y-4">
                         <div className="relative">
                             <User className="absolute left-3 top-3 text-slate-400" size={20} />

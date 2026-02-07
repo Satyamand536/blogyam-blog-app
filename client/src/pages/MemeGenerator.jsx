@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { API_URL } from '../api/axios';
+import api from '../api/axios';
 import { RefreshCw, Download, Sparkles, AlertTriangle, X } from 'lucide-react';
 import OptimizedImage from '../components/OptimizedImage';
 
@@ -14,16 +14,9 @@ export default function MemeGenerator() {
     // Fetch memes from our Production API (Database-first)
     const fetchTemplates = async () => {
         try {
-            const response = await fetch(`${API_URL}/api/memes/templates`);
+            const response = await api.get('/memes/templates');
             
-            if (response.status === 429) {
-                const result = await response.json();
-                setNotification(result.message || "you can not see more than 7 memes in a minute");
-                setLoading(false);
-                return;
-            }
-
-            const result = await response.json();
+            const result = response.data;
             if (result.success && result.data) {
                 const formattedMemes = result.data.map(m => ({
                     id: m._id,
@@ -41,6 +34,11 @@ export default function MemeGenerator() {
             }
         } catch (error) {
             console.error("Error fetching meme templates:", error);
+            if (error.response && error.response.status === 429) {
+                 const msg = error.response.data?.message || "Rate limit exceeded";
+                 setNotification(typeof msg === 'string' ? msg : JSON.stringify(msg));
+                 setLoading(false);
+            }
         } finally {
             setLoading(false);
         }
@@ -63,17 +61,12 @@ export default function MemeGenerator() {
             // Track popularity in background
             if (randomMeme && randomMeme.id) {
                 try {
-                    const response = await fetch(`${API_URL}/api/memes/templates/${randomMeme.id}/popularity`, { 
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' }
-                    });
-
-                    if (response.status === 429) {
-                        const resData = await response.json();
-                        setNotification(resData.message || "you can not see more than 7 memes in a minute");
-                    }
+                    await api.post(`/memes/templates/${randomMeme.id}/popularity`);
                 } catch (e) {
-                    // Ignore tracking errors
+                    if (e.response && e.response.status === 429) {
+                        const msg = e.response.data?.message || "Rate limit exceeded";
+                        setNotification(typeof msg === 'string' ? msg : JSON.stringify(msg));
+                    }
                 }
             }
         } else {

@@ -1,6 +1,6 @@
 import { Clock, BarChart, Tag, Lock } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { API_URL } from '../api/axios';
+import { getImageUrl } from '../utils/imageUtils';
 import { useAuth } from '../context/AuthContext';
 import { stripHtml } from '../utils/textUtils';
 import OptimizedImage from './OptimizedImage';
@@ -22,7 +22,7 @@ export default function BlogCard({ blog }) {
         <div className="card group h-full flex flex-col overflow-hidden">
             <div className="relative h-48 -mx-6 -mt-6 mb-4 overflow-hidden">
                 <OptimizedImage 
-                    src={blog.coverImageURL ? `${API_URL}${blog.coverImageURL}` : '/images/default-blog.png'} 
+                    src={blog.coverImageURL ? getImageUrl(blog.coverImageURL) : '/images/default-blog.png'} 
                     alt={blog.title} 
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     fallbackSrc="/images/default-blog.png"

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { API_URL } from '../api/axios';
-import { RefreshCw, Quote, Sparkles, ChevronLeft, ChevronRight } from 'lucide-react';
+import api from '../api/axios';
+import { RefreshCw, Quote, Sparkles, ChevronLeft, ChevronRight, CheckCircle } from 'lucide-react';
 import OptimizedImage from '../components/OptimizedImage';
 import { getRandomLocalQuote } from '../data/localQuotes';
 
@@ -20,6 +20,9 @@ export default function Quotes() {
     const [quoteHistory, setQuoteHistory] = useState([]);
     const [historyIndex, setHistoryIndex] = useState(-1);
     const [viewedQuoteIds, setViewedQuoteIds] = useState(new Set());
+    
+    // Toast Notification State
+    const [showCopyToast, setShowCopyToast] = useState(false);
 
     const categories = ['Wisdom', 'Knowledge', 'Life', 'Writing', 'Philosophy'];
     const HISTORY_LIMIT = 100; // Prevent memory issues
@@ -66,13 +69,11 @@ export default function Quotes() {
         }
         
         try {
-            const response = await fetch(`${API_URL}/api/quotes/daily`, {
+            const response = await api.get('/quotes/daily', {
                 signal: AbortSignal.timeout(10000)
             });
 
-            if (!response.ok) throw new Error(`API error: ${response.status}`);
-
-            const result = await response.json();
+            const result = response.data;
             
             if (result.success && result.data) {
                 const quoteData = {
@@ -125,16 +126,14 @@ export default function Quotes() {
         
         try {
             const excludeParam = Array.from(viewedQuoteIds).join(',');
-            const url = `${API_URL}/api/quotes?random=true&limit=1&category=${category}${excludeParam ? `&exclude=${excludeParam}` : ''}`;
+            const url = `/quotes?random=true&limit=1&category=${category}${excludeParam ? `&exclude=${excludeParam}` : ''}`;
             
             // Increased timeout to 15s for better reliability on slow networks
-            const response = await fetch(url, {
+            const response = await api.get(url, {
                 signal: AbortSignal.timeout(15000)
             });
 
-            if (!response.ok) throw new Error(`API error: ${response.status}`);
-
-            const result = await response.json();
+            const result = response.data;
             
             if (result.success) {
                 // Fix: API returns { quotes: [...] }, not { data: ... } for random quotes
@@ -172,7 +171,8 @@ export default function Quotes() {
         } catch (error) {
             // SILENT FALLBACK: Don't scare the user with standard error logs
             // Instead of error, we just treat it as "offline mode"
-            if (error.name === 'TimeoutError' || error.name === 'AbortError') {
+            // Check for axios specific error codes or standard error types
+            if (error.code === 'ECONNABORTED' || error.name === 'TimeoutError' || error.name === 'AbortError') {
                 console.warn("Request timed out - switching to local library (Offline Mode)");
             } else {
                 console.warn("Network issue - switching to local library");
@@ -366,7 +366,8 @@ export default function Quotes() {
                                 <button
                                     onClick={() => {
                                         navigator.clipboard.writeText(quote?.text || '');
-                                        alert('Quote copied to clipboard!');
+                                        setShowCopyToast(true);
+                                        setTimeout(() => setShowCopyToast(false), 3000);
                                     }}
                                     className="px-8 py-3 bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-medium rounded-full border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600 transition-all"
                                 >
@@ -387,6 +388,14 @@ export default function Quotes() {
                     </p>
                     <p className="mt-2 text-[var(--text-secondary)] opacity-70 text-sm">— Swami Vivekananda</p>
                 </div>
+
+                {/* Professional Toast Notification */}
+                <div className={`fixed top-24 left-1/2 transform -translate-x-1/2 z-[100] transition-all duration-500 ease-in-out ${showCopyToast ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 -translate-y-4 scale-95 pointer-events-none'}`}>
+                    <div className="flex items-center gap-3 px-6 py-4 rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.3)] backdrop-blur-xl border-2 bg-green-500/95 dark:bg-green-600/90 border-green-400 text-white">
+                        <CheckCircle size={22} className="animate-bounce-short" />
+                        <span className="font-bold text-sm tracking-wide">Quote copied to clipboard!</span>
+                    </div>
+                </div>
         </div>
     );
 }
@@ -399,8 +408,8 @@ function QuoteGrid({ category }) {
         const fetchGridQuotes = async () => {
              setLoading(true);
              try {
-                const response = await fetch(`${API_URL}/api/quotes?category=${category}&limit=24`);
-                const result = await response.json();
+                const response = await api.get(`/quotes?category=${category}&limit=24`);
+                const result = response.data;
                 if (result.success && result.quotes) {
                     setQuotes(result.quotes);
                 }
