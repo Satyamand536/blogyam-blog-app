@@ -29,7 +29,7 @@ REQUIRED_ENV.forEach((key) => {
 const app = express();
 
 // ─────────────────────────────────────────────
-// 🧠 REQUEST DEBUG (safe)
+// 🧠 REQUEST DEBUG
 // ─────────────────────────────────────────────
 app.use((req, res, next) => {
   console.log(`➡️ ${req.method} ${req.path}`);
@@ -47,22 +47,9 @@ mongoose
     process.exit(1);
   });
 
-// ─────────────────────────────────────────────
-// 🛡️ SECURITY
-// ─────────────────────────────────────────────
-app.use(
-  helmet({
-    crossOriginResourcePolicy: { policy: 'cross-origin' },
-    crossOriginEmbedderPolicy: false,
-  })
-);
-
-app.use(compression());
-app.use(hpp());
-
-// ─────────────────────────────────────────────
-// 🌍 CORS – FINAL & CORRECT (credentials compatible)
-// ─────────────────────────────────────────────
+/* =====================================================
+   🌍 CORS – MUST COME BEFORE HELMET
+   ===================================================== */
 const allowedOrigins = [
   'https://blogyam-blog-app-zqvj.vercel.app', // frontend prod
   'http://localhost:5173',                   // frontend dev
@@ -71,7 +58,7 @@ const allowedOrigins = [
 app.use(
   cors({
     origin: (origin, callback) => {
-      // allow Postman / server-side / health checks
+      // allow server-to-server / postman
       if (!origin) return callback(null, true);
 
       if (allowedOrigins.includes(origin)) {
@@ -85,6 +72,20 @@ app.use(
     allowedHeaders: ['Content-Type', 'Authorization'],
   })
 );
+
+/* =====================================================
+   🛡️ SECURITY (AFTER CORS)
+   ===================================================== */
+app.use(
+  helmet({
+    crossOriginResourcePolicy: false,
+    crossOriginEmbedderPolicy: false,
+    crossOriginOpenerPolicy: false,
+  })
+);
+
+app.use(compression());
+app.use(hpp());
 
 // ─────────────────────────────────────────────
 // 📦 BODY PARSERS
@@ -109,7 +110,7 @@ app.use((req, res, next) => {
 app.use(checkForAuthenticationCookie('token'));
 
 // ─────────────────────────────────────────────
-// 📁 STATIC FILES (optional)
+// 📁 STATIC FILES
 // ─────────────────────────────────────────────
 app.use(express.static(path.resolve('./public')));
 
@@ -129,7 +130,7 @@ app.get('/', (req, res) => {
 app.use('/api', require('./routes/api'));
 
 // ─────────────────────────────────────────────
-// ❌ 404 + ERROR HANDLER (LAST)
+// ❌ 404 + ERROR HANDLER
 // ─────────────────────────────────────────────
 app.use(notFoundHandler);
 app.use(errorHandler);
