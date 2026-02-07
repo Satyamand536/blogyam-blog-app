@@ -19,7 +19,7 @@ const { checkForAuthenticationCookie } = require('./middlewares/auth');
 // 🔒 BOOT-TIME ENV VALIDATION
 // ─────────────────────────────────────────────
 const REQUIRED_ENV = ['MONGODB_URL', 'JWT_SECRET'];
-REQUIRED_ENV.forEach(key => {
+REQUIRED_ENV.forEach((key) => {
   if (!process.env[key]) {
     console.error(`❌ Missing ENV variable: ${key}`);
     process.exit(1);
@@ -29,7 +29,7 @@ REQUIRED_ENV.forEach(key => {
 const app = express();
 
 // ─────────────────────────────────────────────
-// 🧠 DEBUG (safe for production)
+// 🧠 REQUEST DEBUG (safe)
 // ─────────────────────────────────────────────
 app.use((req, res, next) => {
   console.log(`➡️ ${req.method} ${req.path}`);
@@ -42,8 +42,8 @@ app.use((req, res, next) => {
 mongoose
   .connect(process.env.MONGODB_URL)
   .then(() => logger.info('✅ MongoDB connected'))
-  .catch(err => {
-    console.error('❌ MongoDB error:', err.message);
+  .catch((err) => {
+    console.error('❌ MongoDB connection failed:', err.message);
     process.exit(1);
   });
 
@@ -61,24 +61,24 @@ app.use(compression());
 app.use(hpp());
 
 // ─────────────────────────────────────────────
-// 🌍 CORS (FINAL FIX – credentials safe)
+// 🌍 CORS – FINAL & CORRECT (credentials compatible)
 // ─────────────────────────────────────────────
 const allowedOrigins = [
-  'https://blogyam-blog-app-zqvj.vercel.app', // frontend
-  'http://localhost:5173'
+  'https://blogyam-blog-app-zqvj.vercel.app', // frontend prod
+  'http://localhost:5173',                   // frontend dev
 ];
 
 app.use(
   cors({
-    origin: function (origin, callback) {
-      // allow server-to-server / postman
+    origin: (origin, callback) => {
+      // allow Postman / server-side / health checks
       if (!origin) return callback(null, true);
 
       if (allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error(`CORS blocked for origin: ${origin}`));
+        return callback(null, true);
       }
+
+      return callback(new Error(`❌ CORS blocked for origin: ${origin}`));
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
@@ -87,7 +87,7 @@ app.use(
 );
 
 // ─────────────────────────────────────────────
-// 📦 PARSERS
+// 📦 BODY PARSERS
 // ─────────────────────────────────────────────
 app.use(express.json({ limit: '10kb' }));
 app.use(express.urlencoded({ extended: false, limit: '10kb' }));
@@ -109,7 +109,7 @@ app.use((req, res, next) => {
 app.use(checkForAuthenticationCookie('token'));
 
 // ─────────────────────────────────────────────
-// 📁 STATIC (optional)
+// 📁 STATIC FILES (optional)
 // ─────────────────────────────────────────────
 app.use(express.static(path.resolve('./public')));
 
@@ -129,7 +129,7 @@ app.get('/', (req, res) => {
 app.use('/api', require('./routes/api'));
 
 // ─────────────────────────────────────────────
-// ❌ 404 + ERROR HANDLER
+// ❌ 404 + ERROR HANDLER (LAST)
 // ─────────────────────────────────────────────
 app.use(notFoundHandler);
 app.use(errorHandler);
@@ -140,11 +140,11 @@ app.use(errorHandler);
 module.exports = app;
 
 // ─────────────────────────────────────────────
-// 🖥️ LOCAL DEV SERVER ONLY
+// 🖥️ LOCAL DEV ONLY
 // ─────────────────────────────────────────────
 if (require.main === module) {
   const PORT = process.env.PORT || 8000;
-  app.listen(PORT, () =>
-    console.log(`🚀 Server running on http://localhost:${PORT}`)
-  );
+  app.listen(PORT, () => {
+    console.log(`🚀 Server running at http://localhost:${PORT}`);
+  });
 }
