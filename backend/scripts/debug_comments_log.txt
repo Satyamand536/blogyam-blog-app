@@ -1,0 +1,22 @@
+✓ Connected to MongoDB
+
+--- Searching for User "Aryan Saini" ---
+Found 1 user(s):
+- Aryan saini (ID: 69832de5b4ffe73e7e485726)
+
+--- Searching for Blog "Future of Ai" ---
+Found 1 blog(s):
+- "FUTURE OF AI" (ID: 69624e60f0d4577a88fe3a28)
+
+--- Comments by Aryan ---
+
+[2026-02-04T11:31:18.321Z] Comment: "Bahut tagda"
+  Blog ID: undefined (Title: "Unknown")
+  Author: 69832de5b4ffe73e7e485726
+
+--- ALL Comments on "Future of Ai" (ID: 69624e60f0d4577a88fe3a28) ---
+- [2026-01-11T12:08:51.791Z] "nice " by Sitaram
+- [2026-01-11T12:08:33.097Z] "hello
+" by Sitaram
+- [2026-01-11T12:08:21.547Z] "hi" by Sitaram
+- [2026-01-10T13:05:29.381Z] "well explained" by Sitaram

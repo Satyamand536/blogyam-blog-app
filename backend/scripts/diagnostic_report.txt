@@ -1,0 +1,84 @@
+
+============================================================
+DATABASE DIAGNOSTIC REPORT
+============================================================
+
+📊 USERS IN DATABASE:
+------------------------------------------------------------
+1. Name: "Sitaram" | Email: sitaram454@gmail.com | ID: 68ffc6e33e7489974373f87f
+2. Name: "Jagdamba" | Email: Jagdamba345@gmail.com | ID: 68ffc9143e7489974373f896
+3. Name: "Dhjay" | Email: Dhjay345@gmail.com | ID: 690098b7c524ed4216c747d7
+4. Name: "Jagmh" | Email: Jagmh456@gmail.com | ID: 69009ac7c524ed4216c747ed
+5. Name: "Jntyu" | Email: Jntyu@1234 | ID: 690d29e052f13c308f5010b7
+6. Name: "Satyamand" | Email: satyamand536@gmail.com | ID: 695292028f6c21882b274718
+7. Name: "Sachin" | Email: sachin1234@gmail.com | ID: 69529ffed06cec2faf3407b2
+8. Name: "Abhi" | Email: Abhi1234@gmail.com | ID: 69621b4d6ebeb58589b29971
+9. Name: "Shivamkumar" | Email: shivamkumar25510@gmail.com | ID: 69624954f0d4577a88fe39f8
+10. Name: "Aakash" | Email: Aakash328@gmail.com | ID: 696267d948d663fb29ab47d7
+11. Name: "Satyamand" | Email: satyamand536@gh | ID: 69691be28a9dbf5d6ba5e149
+12. Name: "Sushil" | Email: Sushil@1235gmail.com | ID: 696a58b6d493725a559bd09a
+13. Name: "Aa123" | Email: Aa123@r.com | ID: 696a660bdd4412618ed0fcd2
+14. Name: "Abh" | Email: Abh12@gmail.com | ID: 696a67a71e0993e766d46620
+15. Name: "Sanghi" | Email: sanghi345@gmail.com | ID: 69830487b9c7484b13d9e595
+
+Total Users: 15
+
+💬 COMMENTS AUTHOR DISTRIBUTION:
+------------------------------------------------------------
+  Sitaram (68ffc6e33e7489974373f87f): 22 comment(s)
+  Sanghi (69830487b9c7484b13d9e595): 3 comment(s)
+
+Total Comments: 25
+
+📝 BLOG AUTHORS DISTRIBUTION:
+------------------------------------------------------------
+  Sitaram (68ffc6e33e7489974373f87f): 7 blog(s)
+
+Total Blogs: 7
+
+🔍 SAMPLE COMMENTS (First 10):
+------------------------------------------------------------
+1. Comment: "fantastic..."
+   Author: Sitaram (ID: 68ffc6e33e7489974373f87f)
+   Created: Tue Oct 28 2025 01:02:13 GMT+0530 (India Standard Time)
+
+2. Comment: "hare krishna!..."
+   Author: Sitaram (ID: 68ffc6e33e7489974373f87f)
+   Created: Tue Oct 28 2025 01:04:17 GMT+0530 (India Standard Time)
+
+3. Comment: "fantabulous..."
+   Author: Sitaram (ID: 68ffc6e33e7489974373f87f)
+   Created: Tue Oct 28 2025 15:56:32 GMT+0530 (India Standard Time)
+
+4. Comment: "wow, unique spiritual story..."
+   Author: Sitaram (ID: 68ffc6e33e7489974373f87f)
+   Created: Tue Oct 28 2025 15:59:48 GMT+0530 (India Standard Time)
+
+5. Comment: "Great..."
+   Author: Sitaram (ID: 68ffc6e33e7489974373f87f)
+   Created: Mon Dec 29 2025 21:47:56 GMT+0530 (India Standard Time)
+
+6. Comment: "well explained..."
+   Author: Sitaram (ID: 68ffc6e33e7489974373f87f)
+   Created: Sat Jan 10 2026 18:35:29 GMT+0530 (India Standard Time)
+
+7. Comment: "god bless you krishna...."
+   Author: Sitaram (ID: 68ffc6e33e7489974373f87f)
+   Created: Sat Jan 10 2026 20:24:14 GMT+0530 (India Standard Time)
+
+8. Comment: "hi..."
+   Author: Sitaram (ID: 68ffc6e33e7489974373f87f)
+   Created: Sun Jan 11 2026 17:38:21 GMT+0530 (India Standard Time)
+
+9. Comment: "hello
+..."
+   Author: Sitaram (ID: 68ffc6e33e7489974373f87f)
+   Created: Sun Jan 11 2026 17:38:33 GMT+0530 (India Standard Time)
+
+10. Comment: "nice ..."
+   Author: Sitaram (ID: 68ffc6e33e7489974373f87f)
+   Created: Sun Jan 11 2026 17:38:51 GMT+0530 (India Standard Time)
+
+============================================================
+DIAGNOSTIC COMPLETE
+============================================================

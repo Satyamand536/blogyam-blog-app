@@ -1,2 +1,59 @@
-node_modules
+# Dependencies
+node_modules/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Testing
+coverage/
+
+# Production
+dist/
+build/
+*.apk
+*.aab
+
+# Environment Variables
 .env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.env
+*.env.*
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+logs
+*.log
+*.pid
+*.seed
+*.pid.lock
+
+# Editor/IDE
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.DS_Store
+Thumbs.db
+
+# Optional: Ignore downloaded memes if you want to save space/bandwidth
+# backend/public/images/memes/*
+# !backend/public/images/memes/.gitkeep
+
+# Sensitive Scripts (contain hardcoded credentials or PII)
+backend/scripts/fix-maisatyam.js
+backend/scripts/restore-passwords.js
+backend/scripts/repair-identity.js
+backend/scripts/platform-integrity.js
+backend/scripts/repair-user.js
+backend/scripts/repair-atlas.js
+
