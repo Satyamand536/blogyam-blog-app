@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import api from '../api/axios';
+import api, { API_URL } from '../api/axios';
 import { Loader2, Shield, CheckCircle, XCircle, Star, User, Award, PenTool, Search } from 'lucide-react';
 import PremiumModal from '../components/PremiumModal';
 
@@ -275,7 +275,7 @@ export default function AdminDashboard() {
                                     <td className="px-6 py-4 font-medium text-[var(--text-primary)] flex items-center gap-3">
                                         <div className="w-8 h-8 rounded-full bg-slate-200 overflow-hidden">
                                             {user.profileImageURL ? (
-                                                <img src={`http://localhost:8000${user.profileImageURL}`} alt="" className="w-full h-full object-cover" />
+                                                <img src={`${API_URL}${user.profileImageURL}`} alt="" className="w-full h-full object-cover" />
                                             ) : (
                                                 <div className="w-full h-full flex items-center justify-center text-xs font-bold text-slate-500">
                                                     {(user.name || 'U')[0]}
@@ -488,7 +488,7 @@ export default function AdminDashboard() {
                                             blog.spotlight === 'bestOfWeek' ? 'border-amber-400 shadow-amber-200' : 'border-indigo-100'
                                         }`}>
                                             <img 
-                                                src={blog.author?.profileImageURL ? `http://localhost:8000${blog.author.profileImageURL}` : '/uploads/default-avatar.png'} 
+                                                src={blog.author?.profileImageURL ? `${API_URL}${blog.author.profileImageURL}` : '/uploads/default-avatar.png'} 
                                                 alt="" 
                                                 className="w-full h-full object-cover" 
                                             />
@@ -563,7 +563,7 @@ export default function AdminDashboard() {
                                                 <div className="flex items-center gap-3">
                                                     <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-amber-200 shadow-sm">
                                                         <img 
-                                                            src={blog.author?.profileImageURL ? `http://localhost:8000${blog.author.profileImageURL}` : '/uploads/default-avatar.png'} 
+                                                            src={blog.author?.profileImageURL ? `${API_URL}${blog.author.profileImageURL}` : '/uploads/default-avatar.png'} 
                                                             alt={blog.author?.name} 
                                                             className="w-full h-full object-cover" 
                                                         />
@@ -578,7 +578,7 @@ export default function AdminDashboard() {
                                                     {nominators.map((nominator, idx) => (
                                                         <div key={idx} className="w-8 h-8 rounded-full border-2 border-[var(--bg-primary)] shadow-sm bg-indigo-50 flex items-center justify-center overflow-hidden z-[10]">
                                                             <img 
-                                                                src={nominator?.profileImageURL ? `http://localhost:8000${nominator.profileImageURL}` : '/uploads/default-avatar.png'} 
+                                                                src={nominator?.profileImageURL ? `${API_URL}${nominator.profileImageURL}` : '/uploads/default-avatar.png'} 
                                                                 alt={nominator?.name} 
                                                                 className="w-full h-full object-cover" 
                                                                 title={nominator?.name}

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import api from '../api/axios';
+import api, { API_URL } from '../api/axios';
 import { Image as ImageIcon, Loader2, Globe, Lock, AlertCircle, Trash2, X } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import ReactQuill from 'react-quill-new';
@@ -285,7 +285,7 @@ export default function CreateBlog() {
                         {(file || (existingBanner && !removeBanner)) && (
                             <div className="relative group/preview w-24 h-14 rounded-lg overflow-hidden border border-[var(--border-color)] shadow-sm">
                                 <img 
-                                    src={file ? URL.createObjectURL(file) : `http://localhost:8000${existingBanner}`} 
+                                    src={file ? URL.createObjectURL(file) : `${API_URL}${existingBanner}`} 
                                     className="w-full h-full object-cover" 
                                     alt="Preview"
                                 />

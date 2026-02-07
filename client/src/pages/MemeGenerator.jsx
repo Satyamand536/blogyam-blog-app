@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { API_URL } from '../api/axios';
 import { RefreshCw, Download, Sparkles, AlertTriangle, X } from 'lucide-react';
 import OptimizedImage from '../components/OptimizedImage';
 
@@ -13,7 +14,7 @@ export default function MemeGenerator() {
     // Fetch memes from our Production API (Database-first)
     const fetchTemplates = async () => {
         try {
-            const response = await fetch('http://localhost:8000/api/memes/templates');
+            const response = await fetch(`${API_URL}/api/memes/templates`);
             
             if (response.status === 429) {
                 const result = await response.json();
@@ -62,7 +63,7 @@ export default function MemeGenerator() {
             // Track popularity in background
             if (randomMeme && randomMeme.id) {
                 try {
-                    const response = await fetch(`http://localhost:8000/api/memes/templates/${randomMeme.id}/popularity`, { 
+                    const response = await fetch(`${API_URL}/api/memes/templates/${randomMeme.id}/popularity`, { 
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' }
                     });

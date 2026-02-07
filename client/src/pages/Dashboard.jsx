@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import api from '../api/axios';
+import api, { API_URL } from '../api/axios';
 import BlogCard from '../components/BlogCard';
 import { Loader2, Flame, BookOpen, PenTool, User as UserIcon, Mail, Calendar, Award, Bookmark, History, Trash2, Settings, Save, X, Camera } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
@@ -213,7 +213,7 @@ export default function Dashboard() {
                             <div className="relative group">
                                 <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-purple-800 rounded-full blur opacity-25 group-hover:opacity-50 transition duration-1000"></div>
                                 <img 
-                                    src={displayUser?.profileImageURL ? `http://localhost:8000${displayUser.profileImageURL}` : '/images/hacker.png'} 
+                                    src={displayUser?.profileImageURL ? `${API_URL}${displayUser.profileImageURL}` : '/images/hacker.png'} 
                                     alt="Profile" 
                                     className="relative w-32 h-32 rounded-full border-4 border-[var(--bg-card)] shadow-xl object-cover"
                                 />
@@ -414,7 +414,7 @@ export default function Dashboard() {
                                     >
                                         <div className="w-1/3 overflow-hidden relative">
                                             <img 
-                                                src={historyItem.blogId.coverImageURL ? `http://localhost:8000${historyItem.blogId.coverImageURL}` : '/images/default-blog.png'} 
+                                                src={historyItem.blogId.coverImageURL ? `${API_URL}${historyItem.blogId.coverImageURL}` : '/images/default-blog.png'} 
                                                 alt={historyItem.blogId.title}
                                                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                                             />

@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import Hero from '../components/Hero';
 import BlogCard from '../components/BlogCard';
-import api from '../api/axios';
+import api, { API_URL } from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 import { Loader2, Search, ArrowDown, Award, PenTool } from 'lucide-react';
 import { stripHtml } from '../utils/textUtils';
@@ -144,7 +144,7 @@ export default function Home() {
                                 <div className="w-full lg:w-[55%] relative group-hover:scale-105 transition-transform duration-1000">
                                     <div className="absolute inset-0 bg-gradient-to-r from-slate-900 via-transparent to-transparent z-10 hidden lg:block" />
                                     <img 
-                                        src={`http://localhost:8000${bestOfWeek.coverImageURL}`} 
+                                        src={`${API_URL}${bestOfWeek.coverImageURL}`} 
                                         alt={bestOfWeek.title} 
                                         className="w-full h-full object-cover"
                                     />
@@ -172,7 +172,7 @@ export default function Home() {
                                     <div className="mt-auto pt-8 border-t border-white/10 flex flex-col gap-6">
                                         <div className="flex items-center gap-5">
                                             <img 
-                                                src={`http://localhost:8000${bestOfWeek.author.profileImageURL}`} 
+                                                src={`${API_URL}${bestOfWeek.author.profileImageURL}`} 
                                                 alt={bestOfWeek.author.name} 
                                                 className="w-16 h-16 rounded-full border-2 border-amber-500/50 object-cover shrink-0 shadow-lg"
                                             />
@@ -212,7 +212,7 @@ export default function Home() {
                                 <div key={blog._id} className="group cursor-pointer" onClick={() => handleBlogClick(blog._id)}>
                                     <div className="relative aspect-[4/5] rounded-[2rem] overflow-hidden mb-6 border border-[var(--border-color)] shadow-lg group-hover:shadow-2xl transition-all duration-500">
                                         <img 
-                                            src={`http://localhost:8000${blog.coverImageURL}`} 
+                                            src={`${API_URL}${blog.coverImageURL}`} 
                                             alt={blog.title}
                                             className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
                                         />

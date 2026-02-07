@@ -55,6 +55,7 @@ app.use(helmet({
 app.use(cors({
     origin: [
         process.env.CLIENT_URL,
+        'https://blogyam-blog-app.vercel.app',
         'http://localhost:5173',
         'http://localhost:5174',
         'http://localhost:4173'
@@ -119,32 +120,39 @@ app.use(express.static(path.resolve('./public')));
 app.use('/api', require('./routes/api')); // Mount API routes
 
 // 404 & Error Handling (MUST be last)
+// 404 & Error Handling (MUST be last)
 app.use(notFoundHandler);
 app.use(errorHandler);
 
-const server = app.listen(PORT, () => logger.info(`Server running on port ${PORT}`));
+// Vercel/Serverless Export
+module.exports = app;
 
-// GRACEFUL SHUTDOWN: Protect against data loss and hung connections
-const shutdown = async (signal) => {
-    logger.info(`${signal} received. Starting graceful shutdown...`);
-    server.close(async () => {
-        logger.info('HTTP server closed.');
-        try {
-            await mongoose.connection.close();
-            logger.info('MongoDB connection closed.');
-            process.exit(0);
-        } catch (err) {
-            logger.error('Error during shutdown:', err);
+// Standalone Server Setup (Only run if called directly)
+if (require.main === module) {
+    const server = app.listen(PORT, () => logger.info(`Server running on port ${PORT}`));
+
+    // GRACEFUL SHUTDOWN: Protect against data loss and hung connections
+    const shutdown = async (signal) => {
+        logger.info(`${signal} received. Starting graceful shutdown...`);
+        server.close(async () => {
+            logger.info('HTTP server closed.');
+            try {
+                await mongoose.connection.close();
+                logger.info('MongoDB connection closed.');
+                process.exit(0);
+            } catch (err) {
+                logger.error('Error during shutdown:', err);
+                process.exit(1);
+            }
+        });
+
+        // Force exit if shutdown takes too long (10s)
+        setTimeout(() => {
+            logger.error('Shutdown timed out. Forcing exit.');
             process.exit(1);
-        }
-    });
+        }, 10000);
+    };
 
-    // Force exit if shutdown takes too long (10s)
-    setTimeout(() => {
-        logger.error('Shutdown timed out. Forcing exit.');
-        process.exit(1);
-    }, 10000);
-};
-
-process.on('SIGTERM', () => shutdown('SIGTERM'));
-process.on('SIGINT', () => shutdown('SIGINT'));
+    process.on('SIGTERM', () => shutdown('SIGTERM'));
+    process.on('SIGINT', () => shutdown('SIGINT'));
+}

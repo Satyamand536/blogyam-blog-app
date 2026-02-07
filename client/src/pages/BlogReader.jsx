@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import api from '../api/axios';
+import api, { API_URL } from '../api/axios';
 import AIAssistant from '../components/AIAssistant';
 import MembershipGate from '../components/MembershipGate';
 import { Loader2, Heart, MessageCircle, Share2, Bookmark, Trash2, User, Tag, Sparkles, Edit3, Shield, CheckCircle, XCircle, AlertTriangle, X } from 'lucide-react';
@@ -303,7 +303,7 @@ export default function BlogReader() {
 
                 <div className="rounded-2xl overflow-hidden shadow-lg mb-10">
                     <img 
-                        src={blog.coverImageURL ? `http://localhost:8000${blog.coverImageURL}` : '/images/default-blog.png'} 
+                        src={blog.coverImageURL ? `${API_URL}${blog.coverImageURL}` : '/images/default-blog.png'} 
                         alt={blog.title} 
                         className="w-full h-80 object-cover"
                     />
@@ -319,7 +319,7 @@ export default function BlogReader() {
                 <div className="mt-12 p-8 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-3xl flex items-center gap-6 animate-fade-in">
                     <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-primary-100 flex-shrink-0 shadow-inner">
                         <img 
-                            src={blog.author?.profileImageURL ? `http://localhost:8000${blog.author.profileImageURL}` : '/images/hacker.png'} 
+                            src={blog.author?.profileImageURL ? `${API_URL}${blog.author.profileImageURL}` : '/images/hacker.png'} 
                             alt={blog.author?.name} 
                             className="w-full h-full object-cover"
                         />
@@ -545,7 +545,7 @@ export default function BlogReader() {
                                 <div className="w-10 h-10 rounded-full bg-primary-100 flex-shrink-0 overflow-hidden flex items-center justify-center">
                                     {user.profileImageURL ? (
                                         <img 
-                                            src={user.profileImageURL} 
+                                            src={`${API_URL}${user.profileImageURL}`} 
                                             alt={user.name || 'You'} 
                                             className="w-full h-full object-cover"
                                             onError={(e) => {
@@ -587,7 +587,7 @@ export default function BlogReader() {
                                 <div className="w-10 h-10 rounded-full bg-primary-100 flex-shrink-0 overflow-hidden flex items-center justify-center">
                                      {comment.author?.profileImageURL ? (
                                          <img 
-                                             src={comment.author.profileImageURL} 
+                                             src={`${API_URL}${comment.author.profileImageURL}`} 
                                              alt={comment.author.name || 'User'} 
                                              className="w-full h-full object-cover"
                                              onError={(e) => {

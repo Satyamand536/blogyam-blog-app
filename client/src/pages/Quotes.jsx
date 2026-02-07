@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { API_URL } from '../api/axios';
 import { RefreshCw, Quote, Sparkles, ChevronLeft, ChevronRight } from 'lucide-react';
 import OptimizedImage from '../components/OptimizedImage';
 import { getRandomLocalQuote } from '../data/localQuotes';
@@ -65,7 +66,7 @@ export default function Quotes() {
         }
         
         try {
-            const response = await fetch(`http://localhost:8000/api/quotes/daily`, {
+            const response = await fetch(`${API_URL}/api/quotes/daily`, {
                 signal: AbortSignal.timeout(10000)
             });
 
@@ -124,7 +125,7 @@ export default function Quotes() {
         
         try {
             const excludeParam = Array.from(viewedQuoteIds).join(',');
-            const url = `http://localhost:8000/api/quotes?random=true&limit=1&category=${category}${excludeParam ? `&exclude=${excludeParam}` : ''}`;
+            const url = `${API_URL}/api/quotes?random=true&limit=1&category=${category}${excludeParam ? `&exclude=${excludeParam}` : ''}`;
             
             // Increased timeout to 15s for better reliability on slow networks
             const response = await fetch(url, {
@@ -398,7 +399,7 @@ function QuoteGrid({ category }) {
         const fetchGridQuotes = async () => {
              setLoading(true);
              try {
-                const response = await fetch(`http://localhost:8000/api/quotes?category=${category}&limit=24`);
+                const response = await fetch(`${API_URL}/api/quotes?category=${category}&limit=24`);
                 const result = await response.json();
                 if (result.success && result.quotes) {
                     setQuotes(result.quotes);

@@ -37,16 +37,8 @@ const { addComment, reportComment, updateComment } = require('../controllers/com
 
 const { requireOwner, requireAuthorOrOwner, requireRole } = require('../middlewares/roles');
 
-// Multer Setup
-const storage = multer.diskStorage({
-    destination: function (req, res, cb) {
-        cb(null, path.resolve(`./public/uploads/`));
-    },
-    filename: function (req, file, cb) {
-        const fileName = `${Date.now()}-${file.originalname}`;
-        cb(null, fileName);
-    }
-});
+// Cloudinary Setup
+const { storage } = require('../utils/cloudinary');
 const upload = multer({ storage: storage });
 
 // Auth Routes

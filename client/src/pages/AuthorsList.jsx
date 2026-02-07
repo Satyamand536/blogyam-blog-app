@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import api from '../api/axios';
+import api, { API_URL } from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 import MembershipGate from '../components/MembershipGate';
 import { Loader2, UserCheck, Shield } from 'lucide-react';
@@ -51,7 +51,7 @@ export default function AuthorsList() {
                         <div className="bg-[var(--bg-card)] rounded-2xl p-6 border border-[var(--border-color)] shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col items-center text-center h-full">
                             <div className="relative w-24 h-24 mb-4">
                                 <img 
-                                    src={`http://localhost:8000${author.profileImageURL}`} 
+                                    src={`${API_URL}${author.profileImageURL}`} 
                                     alt={author.name} 
                                     className="w-full h-full rounded-full object-cover ring-4 ring-primary-50 dark:ring-primary-900/20 group-hover:scale-105 transition-transform duration-300"
                                 />
