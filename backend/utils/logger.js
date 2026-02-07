@@ -1,34 +1,23 @@
 /**
- * Production-Ready Logging System
- * Structured logging with levels, timestamps, and context
+ * Serverless-Safe Production Logger
+ * - Works on Vercel / AWS Lambda
+ * - No filesystem usage
+ * - Structured JSON logs
  */
 
-const fs = require('fs');
-const path = require('path');
+const isServerless = !!process.env.VERCEL;
 
 class Logger {
     constructor(options = {}) {
         this.level = options.level || process.env.LOG_LEVEL || 'info';
         this.serviceName = options.serviceName || 'blog-app';
-        this.logFilePath = options.logFilePath || path.join(__dirname, '../logs/app.log');
-        this.errorLogPath = options.errorLogPath || path.join(__dirname, '../logs/error.log');
-        
+
         this.levels = {
             error: 0,
             warn: 1,
             info: 2,
             debug: 3
         };
-
-        // Ensure log directory exists
-        this.ensureLogDirectory();
-    }
-
-    ensureLogDirectory() {
-        const logDir = path.dirname(this.logFilePath);
-        if (!fs.existsSync(logDir)) {
-            fs.mkdirSync(logDir, { recursive: true });
-        }
     }
 
     shouldLog(level) {
@@ -36,56 +25,37 @@ class Logger {
     }
 
     formatMessage(level, message, meta = {}) {
-        const timestamp = new Date().toISOString();
-        const logEntry = {
-            timestamp,
+        return JSON.stringify({
+            timestamp: new Date().toISOString(),
             level: level.toUpperCase(),
             service: this.serviceName,
             message,
             ...meta
-        };
-
-        return JSON.stringify(logEntry);
-    }
-
-    writeToFile(logEntry, isError = false) {
-        try {
-            const filePath = isError ? this.errorLogPath : this.logFilePath;
-            fs.appendFileSync(filePath, logEntry + '\n');
-        } catch (err) {
-            // Fallback to console if file write fails
-            console.error('Failed to write to log file:', err.message);
-        }
+        });
     }
 
     log(level, message, meta = {}) {
         if (!this.shouldLog(level)) return;
 
-        const formattedMessage = this.formatMessage(level, message, meta);
-        
-        // Console output (colorized for development)
-        if (process.env.NODE_ENV !== 'production') {
-            const colors = {
-                error: '\x1b[31m', // Red
-                warn: '\x1b[33m',  // Yellow
-                info: '\x1b[36m',  // Cyan
-                debug: '\x1b[90m'  // Gray
-            };
-            const reset = '\x1b[0m';
-            console.log(`${colors[level]}${formattedMessage}${reset}`);
-        } else {
-            console.log(formattedMessage);
+        // Attach stack trace safely
+        if (meta?.error instanceof Error) {
+            meta.stack = meta.error.stack;
+            meta.error = meta.error.message;
         }
 
-        // Write to file
-        this.writeToFile(formattedMessage, level === 'error');
+        const formatted = this.formatMessage(level, message, meta);
+
+        // Serverless & Production-safe logging
+        if (level === 'error') {
+            console.error(formatted);
+        } else if (level === 'warn') {
+            console.warn(formatted);
+        } else {
+            console.log(formatted);
+        }
     }
 
     error(message, meta = {}) {
-        // Add stack trace if error object is provided
-        if (meta.error && meta.error.stack) {
-            meta.stack = meta.error.stack;
-        }
         this.log('error', message, meta);
     }
 
@@ -101,19 +71,19 @@ class Logger {
         this.log('debug', message, meta);
     }
 
-    // Special method for HTTP request logging
+    // HTTP request logging
     logRequest(req, res, duration) {
         this.info('HTTP Request', {
             method: req.method,
-            url: req.url,
+            url: req.originalUrl || req.url,
             statusCode: res.statusCode,
             duration: `${duration}ms`,
             ip: req.ip,
-            userAgent: req.get('user-agent')
+            userAgent: req.get?.('user-agent')
         });
     }
 
-    // Log performance metrics
+    // Performance metrics
     logPerformance(operation, duration, meta = {}) {
         this.info('Performance Metric', {
             operation,
@@ -123,10 +93,8 @@ class Logger {
     }
 }
 
-// Create singleton instance
-const logger = new Logger({
+// Singleton instance
+module.exports = new Logger({
     serviceName: 'BlogyAM-API',
     level: process.env.LOG_LEVEL || 'info'
 });
-
-module.exports = logger;
