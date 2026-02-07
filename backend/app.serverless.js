@@ -5,7 +5,12 @@ const mongoose = require('mongoose');
 
 const app = express();
 
-// ⚠️ SIMPLE CORS (baad me tighten karenge)
+/* ❌ NEVER process.exit() in serverless */
+if (!process.env.MONGODB_URL) {
+  throw new Error('MONGODB_URL is missing');
+}
+
+/* ✅ Minimal CORS */
 app.use(cors({
   origin: '*',
   credentials: true
@@ -13,17 +18,29 @@ app.use(cors({
 
 app.use(express.json());
 
-// ⚠️ MongoDB connect (NO cron jobs)
-if (!mongoose.connection.readyState) {
-  mongoose.connect(process.env.MONGODB_URL)
-    .then(() => console.log('Mongo connected (serverless)'))
-    .catch(err => console.error(err));
+/* ✅ Safe MongoDB connection */
+let isConnected = false;
+
+async function connectDB() {
+  if (isConnected) return;
+  await mongoose.connect(process.env.MONGODB_URL);
+  isConnected = true;
+  console.log('MongoDB connected (serverless)');
 }
 
-// ✅ ROUTES (KEEP /api PREFIX)
+app.use(async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (err) {
+    console.error('DB connection failed', err);
+    res.status(500).json({ message: 'Database connection failed' });
+  }
+});
+
+/* ✅ ROUTES */
 app.use('/api', require('./routes/api'));
 
-// Health check
 app.get('/api/health', (req, res) => {
   res.json({ status: 'OK' });
 });
