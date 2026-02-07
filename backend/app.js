@@ -117,7 +117,7 @@ app.use(checkForAuthenticationCookie("token"));
 app.use(express.static(path.resolve('./public')));
 
 // API Routes
-app.use('/api', require('./routes/api')); // Mount API routes
+app.use('/api', require('./routes/api')); // Mount API routes at /api
 
 // 404 & Error Handling (MUST be last)
 // 404 & Error Handling (MUST be last)
