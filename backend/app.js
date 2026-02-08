@@ -3,7 +3,6 @@ const path = require('path');
 const express = require('express');
 const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
-const cors = require('cors');
 const helmet = require('helmet');
 const compression = require('compression');
 const hpp = require('hpp');
@@ -16,10 +15,9 @@ const { errorHandler, notFoundHandler } = require('./middlewares/errorMonitoring
 const { checkForAuthenticationCookie } = require('./middlewares/auth');
 
 // ─────────────────────────────────────────────
-// 🔒 BOOT-TIME ENV VALIDATION
+// 🔒 ENV VALIDATION
 // ─────────────────────────────────────────────
-const REQUIRED_ENV = ['MONGODB_URL', 'JWT_SECRET'];
-REQUIRED_ENV.forEach((key) => {
+['MONGODB_URL', 'JWT_SECRET'].forEach((key) => {
   if (!process.env[key]) {
     console.error(`❌ Missing ENV variable: ${key}`);
     process.exit(1);
@@ -47,40 +45,45 @@ mongoose
     process.exit(1);
   });
 
-/* =====================================================
-   🌍 CORS – MUST COME BEFORE HELMET
-   ===================================================== */
+// ─────────────────────────────────────────────
+// 🌍 CORS – MANUAL & BULLETPROOF (NO * EVER)
+// ─────────────────────────────────────────────
 const allowedOrigins = [
   'https://blogyam-blog-app-zqvj.vercel.app', // frontend prod
-  'http://localhost:5173',                   // frontend dev
+  'http://localhost:5173',
 ];
 
-app.use(
-  cors({
-    origin: (origin, callback) => {
-      // allow server-to-server / postman
-      if (!origin) return callback(null, true);
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
 
-      if (allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      }
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+  }
 
-      return callback(new Error(`❌ CORS blocked for origin: ${origin}`));
-    },
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-  })
-);
+  res.setHeader(
+    'Access-Control-Allow-Headers',
+    'Origin, X-Requested-With, Content-Type, Accept, Authorization'
+  );
+  res.setHeader(
+    'Access-Control-Allow-Methods',
+    'GET, POST, PUT, PATCH, DELETE, OPTIONS'
+  );
 
-/* =====================================================
-   🛡️ SECURITY (AFTER CORS)
-   ===================================================== */
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200);
+  }
+
+  next();
+});
+
+// ─────────────────────────────────────────────
+// 🛡️ SECURITY
+// ─────────────────────────────────────────────
 app.use(
   helmet({
-    crossOriginResourcePolicy: false,
     crossOriginEmbedderPolicy: false,
-    crossOriginOpenerPolicy: false,
+    crossOriginResourcePolicy: false,
   })
 );
 
@@ -105,20 +108,20 @@ app.use((req, res, next) => {
 });
 
 // ─────────────────────────────────────────────
-// 🔐 AUTH (cookie based)
+// 🔐 AUTH
 // ─────────────────────────────────────────────
 app.use(checkForAuthenticationCookie('token'));
 
 // ─────────────────────────────────────────────
-// 📁 STATIC FILES
+// 📁 STATIC
 // ─────────────────────────────────────────────
 app.use(express.static(path.resolve('./public')));
 
 // ─────────────────────────────────────────────
-// 🩺 ROOT HEALTH CHECK
+// 🩺 HEALTH
 // ─────────────────────────────────────────────
 app.get('/', (req, res) => {
-  res.status(200).json({
+  res.json({
     status: 'ok',
     message: 'BlogyAM API is running',
   });
@@ -130,22 +133,22 @@ app.get('/', (req, res) => {
 app.use('/api', require('./routes/api'));
 
 // ─────────────────────────────────────────────
-// ❌ 404 + ERROR HANDLER
+// ❌ ERRORS
 // ─────────────────────────────────────────────
 app.use(notFoundHandler);
 app.use(errorHandler);
 
 // ─────────────────────────────────────────────
-// ☁️ SERVERLESS EXPORT (VERCEL)
+// ☁️ SERVERLESS EXPORT
 // ─────────────────────────────────────────────
 module.exports = app;
 
 // ─────────────────────────────────────────────
-// 🖥️ LOCAL DEV ONLY
+// 🖥️ LOCAL DEV
 // ─────────────────────────────────────────────
 if (require.main === module) {
   const PORT = process.env.PORT || 8000;
-  app.listen(PORT, () => {
-    console.log(`🚀 Server running at http://localhost:${PORT}`);
-  });
+  app.listen(PORT, () =>
+    console.log(`🚀 Server running at http://localhost:${PORT}`)
+  );
 }
