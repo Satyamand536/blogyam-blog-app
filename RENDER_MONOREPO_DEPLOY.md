@@ -31,14 +31,10 @@ Render dashboard ke **"Environment"** tab mein niche diye gaye variables add kar
 | `NODE_ENV` | `production` |
 | `MONGODB_URL` | *(Aapki MongoDB URI)* |
 | `JWT_SECRET` | *(Koi bhi random string)* |
-| `VITE_API_URL` | `https://blogyam.onrender.com` (Aapki final Render link) |
 | `OPENROUTER_API_KEY` | *(Aapki OpenRouter Key)* |
 | `CLOUDINARY_CLOUD_NAME` | `dxfqlr7y8` |
 | `CLOUDINARY_API_KEY` | `388566182328988` |
 | `CLOUDINARY_API_SECRET` | `thqsggXGWH_C2WIgST9SdWyOYp8` |
-
-> [!IMPORTANT]
-> **VITE_API_URL** mein apni Render ki website link daalna mat bhulna (piche `/api` nahi lagana hai).
 
 ---
 

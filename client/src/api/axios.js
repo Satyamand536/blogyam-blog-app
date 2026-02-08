@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-// Backend base URL (no /api suffix, no trailing slash)
-const rawUrl = (import.meta.env.VITE_API_URL || 'http://localhost:8000').trim();
+// Backend base URL (Automatic detection for monorepo deployment)
+const rawUrl = (import.meta.env.VITE_API_URL || (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:8000')).trim();
 export const API_URL = rawUrl.replace(/\/api\/?$/, '').replace(/\/$/, '');
 
 const api = axios.create({
