@@ -55,10 +55,10 @@ const memeRateLimiter = async (req, res, next) => {
         // Filter out old requests
         requests = requests.filter(timestamp => timestamp > windowStart);
         
-        if (requests.length >= 7) {
+        if (requests.length >= 100) {
             return res.status(429).json({
                 success: false,
-                message: "you can not see more than 7 memes in a minute"
+                message: "Too many meme requests. Please slow down."
             });
         }
         

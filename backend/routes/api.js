@@ -131,6 +131,16 @@ router.post('/admin/blacklist-email', requireOwner, (req, res) => {
     return blacklistEmail(req, res);
 });
 
+router.get('/admin/reports', requireOwner, (req, res) => {
+    const { getReports } = require('../controllers/adminController');
+    return getReports(req, res);
+});
+
+router.patch('/admin/reports/:id/dismiss', requireOwner, (req, res) => {
+    const { dismissReport } = require('../controllers/adminController');
+    return dismissReport(req, res);
+});
+
 // Health Checks (Internally protected by requireOwner for metrics)
 const healthRoutes = require('./health');
 router.use('/system', healthRoutes); // e.g., /api/system/health, /api/system/metrics

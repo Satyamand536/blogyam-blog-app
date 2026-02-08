@@ -219,6 +219,32 @@ async function blacklistEmail(req, res) {
     }
 }
 
+async function getReports(req, res) {
+    const Comment = require('../models/comments');
+    try {
+        const reports = await Comment.find({ reportCount: { $gt: 0 } })
+            .populate('author', 'name email profileImageURL')
+            .populate('reportedBy', 'name email')
+            .populate('blogId', 'title')
+            .sort({ reportCount: -1 });
+        
+        return res.json({ success: true, reports });
+    } catch (error) {
+        return res.status(500).json({ success: false, error: error.message });
+    }
+}
+
+async function dismissReport(req, res) {
+    const Comment = require('../models/comments');
+    try {
+        const { id } = req.params;
+        await Comment.findByIdAndUpdate(id, { reportCount: 0, reportedBy: [], isHidden: false });
+        return res.json({ success: true, message: "Report dismissed" });
+    } catch (error) {
+        return res.status(500).json({ success: false, error: error.message });
+    }
+}
+
 module.exports = {
     getUsers,
     makeAuthor,
@@ -230,5 +256,7 @@ module.exports = {
     getAuthorPublicBlogs,
     banUser,
     blacklistIP,
-    blacklistEmail
+    blacklistEmail,
+    getReports,
+    dismissReport
 };

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import api from '../api/axios';
 import { getImageUrl } from '../utils/imageUtils';
-import { Loader2, Shield, CheckCircle, XCircle, Star, User, Award, PenTool, Search } from 'lucide-react';
+import { Loader2, Shield, CheckCircle, XCircle, Star, User, Award, PenTool, Search, AlertTriangle } from 'lucide-react';
 import PremiumModal from '../components/PremiumModal';
 
 export default function AdminDashboard() {
@@ -11,6 +11,8 @@ export default function AdminDashboard() {
     const [loading, setLoading] = useState(true);
     const [actionLoading, setActionLoading] = useState(null);
     const [spotlightLoading, setSpotlightLoading] = useState(null);
+    const [reports, setReports] = useState([]);
+    const [activeTab, setActiveTab] = useState('users'); // users, spotlight, reports, moderation
     
     // Direct Spotlight Search Power
     const [searchQuery, setSearchQuery] = useState('');
@@ -45,7 +47,17 @@ export default function AdminDashboard() {
         fetchUsers();
         fetchSpotlightQueue();
         fetchActiveSpotlight();
+        fetchReports();
     }, []);
+
+    const fetchReports = async () => {
+        try {
+            const { data } = await api.get('/admin/reports');
+            if (data.success) setReports(data.reports);
+        } catch (error) {
+            console.error("Failed to fetch reports", error);
+        }
+    };
 
     const fetchUsers = async () => {
         try {
@@ -246,6 +258,18 @@ export default function AdminDashboard() {
         });
     };
 
+    const handleDismissReport = async (reportId) => {
+        try {
+            const { data } = await api.patch(`/admin/reports/${reportId}/dismiss`);
+            if (data.success) {
+                showToast("Report dismissed", 'success');
+                setReports(prev => prev.filter(r => r._id !== reportId));
+            }
+        } catch (error) {
+            showToast("Failed to dismiss report", 'error');
+        }
+    };
+
     if (loading) return <div className="flex justify-center py-20"><Loader2 className="animate-spin text-primary-600" size={40} /></div>;
 
     return (
@@ -254,7 +278,36 @@ export default function AdminDashboard() {
                 <Shield className="text-primary-600" /> Admin Control Center
             </h1>
 
-            <div className="bg-[var(--bg-card)] rounded-xl border border-[var(--border-color)] overflow-hidden shadow-sm mb-12">
+            {/* Tab Navigation */}
+            <div className="flex flex-wrap gap-2 mb-8 border-b border-[var(--border-color)] pb-4">
+                {[
+                    { id: 'users', label: 'Users', icon: User },
+                    { id: 'spotlight', label: 'Spotlight', icon: Star },
+                    { id: 'reports', label: 'Reports', icon: Shield, count: reports.length },
+                    { id: 'moderation', label: 'Moderation', icon: Shield }
+                ].map(tab => (
+                    <button
+                        key={tab.id}
+                        onClick={() => setActiveTab(tab.id)}
+                        className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest transition-all ${
+                            activeTab === tab.id 
+                            ? 'bg-primary-600 text-white shadow-lg shadow-primary-500/20' 
+                            : 'bg-[var(--bg-card)] text-[var(--text-secondary)] hover:bg-[var(--bg-primary)] border border-[var(--border-color)]'
+                        }`}
+                    >
+                        <tab.icon size={14} />
+                        {tab.label}
+                        {tab.count > 0 && (
+                            <span className="ml-1 px-1.5 py-0.5 bg-red-500 text-white rounded-full text-[10px] animate-pulse">
+                                {tab.count}
+                            </span>
+                        )}
+                    </button>
+                ))}
+            </div>
+
+            {activeTab === 'users' && (
+                <div className="bg-[var(--bg-card)] rounded-xl border border-[var(--border-color)] overflow-hidden shadow-sm mb-12 animate-fade-in text-[var(--text-primary)]">
                 <div className="px-6 py-4 border-b border-[var(--border-color)] bg-[var(--bg-primary)] flex items-center justify-between">
                     <h2 className="font-bold text-[var(--text-primary)]">User Management</h2>
                     <span className="text-xs font-bold text-primary-600 bg-primary-50 px-2 py-1 rounded-md uppercase tracking-wide">Platform Governance</span>
@@ -392,10 +445,12 @@ export default function AdminDashboard() {
                         </div>
                     ))}
                 </div>
-            </div>
+            )}
 
-            {/* Moderation Command Center */}
-            <div className="bg-red-950/20 rounded-2xl p-4 sm:p-8 mb-12 shadow-xl border border-red-500/20 relative overflow-hidden backdrop-blur-sm">
+            {activeTab === 'moderation' && (
+                <div className="animate-fade-in">
+                    {/* Moderation Command Center */}
+                    <div className="bg-red-950/20 rounded-2xl p-4 sm:p-8 mb-12 shadow-xl border border-red-500/20 relative overflow-hidden backdrop-blur-sm">
                 <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
                     <Shield size={120} className="text-red-500" />
                 </div>
@@ -453,11 +508,15 @@ export default function AdminDashboard() {
                             </div>
                         </div>
                     </div>
+                        </div>
+                    </div>
                 </div>
-            </div>
+            )}
 
-            {/* Direct Spotlight Search (Owner Superpower) */}
-            <div className="bg-slate-900 rounded-2xl p-4 sm:p-8 mb-12 shadow-2xl border border-white/10 relative overflow-hidden">
+            {activeTab === 'spotlight' && (
+                <div className="animate-fade-in">
+                    {/* Direct Spotlight Search (Owner Superpower) */}
+                    <div className="bg-slate-900 rounded-2xl p-4 sm:p-8 mb-12 shadow-2xl border border-white/10 relative overflow-hidden">
                 <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
                     <Shield size={120} className="text-white" />
                 </div>
@@ -508,11 +567,98 @@ export default function AdminDashboard() {
                             ))}
                         </div>
                     )}
+                        </div>
+                    )}
                 </div>
             </div>
+            
+            {activeTab === 'reports' && (
+                <div className="animate-fade-in">
+                    <div className="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-color)] overflow-hidden shadow-xl mb-12">
+                        <div className="px-4 sm:px-8 py-6 border-b border-[var(--border-color)] bg-gradient-to-r from-red-500/10 to-transparent flex items-center justify-between">
+                            <h2 className="text-lg sm:text-xl font-serif font-bold text-[var(--text-primary)] flex items-center gap-2">
+                                <Shield className="text-red-600" size={20} /> Community Reports
+                            </h2>
+                            <span className="text-[10px] font-black uppercase tracking-widest text-red-600 bg-red-50 px-3 py-1 rounded-full">
+                                {reports.length} Priority {reports.length === 1 ? 'Alert' : 'Alerts'}
+                            </span>
+                        </div>
 
-            {/* Active Spotlight Management */}
-            <div className="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-color)] overflow-hidden shadow-xl mb-12 animate-fade-in delay-100">
+                        <div className="p-4 sm:p-8">
+                            {reports.length > 0 ? (
+                                <div className="grid grid-cols-1 gap-6">
+                                    {reports.map(report => (
+                                        <div key={report._id} className="bg-[var(--bg-primary)] rounded-3xl p-6 border border-[var(--border-color)] hover:shadow-xl transition-all duration-300 relative overflow-hidden group">
+                                            {/* Report Count Badge */}
+                                            <div className="absolute top-0 right-0 p-4">
+                                                <div className="bg-red-600 text-white px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter flex items-center gap-1">
+                                                    <AlertTriangle size={12} /> {report.reportCount} Reports
+                                                </div>
+                                            </div>
+
+                                            <div className="flex flex-col md:flex-row gap-6">
+                                                <div className="flex-1">
+                                                    <div className="flex items-center gap-3 mb-4">
+                                                        <div className="w-10 h-10 rounded-full bg-slate-200 overflow-hidden ring-2 ring-red-100">
+                                                            <img 
+                                                                src={report.author?.profileImageURL ? getImageUrl(report.author.profileImageURL) : '/uploads/default-avatar.png'} 
+                                                                alt="" 
+                                                                className="w-full h-full object-cover" 
+                                                            />
+                                                        </div>
+                                                        <div>
+                                                            <h4 className="text-sm font-bold text-[var(--text-primary)]">By {report.author?.name}</h4>
+                                                            <p className="text-[10px] text-[var(--text-secondary)] uppercase font-black">Blog: {report.blogId?.title || 'Unknown'}</p>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="bg-[var(--bg-card)] p-4 rounded-2xl border border-red-100 dark:border-red-900/30 mb-4">
+                                                        <p className="text-sm text-[var(--text-primary)] italic">"{report.content}"</p>
+                                                    </div>
+
+                                                    <div className="flex flex-wrap gap-2 items-center">
+                                                        <span className="text-[10px] font-black uppercase text-slate-400">Reported By:</span>
+                                                        {report.reportedBy.map((reporter, rIdx) => (
+                                                            <span key={rIdx} className="bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-lg text-[10px] font-bold text-[var(--text-secondary)]">
+                                                                {reporter.name || reporter.email}
+                                                            </span>
+                                                        ))}
+                                                    </div>
+                                                </div>
+
+                                                <div className="flex md:flex-col gap-2 justify-end">
+                                                    <button 
+                                                        onClick={() => handleModerationAction('ban', report.author?._id, `Malicious content in blog: ${report.blogId?.title}`)}
+                                                        className="flex-1 px-6 py-3 bg-red-600 hover:bg-red-700 text-white text-[10px] font-black uppercase rounded-xl transition-all shadow-lg shadow-red-500/20"
+                                                    >
+                                                        Ban Author
+                                                    </button>
+                                                    <button 
+                                                        onClick={() => handleDismissReport(report._id)}
+                                                        className="flex-1 px-6 py-3 bg-[var(--bg-card)] text-slate-600 hover:text-green-600 border border-[var(--border-color)] text-[10px] font-black uppercase rounded-xl transition-all"
+                                                    >
+                                                        Dismiss
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="text-center py-16 flex flex-col items-center bg-slate-50/50 dark:bg-slate-900/10 rounded-3xl border-2 border-dashed border-[var(--border-color)]">
+                                    <Shield size={32} className="text-slate-300 mb-2" />
+                                    <p className="text-xs sm:text-sm text-[var(--text-secondary)] font-medium">Community is safe. No active reports.</p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {activeTab === 'spotlight' && (
+                <div className="animate-fade-in">
+                    {/* Active Spotlight Management */}
+                    <div className="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-color)] overflow-hidden shadow-xl mb-12">
                 <div className="px-4 sm:px-8 py-6 border-b border-[var(--border-color)] bg-gradient-to-r from-amber-500/10 to-transparent flex items-center justify-between">
                     <div>
                         <h2 className="text-lg sm:text-xl font-serif font-bold text-[var(--text-primary)] flex items-center gap-2">

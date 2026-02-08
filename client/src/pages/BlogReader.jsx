@@ -618,76 +618,78 @@ export default function BlogReader() {
                                                 This comment has been hidden after multiple community reports.
                                             </p>
                                         ) : (
-                                            <>
-                                                {editingCommentId === comment._id ? (
-                                                    <div className="mt-2">
-                                                        <textarea 
-                                                            value={editedContent}
-                                                            onChange={(e) => setEditedContent(e.target.value)}
-                                                            className="w-full p-3 bg-white dark:bg-slate-900 border border-[var(--border-color)] rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm"
-                                                            rows={3}
-                                                        />
-                                                        <div className="flex justify-end gap-2 mt-2">
-                                                            <button 
-                                                                onClick={handleCancelEdit}
-                                                                className="text-xs font-medium text-slate-500 hover:text-slate-700 px-3 py-1"
-                                                            >
-                                                                Cancel
-                                                            </button>
-                                                            <button 
-                                                                onClick={() => handleSaveEdit(comment._id)}
-                                                                className="text-xs font-bold text-white bg-primary-600 hover:bg-primary-700 px-4 py-1 rounded-lg transition-colors"
-                                                            >
-                                                                Save
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                ) : (
-                                                    <p className="text-[var(--text-secondary)] text-sm leading-relaxed">{comment.content}</p>
-                                                )}
-
-                                                <div className="mt-2 flex justify-between items-center">
-                                                    {/* Edit Button for Author */}
-                                                    {user && user._id === comment.author?._id && editingCommentId !== comment._id && (
-                                                        <button 
-                                                            onClick={() => handleEditClick(comment)}
-                                                            className="text-[10px] font-bold text-slate-400 hover:text-primary-600 transition-colors flex items-center gap-1"
-                                                            title="Edit Comment"
-                                                        >
-                                                            <Edit3 size={12} /> Edit
-                                                        </button>
-                                                    )}
-                                                    
-                                                    {/* Report Button (Right Aligned) */}
-                                                    <div className="ml-auto">
-                                                        {reportingCommentId === comment._id ? (
-                                                            <div className="flex items-center gap-3 animate-fade-in bg-red-50 dark:bg-red-900/10 px-3 py-1 rounded-lg">
-                                                                <span className="text-xs text-red-600 font-bold">Report this?</span>
-                                                                <button 
-                                                                    onClick={() => confirmReport(comment._id)}
-                                                                    className="text-xs font-bold text-white bg-red-500 hover:bg-red-600 px-3 py-1 rounded-md transition-colors"
-                                                                >
-                                                                    Yes
-                                                                </button>
-                                                                <button 
-                                                                    onClick={cancelReport}
-                                                                    className="text-xs font-bold text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 px-2 py-1 transition-colors"
-                                                                >
-                                                                    No
-                                                                </button>
+                                                    <>
+                                                        {editingCommentId === comment._id ? (
+                                                            <div className="mt-2 text-[var(--text-primary)]">
+                                                                <textarea 
+                                                                    value={editedContent}
+                                                                    onChange={(e) => setEditedContent(e.target.value)}
+                                                                    className="w-full p-3 bg-stone-50 dark:bg-slate-900 text-slate-950 dark:text-slate-100 border border-[var(--border-color)] rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm shadow-inner"
+                                                                    rows={3}
+                                                                />
+                                                                <div className="flex justify-end gap-2 mt-2">
+                                                                    <button 
+                                                                        onClick={handleCancelEdit}
+                                                                        className="text-xs font-medium text-slate-500 hover:text-slate-700 px-3 py-1"
+                                                                    >
+                                                                        Cancel
+                                                                    </button>
+                                                                    <button 
+                                                                        onClick={() => handleSaveEdit(comment._id)}
+                                                                        className="text-xs font-bold text-white bg-primary-600 hover:bg-primary-700 px-4 py-1 rounded-lg transition-colors"
+                                                                    >
+                                                                        Save
+                                                                    </button>
+                                                                </div>
                                                             </div>
                                                         ) : (
-                                                            <button 
-                                                                onClick={() => handleReportClick(comment._id)}
-                                                                className="text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-red-500 transition-colors flex items-center gap-1"
-                                                                title="Report inappropriate content"
-                                                            >
-                                                                <Shield size={10} /> Report
-                                                            </button>
+                                                            <p className="text-[var(--text-secondary)] text-sm leading-relaxed">{comment.content}</p>
                                                         )}
-                                                    </div>
-                                                </div>
-                                            </>
+        
+                                                        <div className="mt-2 flex justify-between items-center">
+                                                            {/* Edit Button for Author */}
+                                                            {user && user._id === comment.author?._id && editingCommentId !== comment._id && (
+                                                                <button 
+                                                                    onClick={() => handleEditClick(comment)}
+                                                                    className="text-[10px] font-bold text-slate-400 hover:text-primary-600 transition-colors flex items-center gap-1"
+                                                                    title="Edit Comment"
+                                                                >
+                                                                    <Edit3 size={12} /> Edit
+                                                                </button>
+                                                            )}
+                                                            
+                                                            {/* Report Button (Right Aligned) - Hidden for your own comments */}
+                                                            <div className="ml-auto">
+                                                                {user && user._id !== comment.author?._id && (
+                                                                    reportingCommentId === comment._id ? (
+                                                                        <div className="flex items-center gap-3 animate-fade-in bg-red-50 dark:bg-red-900/10 px-3 py-1 rounded-lg">
+                                                                            <span className="text-xs text-red-600 font-bold">Report this?</span>
+                                                                            <button 
+                                                                                onClick={() => confirmReport(comment._id)}
+                                                                                className="text-xs font-bold text-white bg-red-500 hover:bg-red-600 px-3 py-1 rounded-md transition-colors"
+                                                                            >
+                                                                                Yes
+                                                                            </button>
+                                                                            <button 
+                                                                                onClick={cancelReport}
+                                                                                className="text-xs font-bold text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 px-2 py-1 transition-colors"
+                                                                            >
+                                                                                No
+                                                                            </button>
+                                                                        </div>
+                                                                    ) : (
+                                                                        <button 
+                                                                            onClick={() => handleReportClick(comment._id)}
+                                                                            className="text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-red-500 transition-colors flex items-center gap-1"
+                                                                            title="Report inappropriate content"
+                                                                        >
+                                                                            <Shield size={10} /> Report
+                                                                        </button>
+                                                                    )
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    </>
                                         )}
                                     </div>
                                 </div>
