@@ -9,23 +9,32 @@ const hpp = require('hpp');
 const app = express();
 
 /* =====================================================
-   🌍 CORS – MANUAL (NO WILDCARD EVER)
+   ✅ TRUST PROXY (VERY IMPORTANT FOR VERCEL)
+   ===================================================== */
+app.set('trust proxy', 1);
+
+/* =====================================================
+   🌍 CORS – MANUAL (NO WILDCARD)
    ===================================================== */
 const ALLOWED_ORIGIN = 'https://blogyam-blog-app-zqvj.vercel.app';
 
 app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', ALLOWED_ORIGIN);
-  res.header('Access-Control-Allow-Credentials', 'true');
-  res.header(
+  const origin = req.headers.origin;
+
+  if (origin === ALLOWED_ORIGIN) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+  }
+
+  res.setHeader(
     'Access-Control-Allow-Headers',
     'Origin, X-Requested-With, Content-Type, Accept, Authorization'
   );
-  res.header(
+  res.setHeader(
     'Access-Control-Allow-Methods',
     'GET, POST, PUT, PATCH, DELETE, OPTIONS'
   );
 
-  // preflight
   if (req.method === 'OPTIONS') {
     return res.sendStatus(204);
   }
@@ -78,6 +87,6 @@ app.get('/', (req, res) => {
 app.use('/api', require('./routes/api'));
 
 /* =====================================================
-   ☁️ EXPORT
+   ☁️ EXPORT (VERCEL)
    ===================================================== */
 module.exports = app;
