@@ -385,65 +385,6 @@ export default function AdminDashboard() {
                         </tbody>
                     </table>
                 </div>
-
-                {/* Mobile Cards for Handhelds */}
-                <div className="md:hidden divide-y divide-[var(--border-color)]">
-                    {users.map(user => (
-                        <div key={user._id} className="p-4 space-y-4">
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-full bg-slate-200 overflow-hidden shadow-sm">
-                                        {user.profileImageURL ? (
-                                            <img src={getImageUrl(user.profileImageURL)} alt="" className="w-full h-full object-cover" />
-                                        ) : (
-                                            <div className="w-full h-full flex items-center justify-center text-sm font-bold text-slate-500">
-                                                {(user.name || 'U')[0]}
-                                            </div>
-                                        )}
-                                    </div>
-                                    <div>
-                                        <h4 className="text-[var(--text-primary)] font-bold">{user.name}</h4>
-                                        <p className="text-xs text-[var(--text-secondary)] truncate max-w-[180px]">{user.email}</p>
-                                    </div>
-                                </div>
-                                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${
-                                    user.role === 'owner' ? 'bg-purple-100 text-purple-800' :
-                                    user.role === 'author' ? 'bg-green-100 text-green-800' :
-                                    'bg-slate-100 text-slate-800'
-                                }`}>
-                                    {user.role}
-                                </span>
-                            </div>
-                            
-                            {user.role !== 'owner' && (
-                                <div className="flex gap-2 pt-2">
-                                    <button
-                                        onClick={() => toggleRole(user._id, user.role)}
-                                        disabled={actionLoading === user._id}
-                                        className={`flex-1 text-[10px] font-black uppercase tracking-widest py-3 rounded-xl transition-all border ${
-                                            user.role === 'author' 
-                                            ? 'text-amber-600 border-amber-200' 
-                                            : 'text-primary-600 border-primary-200'
-                                        }`}
-                                    >
-                                        {actionLoading === user._id ? (
-                                            <Loader2 size={12} className="animate-spin mx-auto" />
-                                        ) : (
-                                            user.role === 'author' ? "Demote to User" : "Make Author"
-                                        )}
-                                    </button>
-                                    {!user.isBanned && (
-                                        <button
-                                            onClick={() => handleModerationAction('ban', user._id, 'Community management')}
-                                            className="flex-1 text-[10px] font-black uppercase tracking-widest py-3 rounded-xl text-red-600 border border-red-200 transition-all"
-                                        >
-                                            Ban Account
-                                        </button>
-                                    )}
-                                </div>
-                            )}
-                        </div>
-                    ))}
                 </div>
             )}
 
@@ -508,8 +449,8 @@ export default function AdminDashboard() {
                             </div>
                         </div>
                     </div>
-                        </div>
-                    </div>
+                </div>
+                </div>
                 </div>
             )}
 
@@ -517,61 +458,238 @@ export default function AdminDashboard() {
                 <div className="animate-fade-in">
                     {/* Direct Spotlight Search (Owner Superpower) */}
                     <div className="bg-slate-900 rounded-2xl p-4 sm:p-8 mb-12 shadow-2xl border border-white/10 relative overflow-hidden">
-                <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
-                    <Shield size={120} className="text-white" />
-                </div>
-                
-                <div className="relative z-10">
-                    <h2 className="text-xl sm:text-2xl font-serif font-bold text-white mb-2 flex items-center gap-3">
-                        <Star className="text-amber-400" size={24} /> Spotlight Assignment
-                    </h2>
-                    <p className="text-slate-400 text-xs sm:text-sm mb-6 sm:mb-8 italic">Search for any story to instantly promote it to the Home page Hero.</p>
-                    
-                    <div className="relative max-w-2xl">
-                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                            <Search className="text-slate-500" size={20} />
+                        <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
+                            <Shield size={120} className="text-white" />
                         </div>
-                        <input 
-                            type="text"
-                            value={searchQuery}
-                            onChange={(e) => handleDirectSearch(e.target.value)}
-                            placeholder="Type title to crown..."
-                            className="w-full bg-slate-800/50 border border-slate-700 text-white pl-12 pr-4 py-3 sm:py-4 rounded-xl focus:ring-2 focus:ring-amber-500 transition-all placeholder:text-slate-600 text-sm"
-                        />
-                        {searching && <Loader2 className="absolute right-4 top-3 sm:top-4 animate-spin text-amber-500" size={20} />}
+                        
+                        <div className="relative z-10">
+                            <h2 className="text-xl sm:text-2xl font-serif font-bold text-white mb-2 flex items-center gap-3">
+                                <Star className="text-amber-400" size={24} /> Spotlight Assignment
+                            </h2>
+                            <p className="text-slate-400 text-xs sm:text-sm mb-6 sm:mb-8 italic">Search for any story to instantly promote it to the Home page Hero.</p>
+                            
+                            <div className="relative max-w-2xl">
+                                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                    <Search className="text-slate-500" size={20} />
+                                </div>
+                                <input 
+                                    type="text"
+                                    value={searchQuery}
+                                    onChange={(e) => handleDirectSearch(e.target.value)}
+                                    placeholder="Type title to crown..."
+                                    className="w-full bg-slate-800/50 border border-slate-700 text-white pl-12 pr-4 py-3 sm:py-4 rounded-xl focus:ring-2 focus:ring-amber-500 transition-all placeholder:text-slate-600 text-sm"
+                                />
+                                {searching && <Loader2 className="absolute right-4 top-3 sm:top-4 animate-spin text-amber-500" size={20} />}
+                            </div>
+
+                            {searchResults.length > 0 && (
+                                <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 animate-fade-in">
+                                    {searchResults.map(blog => (
+                                        <div key={blog._id} className="bg-slate-800/80 border border-slate-700 rounded-xl p-3 sm:p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between group hover:border-amber-500/50 transition-all gap-3">
+                                            <div className="flex-1 min-w-0 pr-4">
+                                                <h4 className="text-slate-200 font-bold truncate text-sm sm:text-base">{blog.title}</h4>
+                                                <p className="text-slate-500 text-[9px] uppercase font-black">By {blog.author?.name}</p>
+                                            </div>
+                                            <div className="flex gap-2 w-full sm:w-auto">
+                                                <button 
+                                                    onClick={() => handleSetSpotlight(blog._id, 'bestOfWeek')}
+                                                    className="flex-1 sm:flex-none px-3 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 text-[10px] font-black rounded-lg transition-all uppercase tracking-wider"
+                                                >
+                                                    Supreme
+                                                </button>
+                                                <button 
+                                                    onClick={() => handleSetSpotlight(blog._id, 'featured')}
+                                                    className="flex-1 sm:flex-none px-3 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-black rounded-lg transition-all uppercase tracking-wider"
+                                                >
+                                                    Elite
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
                     </div>
 
-                    {searchResults.length > 0 && (
-                        <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 animate-fade-in">
-                            {searchResults.map(blog => (
-                                <div key={blog._id} className="bg-slate-800/80 border border-slate-700 rounded-xl p-3 sm:p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between group hover:border-amber-500/50 transition-all gap-3">
-                                    <div className="flex-1 min-w-0 pr-4">
-                                        <h4 className="text-slate-200 font-bold truncate text-sm sm:text-base">{blog.title}</h4>
-                                        <p className="text-slate-500 text-[9px] uppercase font-black">By {blog.author?.name}</p>
-                                    </div>
-                                    <div className="flex gap-2 w-full sm:w-auto">
-                                        <button 
-                                            onClick={() => handleSetSpotlight(blog._id, 'bestOfWeek')}
-                                            className="flex-1 sm:flex-none px-3 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 text-[10px] font-black rounded-lg transition-all uppercase tracking-wider"
-                                        >
-                                            Supreme
-                                        </button>
-                                        <button 
-                                            onClick={() => handleSetSpotlight(blog._id, 'featured')}
-                                            className="flex-1 sm:flex-none px-3 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-black rounded-lg transition-all uppercase tracking-wider"
-                                        >
-                                            Elite
-                                        </button>
-                                    </div>
+                    {/* Active Spotlight Management */}
+                    <div className="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-color)] overflow-hidden shadow-xl mb-12">
+                        <div className="px-4 sm:px-8 py-6 border-b border-[var(--border-color)] bg-gradient-to-r from-amber-500/10 to-transparent flex items-center justify-between">
+                            <div>
+                                <h2 className="text-lg sm:text-xl font-serif font-bold text-[var(--text-primary)] flex items-center gap-2">
+                                     <PenTool className="text-amber-600" size={20} /> Active Spotlight
+                                </h2>
+                            </div>
+                        </div>
+                        
+                        <div className="p-4 sm:p-8">
+                            {activeSpotlight.length > 0 ? (
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                                    {activeSpotlight.map(blog => (
+                                        <div key={blog._id} className={`relative group rounded-3xl p-5 sm:p-6 border transition-all duration-500 hover:shadow-2xl ${
+                                            blog.spotlight === 'bestOfWeek' 
+                                            ? 'bg-amber-50/30 border-amber-200 dark:bg-amber-950/10 dark:border-amber-900/50 shadow-amber-500/5' 
+                                            : 'bg-[var(--bg-primary)] border-[var(--border-color)]'
+                                        }`}>
+                                            <div className="absolute top-4 right-4 z-10">
+                                                <div className={`px-2.5 py-1 rounded-full text-[8px] font-black uppercase tracking-[0.1em] shadow-sm flex items-center gap-1 border ${
+                                                    blog.spotlight === 'bestOfWeek' 
+                                                    ? 'bg-amber-500 text-white border-amber-400' 
+                                                    : 'bg-indigo-600 text-white border-indigo-500'
+                                                }`}>
+                                                    {blog.spotlight === 'bestOfWeek' ? <Award size={10} /> : <Star size={10} />}
+                                                    {blog.spotlight === 'bestOfWeek' ? 'Supreme' : 'Elite'}
+                                                </div>
+                                            </div>
+                                            
+                                            <div className="flex items-center gap-3 mb-4 sm:mb-5">
+                                                <div className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full overflow-hidden border-2 ${
+                                                    blog.spotlight === 'bestOfWeek' ? 'border-amber-400' : 'border-indigo-100'
+                                                }`}>
+                                                    <img 
+                                                        src={blog.author?.profileImageURL ? getImageUrl(blog.author.profileImageURL) : '/uploads/default-avatar.png'} 
+                                                        alt="" 
+                                                        className="w-full h-full object-cover" 
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <p className="text-[10px] font-black text-[var(--text-primary)] uppercase tracking-tight line-clamp-1">{blog.author?.name}</p>
+                                                </div>
+                                            </div>
+                                            
+                                            <div className="mb-6">
+                                                <h4 className="font-serif font-bold text-[var(--text-primary)] text-sm sm:text-base line-clamp-2 min-h-[2.5rem] leading-tight group-hover:text-primary-600 transition-colors">
+                                                    {blog.title}
+                                                </h4>
+                                            </div>
+                                            
+                                            <div className="pt-4 border-t border-[var(--border-color)]">
+                                                <button 
+                                                    onClick={() => handleSetSpotlight(blog._id, 'none')}
+                                                    disabled={spotlightLoading === blog._id}
+                                                    className="w-full py-2.5 bg-slate-100/80 text-slate-600 hover:bg-red-600 hover:text-white dark:bg-slate-800/80 dark:text-slate-300 dark:hover:bg-red-600 dark:hover:text-white text-[9px] font-black uppercase tracking-widest rounded-xl transition-all flex items-center justify-center gap-2 border border-slate-200 dark:border-slate-700 shadow-sm"
+                                                >
+                                                    <XCircle size={14} /> Unset
+                                                </button>
+                                            </div>
+                                            
+                                            {spotlightLoading === blog._id && (
+                                                <div className="absolute inset-0 bg-white/80 dark:bg-black/80 backdrop-blur-[2px] rounded-[1.5rem] flex items-center justify-center z-20">
+                                                    <Loader2 className="animate-spin text-primary-600" />
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))}
                                 </div>
-                            ))}
+                            ) : (
+                                <div className="text-center py-10 sm:py-16 flex flex-col items-center bg-slate-50/50 dark:bg-slate-900/20 rounded-3xl border-2 border-dashed border-[var(--border-color)]">
+                                    <PenTool size={32} className="text-slate-300 mb-2" />
+                                    <p className="text-xs sm:text-sm text-[var(--text-secondary)] font-medium">Archive is empty.</p>
+                                </div>
+                            )}
                         </div>
-                    )}
+                    </div>
+
+                    {/* Spotlight Curation Deck */}
+                    <div className="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-color)] overflow-hidden shadow-xl animate-fade-in">
+                        <div className="px-4 sm:px-8 py-6 border-b border-[var(--border-color)] bg-gradient-to-r from-[var(--bg-primary)] to-[var(--bg-card)] flex items-center justify-between">
+                            <div>
+                                <h2 className="text-lg sm:text-xl font-serif font-bold text-[var(--text-primary)] flex items-center gap-2">
+                                     <Award className="text-amber-50" size={20} /> Curation Deck
+                                </h2>
+                            </div>
                         </div>
-                    )}
+
+                        <div className="p-4 sm:p-8">
+                            {spotlightQueue.length > 0 ? (
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                                    {spotlightQueue.map(group => {
+                                        const blog = group.blog;
+                                        const nominators = group.nominators;
+                                        if (!blog) return null;
+
+                                        return (
+                                            <div key={blog._id} className="relative group bg-[var(--bg-primary)] rounded-3xl p-5 sm:p-6 border border-[var(--border-color)] hover:shadow-2xl hover:border-amber-400/50 transition-all duration-500 overflow-hidden">
+                                                <div className="relative">
+                                                    <div className="flex items-center justify-between mb-4 sm:mb-6">
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="w-9 h-9 rounded-full overflow-hidden border-2 border-amber-200 shadow-sm">
+                                                                <img 
+                                                                    src={blog.author?.profileImageURL ? getImageUrl(blog.author.profileImageURL) : '/uploads/default-avatar.png'} 
+                                                                    alt={blog.author?.name} 
+                                                                    className="w-full h-full object-cover" 
+                                                                />
+                                                            </div>
+                                                            <div>
+                                                                <p className="text-[10px] font-black text-[var(--text-primary)] uppercase tracking-tight">{blog.author?.name || 'Anonymous'}</p>
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex -space-x-3">
+                                                            {nominators.slice(0, 3).map((nominator, idx) => (
+                                                                <div key={idx} className="w-7 h-7 rounded-full border-2 border-[var(--bg-primary)] shadow-sm bg-indigo-50 flex items-center justify-center overflow-hidden">
+                                                                    <img 
+                                                                        src={nominator?.profileImageURL ? getImageUrl(nominator.profileImageURL) : '/uploads/default-avatar.png'} 
+                                                                        alt={nominator?.name} 
+                                                                        className="w-full h-full object-cover" 
+                                                                    />
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="mb-4">
+                                                        <span className="px-2 py-0.5 bg-indigo-100/50 text-indigo-700 text-[8px] font-black uppercase rounded-md mb-2 inline-block">
+                                                            {nominators.length} {nominators.length === 1 ? 'Nomination' : 'Nominations'}
+                                                        </span>
+                                                        <h4 className="font-serif font-bold text-[var(--text-primary)] text-sm sm:text-base line-clamp-2 min-h-[2.5rem] group-hover:text-amber-600 transition-colors">
+                                                            {blog.title}
+                                                        </h4>
+                                                    </div>
+
+                                                    <div className="flex flex-col gap-2 pt-4 border-t border-[var(--border-color)]">
+                                                        <div className="flex gap-2">
+                                                            <button 
+                                                                onClick={() => handleSetSpotlight(blog._id, 'bestOfWeek')}
+                                                                disabled={spotlightLoading === blog._id}
+                                                                className="flex-1 flex items-center justify-center gap-1 py-3 bg-amber-500 hover:bg-amber-600 text-white text-[9px] font-black uppercase tracking-wider rounded-xl shadow-lg shadow-amber-500/10 transition-all active:scale-95 disabled:opacity-50"
+                                                            >
+                                                                Supreme
+                                                            </button>
+                                                            <button 
+                                                                onClick={() => handleSetSpotlight(blog._id, 'featured')}
+                                                                disabled={spotlightLoading === blog._id}
+                                                                className="flex-1 flex items-center justify-center gap-1 py-3 bg-indigo-600 hover:bg-indigo-700 text-white text-[9px] font-black uppercase tracking-wider rounded-xl shadow-lg shadow-indigo-600/10 transition-all active:scale-95 disabled:opacity-50"
+                                                            >
+                                                                Elite
+                                                            </button>
+                                                        </div>
+                                                        <button 
+                                                            onClick={() => handleSetSpotlight(blog._id, 'none')}
+                                                            disabled={spotlightLoading === blog._id}
+                                                            className="w-full py-2.5 bg-[var(--bg-primary)] text-slate-500 hover:text-red-600 border border-[var(--border-color)] text-[9px] font-black uppercase tracking-widest rounded-xl transition-all active:scale-95 disabled:opacity-50"
+                                                        >
+                                                            Dismiss
+                                                        </button>
+                                                    </div>
+                                                    
+                                                    {spotlightLoading === blog._id && (
+                                                        <div className="absolute inset-0 bg-[var(--bg-primary)]/80 backdrop-blur-[4px] rounded-3xl flex items-center justify-center z-20">
+                                                            <Loader2 className="animate-spin text-primary-600" size={32} />
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            ) : (
+                                <div className="text-center py-10 flex flex-col items-center">
+                                    <h3 className="font-bold text-[var(--text-primary)] text-sm">No nominations.</h3>
+                                </div>
+                            )}
+                        </div>
+                    </div>
                 </div>
-            </div>
-            
+            )}
             {activeTab === 'reports' && (
                 <div className="animate-fade-in">
                     <div className="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-color)] overflow-hidden shadow-xl mb-12">
@@ -655,185 +773,6 @@ export default function AdminDashboard() {
                 </div>
             )}
 
-            {activeTab === 'spotlight' && (
-                <div className="animate-fade-in">
-                    {/* Active Spotlight Management */}
-                    <div className="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-color)] overflow-hidden shadow-xl mb-12">
-                <div className="px-4 sm:px-8 py-6 border-b border-[var(--border-color)] bg-gradient-to-r from-amber-500/10 to-transparent flex items-center justify-between">
-                    <div>
-                        <h2 className="text-lg sm:text-xl font-serif font-bold text-[var(--text-primary)] flex items-center gap-2">
-                             <PenTool className="text-amber-600" size={20} /> Active Spotlight
-                        </h2>
-                    </div>
-                </div>
-                
-                <div className="p-4 sm:p-8">
-                    {activeSpotlight.length > 0 ? (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-                            {activeSpotlight.map(blog => (
-                                <div key={blog._id} className={`relative group rounded-3xl p-5 sm:p-6 border transition-all duration-500 hover:shadow-2xl ${
-                                    blog.spotlight === 'bestOfWeek' 
-                                    ? 'bg-amber-50/30 border-amber-200 dark:bg-amber-950/10 dark:border-amber-900/50 shadow-amber-500/5' 
-                                    : 'bg-[var(--bg-primary)] border-[var(--border-color)]'
-                                }`}>
-                                    <div className="absolute top-4 right-4 z-10">
-                                        <div className={`px-2.5 py-1 rounded-full text-[8px] font-black uppercase tracking-[0.1em] shadow-sm flex items-center gap-1 border ${
-                                            blog.spotlight === 'bestOfWeek' 
-                                            ? 'bg-amber-500 text-white border-amber-400' 
-                                            : 'bg-indigo-600 text-white border-indigo-500'
-                                        }`}>
-                                            {blog.spotlight === 'bestOfWeek' ? <Award size={10} /> : <Star size={10} />}
-                                            {blog.spotlight === 'bestOfWeek' ? 'Supreme' : 'Elite'}
-                                        </div>
-                                    </div>
-                                    
-                                    <div className="flex items-center gap-3 mb-4 sm:mb-5">
-                                        <div className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full overflow-hidden border-2 ${
-                                            blog.spotlight === 'bestOfWeek' ? 'border-amber-400' : 'border-indigo-100'
-                                        }`}>
-                                            <img 
-                                                src={blog.author?.profileImageURL ? getImageUrl(blog.author.profileImageURL) : '/uploads/default-avatar.png'} 
-                                                alt="" 
-                                                className="w-full h-full object-cover" 
-                                            />
-                                        </div>
-                                        <div>
-                                            <p className="text-[10px] font-black text-[var(--text-primary)] uppercase tracking-tight line-clamp-1">{blog.author?.name}</p>
-                                        </div>
-                                    </div>
-                                    
-                                    <div className="mb-6">
-                                        <h4 className="font-serif font-bold text-[var(--text-primary)] text-sm sm:text-base line-clamp-2 min-h-[2.5rem] leading-tight group-hover:text-primary-600 transition-colors">
-                                            {blog.title}
-                                        </h4>
-                                    </div>
-                                    
-                                    <div className="pt-4 border-t border-[var(--border-color)]">
-                                        <button 
-                                            onClick={() => handleSetSpotlight(blog._id, 'none')}
-                                            disabled={spotlightLoading === blog._id}
-                                            className="w-full py-2.5 bg-slate-100/80 text-slate-600 hover:bg-red-600 hover:text-white dark:bg-slate-800/80 dark:text-slate-300 dark:hover:bg-red-600 dark:hover:text-white text-[9px] font-black uppercase tracking-widest rounded-xl transition-all flex items-center justify-center gap-2 border border-slate-200 dark:border-slate-700 shadow-sm"
-                                        >
-                                            <XCircle size={14} /> Unset
-                                        </button>
-                                    </div>
-                                    
-                                    {spotlightLoading === blog._id && (
-                                        <div className="absolute inset-0 bg-white/80 dark:bg-black/80 backdrop-blur-[2px] rounded-[1.5rem] flex items-center justify-center z-20">
-                                            <Loader2 className="animate-spin text-primary-600" />
-                                        </div>
-                                    )}
-                                </div>
-                            ))}
-                        </div>
-                    ) : (
-                        <div className="text-center py-10 sm:py-16 flex flex-col items-center bg-slate-50/50 dark:bg-slate-900/20 rounded-3xl border-2 border-dashed border-[var(--border-color)]">
-                            <PenTool size={32} className="text-slate-300 mb-2" />
-                            <p className="text-xs sm:text-sm text-[var(--text-secondary)] font-medium">Archive is empty.</p>
-                        </div>
-                    )}
-                </div>
-            </div>
-
-            {/* Spotlight Curation Deck */}
-            <div className="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-color)] overflow-hidden shadow-xl animate-fade-in">
-                <div className="px-4 sm:px-8 py-6 border-b border-[var(--border-color)] bg-gradient-to-r from-[var(--bg-primary)] to-[var(--bg-card)] flex items-center justify-between">
-                    <div>
-                        <h2 className="text-lg sm:text-xl font-serif font-bold text-[var(--text-primary)] flex items-center gap-2">
-                             <Award className="text-amber-50" size={20} /> Curation Deck
-                        </h2>
-                    </div>
-                </div>
-
-                <div className="p-4 sm:p-8">
-                    {spotlightQueue.length > 0 ? (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-                            {spotlightQueue.map(group => {
-                                const blog = group.blog;
-                                const nominators = group.nominators;
-                                if (!blog) return null;
-
-                                return (
-                                    <div key={blog._id} className="relative group bg-[var(--bg-primary)] rounded-3xl p-5 sm:p-6 border border-[var(--border-color)] hover:shadow-2xl hover:border-amber-400/50 transition-all duration-500 overflow-hidden">
-                                        <div className="relative">
-                                            <div className="flex items-center justify-between mb-4 sm:mb-6">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="w-9 h-9 rounded-full overflow-hidden border-2 border-amber-200 shadow-sm">
-                                                        <img 
-                                                            src={blog.author?.profileImageURL ? getImageUrl(blog.author.profileImageURL) : '/uploads/default-avatar.png'} 
-                                                            alt={blog.author?.name} 
-                                                            className="w-full h-full object-cover" 
-                                                        />
-                                                    </div>
-                                                    <div>
-                                                        <p className="text-[10px] font-black text-[var(--text-primary)] uppercase tracking-tight">{blog.author?.name || 'Anonymous'}</p>
-                                                    </div>
-                                                </div>
-                                                <div className="flex -space-x-3">
-                                                    {nominators.slice(0, 3).map((nominator, idx) => (
-                                                        <div key={idx} className="w-7 h-7 rounded-full border-2 border-[var(--bg-primary)] shadow-sm bg-indigo-50 flex items-center justify-center overflow-hidden">
-                                                            <img 
-                                                                src={nominator?.profileImageURL ? getImageUrl(nominator.profileImageURL) : '/uploads/default-avatar.png'} 
-                                                                alt={nominator?.name} 
-                                                                className="w-full h-full object-cover" 
-                                                            />
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            </div>
-
-                                            <div className="mb-4">
-                                                <span className="px-2 py-0.5 bg-indigo-100/50 text-indigo-700 text-[8px] font-black uppercase rounded-md mb-2 inline-block">
-                                                    {nominators.length} {nominators.length === 1 ? 'Nomination' : 'Nominations'}
-                                                </span>
-                                                <h4 className="font-serif font-bold text-[var(--text-primary)] text-sm sm:text-base line-clamp-2 min-h-[2.5rem] group-hover:text-amber-600 transition-colors">
-                                                    {blog.title}
-                                                </h4>
-                                            </div>
-
-                                            <div className="flex flex-col gap-2 pt-4 border-t border-[var(--border-color)]">
-                                                <div className="flex gap-2">
-                                                    <button 
-                                                        onClick={() => handleSetSpotlight(blog._id, 'bestOfWeek')}
-                                                        disabled={spotlightLoading === blog._id}
-                                                        className="flex-1 flex items-center justify-center gap-1 py-3 bg-amber-500 hover:bg-amber-600 text-white text-[9px] font-black uppercase tracking-wider rounded-xl shadow-lg shadow-amber-500/10 transition-all active:scale-95 disabled:opacity-50"
-                                                    >
-                                                        Supreme
-                                                    </button>
-                                                    <button 
-                                                        onClick={() => handleSetSpotlight(blog._id, 'featured')}
-                                                        disabled={spotlightLoading === blog._id}
-                                                        className="flex-1 flex items-center justify-center gap-1 py-3 bg-indigo-600 hover:bg-indigo-700 text-white text-[9px] font-black uppercase tracking-wider rounded-xl shadow-lg shadow-indigo-600/10 transition-all active:scale-95 disabled:opacity-50"
-                                                    >
-                                                        Elite
-                                                    </button>
-                                                </div>
-                                                <button 
-                                                    onClick={() => handleSetSpotlight(blog._id, 'none')}
-                                                    disabled={spotlightLoading === blog._id}
-                                                    className="w-full py-2.5 bg-[var(--bg-primary)] text-slate-500 hover:text-red-600 border border-[var(--border-color)] text-[9px] font-black uppercase tracking-widest rounded-xl transition-all active:scale-95 disabled:opacity-50"
-                                                >
-                                                    Dismiss
-                                                </button>
-                                            </div>
-                                            
-                                            {spotlightLoading === blog._id && (
-                                                <div className="absolute inset-0 bg-[var(--bg-primary)]/80 backdrop-blur-[4px] rounded-3xl flex items-center justify-center z-20">
-                                                    <Loader2 className="animate-spin text-primary-600" size={32} />
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    ) : (
-                        <div className="text-center py-10 flex flex-col items-center">
-                            <h3 className="font-bold text-[var(--text-primary)] text-sm">No nominations.</h3>
-                        </div>
-                    )}
-                </div>
-            </div>
 
             {/* Confirmation Infrastructure */}
             <PremiumModal 
