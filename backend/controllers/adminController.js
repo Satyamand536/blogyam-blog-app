@@ -2,6 +2,7 @@ const User = require('../models/user');
 const Blog = require('../models/blog');
 const Nomination = require('../models/nomination');
 const Blacklist = require('../models/blacklist');
+const { hotDataCache } = require('../utils/cacheManager');
 
 async function getUsers(req, res) {
     try {
@@ -62,6 +63,9 @@ async function getSpotlightQueue(req, res) {
 
         nominations.forEach(n => {
             if (!n.blog || n.blog.nominationStatus !== 'pending') return;
+            
+            // SECURITY/CURATION CHECK: Only allow public & published blogs to be promoted
+            if (n.blog.visibility !== 'public' || n.blog.status !== 'published') return;
 
             const blogId = n.blog._id.toString();
             if (!groupedMap.has(blogId)) {
@@ -120,6 +124,9 @@ async function setBlogSpotlight(req, res) {
             spotlightAt: spotlight !== 'none' ? new Date() : null,
             nominationStatus: 'reviewed'
         }, { new: true });
+        
+        // INVALIDATE CACHE: Clear the featured blogs cache so Home page updates instantly
+        hotDataCache.del('featured_blogs');
         
         return res.json({ success: true, blog });
     } catch (error) {
