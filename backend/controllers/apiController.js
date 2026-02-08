@@ -646,3 +646,4 @@ module.exports = {
     updateProfile,
     nominateBlog
 };
+

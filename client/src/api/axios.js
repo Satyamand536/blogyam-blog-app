@@ -7,7 +7,7 @@ export const API_URL = rawUrl.replace(/\/api\/?$/, '').replace(/\/$/, '');
 const api = axios.create({
     baseURL: `${API_URL}/api`,
     withCredentials: true, // Required for cookie-based auth
-    timeout: 15000,
+    timeout: 30000,        // Increased to 30s for production resilience and cold starts
     headers: {
         'Content-Type': 'application/json',
     },

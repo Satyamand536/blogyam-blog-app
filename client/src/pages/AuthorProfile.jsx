@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import MembershipGate from '../components/MembershipGate';
 import { Loader2, Calendar } from 'lucide-react';
 import BlogCard from '../components/BlogCard';
+import { getImageUrl } from '../utils/imageUtils';
 
 export default function AuthorProfile() {
     const { id } = useParams();

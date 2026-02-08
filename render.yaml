@@ -1,15 +1,18 @@
 services:
-  # Backend Web Service
+  # Unified Monorepo Service (Backend + Frontend)
+  # This serves the blog application as a single unit
   - type: web
-    name: blogyam-backend
+    name: blogyam-fullstack
     env: node
     region: singapore
     plan: free
-    buildCommand: cd backend && npm install
-    startCommand: cd backend && npm start
+    buildCommand: npm run build
+    startCommand: npm start
     envVars:
       - key: NODE_ENV
         value: production
+      - key: PORT
+        value: 10000
       - key: MONGODB_URL
         sync: false
       - key: JWT_SECRET
@@ -23,21 +26,7 @@ services:
       - key: CLOUDINARY_API_SECRET
         value: thqsggXGWH_C2WIgST9SdWyOYp8
       - key: CLIENT_URL
-        value: https://blogyam.onrender.com
-    healthCheckPath: /api/health
-
-  # Frontend Static Site
-  - type: web
-    name: blogyam-frontend
-    env: static
-    region: singapore
-    plan: free
-    buildCommand: cd client && npm install && npm run build
-    staticPublishPath: ./client/dist
-    envVars:
+        value: https://blogyam-fullstack.onrender.com
       - key: VITE_API_URL
-        value: https://blogyam-backend.onrender.com
-    routes:
-      - type: rewrite
-        source: /*
-        destination: /index.html
+        value: https://blogyam-fullstack.onrender.com
+    healthCheckPath: /api/health

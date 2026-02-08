@@ -33,46 +33,16 @@ async function generateResponse(messages) {
         return "Configuration Error: API Key is missing. Please add OPENROUTER_API_KEY to your .env file.";
     }
 
-    // List of ~70+ strategic models for Top 1% High Availability & Scalability
+    // List of strategic models for High Availability
     const MODELS = [
-        // TIER 1: HIGH PERFORMANCE (PRIMARY)
+        "deepseek/deepseek-r1:free", // Most reliable in current tests
         "google/gemini-2.0-flash-exp:free",
         "google/gemini-2.0-flash-lite-preview-02-05:free",
-        "deepseek/deepseek-r1:free",
         "deepseek/deepseek-chat:free",
         "meta-llama/llama-3.3-70b-instruct:free",
         "qwen/qwen-2.5-72b-instruct:free",
-        "nvidia/llama-3.1-nemotron-70b-instruct:free",
-        
-        // TIER 2: RELIABILITY FALLBACKS (FREE & STABLE)
         "mistralai/mistral-7b-instruct:free",
-        "microsoft/phi-3-medium-128k-instruct:free",
-        "gryphe/mythomax-l2-13b:free",
-        "google/learnlm-1.5-pro-experimental:free",
-        "meta-llama/llama-3.2-3b-instruct:free",
-        "meta-llama/llama-3.1-8b-instruct:free",
-        "qwen/qwen-2.5-7b-instruct:free",
-        "qwen/qwen-2.5-coder-32b-instruct:free",
-        "qwen/qwq-32b-preview:free",
-        "mistralai/pixtral-12b:free",
-        "mistralai/mistral-nemo:free",
-        "liquid/lfm-40b:free",
-        "huggingfaceh4/zephyr-7b-beta:free",
-        "openchat/openchat-7b:free",
-        "cognitivecomputations/dolphin-mixtral-8x7b:free",
-        "nousresearch/hermes-3-llama-3.1-405b:free",
-        "nousresearch/hermes-3-llama-3.1-70b:free",
-        
-        // TIER 3: PAID HIGH-END (FOR CRITICAL FALLBACKS)
-        "anthropic/claude-3.5-sonnet",
-        "google/gemini-pro-1.5",
-        "openai/gpt-4o",
-        "openai/gpt-4o-mini",
-        "anthropic/claude-3-haiku",
-        "x-ai/grok-2-1212",
-        "cohere/command-r-plus-08-2024",
-        
-        "openrouter/auto" // FINAL FALLBACK
+        "openrouter/auto" // Strategic auto-fallback
     ];
 
     // Ensure messages is an array
@@ -101,10 +71,10 @@ async function generateResponse(messages) {
                     headers: {
                         "Authorization": `Bearer ${apiKey}`,
                         "Content-Type": "application/json",
-                        "HTTP-Referer": "http://localhost:8000",
+                        "HTTP-Referer": process.env.CLIENT_URL || "http://localhost:8000",
                         "X-Title": "BlogYam Intelligence"
                     },
-                    timeout: 8000 // Fast timeout (8s) for ultra-responsiveness
+                    timeout: 15000 // Increased to 15s for better stability
                 }
             );
 
@@ -116,24 +86,23 @@ async function generateResponse(messages) {
 
         } catch (error) {
             retryCount++;
-            const errorMsg = error.response ? error.response.status : error.message;
-            console.warn(`[AI HA] Model ${model} failed (${errorMsg}). Trying next...`);
+            const status = error.response ? error.response.status : error.message;
+            const data = error.response ? JSON.stringify(error.response.data) : "No response data";
+            console.warn(`[AI HA] Model ${model} failed | Status: ${status} | Error: ${data}`);
             
             if (retryCount >= MAX_RETRIES && i < MODELS.length - 1) {
-                // If we've failed 5 times, but still have models, let's skip ahead to a different "Family"
-                // This is a strategic jump for high availability
-                i += 5; 
+                i += 2; // Jump ahead slightly
             }
             
             if (error.response && error.response.status === 401) {
                 return "AI Authentication Error: Your API key appears to be invalid.";
             }
 
-            continue; // Continue to next model in loop
+            continue; 
         }
     }
 
-    return "Service Unavailable: The AI infrastructure is currently under heavy load (exhausted 50 models). Please try again in 30 seconds.";
+    return "I'm sorry, bhai. The AI assistant is currently experiencing high load. Please try again in 30 seconds or ask a simpler question.";
 }
 
 async function summarizeBlog(content) {

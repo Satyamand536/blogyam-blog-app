@@ -28,9 +28,9 @@ const {
     removeAuthor, 
     getSpotlightQueue,
     getActiveSpotlight,
-    setBlogSpotlight, 
-    getAuthors, 
-    getAuthorPublicBlogs 
+    setBlogSpotlight,
+    getAuthors,
+    getAuthorPublicBlogs
 } = require('../controllers/adminController');
 
 const { addComment, reportComment, updateComment } = require('../controllers/commentController');

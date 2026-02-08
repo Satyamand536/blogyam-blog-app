@@ -133,8 +133,14 @@ const cacheClient = {
 };
 
 // Initialize on module load
-initializeRedis().catch(err => {
-    console.warn('Redis initialization failed:', err.message);
-});
+if (process.env.REDIS_HOST || process.env.NODE_ENV === 'production') {
+    initializeRedis().catch(err => {
+        console.warn('Redis initialization failed:', err.message);
+        useRedis = false;
+    });
+} else {
+    console.log('💾 Local dev: Skipping Redis, using in-memory cache');
+    useRedis = false;
+}
 
 module.exports = cacheClient;
