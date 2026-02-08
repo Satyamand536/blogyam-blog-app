@@ -1,154 +1,83 @@
 require('dotenv').config();
-const path = require('path');
 const express = require('express');
 const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
 const helmet = require('helmet');
 const compression = require('compression');
 const hpp = require('hpp');
-const { randomUUID } = require('crypto');
-
-// utils & middlewares
-const logger = require('./utils/logger');
-const performanceMonitor = require('./utils/performanceMonitor');
-const { errorHandler, notFoundHandler } = require('./middlewares/errorMonitoring');
-const { checkForAuthenticationCookie } = require('./middlewares/auth');
-
-// ─────────────────────────────────────────────
-// 🔒 ENV VALIDATION
-// ─────────────────────────────────────────────
-['MONGODB_URL', 'JWT_SECRET'].forEach((key) => {
-  if (!process.env[key]) {
-    console.error(`❌ Missing ENV variable: ${key}`);
-    process.exit(1);
-  }
-});
 
 const app = express();
 
-// ─────────────────────────────────────────────
-// 🧠 REQUEST DEBUG
-// ─────────────────────────────────────────────
-app.use((req, res, next) => {
-  console.log(`➡️ ${req.method} ${req.path}`);
-  next();
-});
-
-// ─────────────────────────────────────────────
-// 🛢️ DATABASE
-// ─────────────────────────────────────────────
-mongoose
-  .connect(process.env.MONGODB_URL)
-  .then(() => logger.info('✅ MongoDB connected'))
-  .catch((err) => {
-    console.error('❌ MongoDB connection failed:', err.message);
-    process.exit(1);
-  });
-
-// ─────────────────────────────────────────────
-// 🌍 CORS – MANUAL & BULLETPROOF (NO * EVER)
-// ─────────────────────────────────────────────
-const allowedOrigins = [
-  'https://blogyam-blog-app-zqvj.vercel.app', // frontend prod
-  'http://localhost:5173',
-];
+/* =====================================================
+   🌍 CORS – MANUAL (NO WILDCARD EVER)
+   ===================================================== */
+const ALLOWED_ORIGIN = 'https://blogyam-blog-app-zqvj.vercel.app';
 
 app.use((req, res, next) => {
-  const origin = req.headers.origin;
-
-  if (allowedOrigins.includes(origin)) {
-    res.setHeader('Access-Control-Allow-Origin', origin);
-    res.setHeader('Access-Control-Allow-Credentials', 'true');
-  }
-
-  res.setHeader(
+  res.header('Access-Control-Allow-Origin', ALLOWED_ORIGIN);
+  res.header('Access-Control-Allow-Credentials', 'true');
+  res.header(
     'Access-Control-Allow-Headers',
     'Origin, X-Requested-With, Content-Type, Accept, Authorization'
   );
-  res.setHeader(
+  res.header(
     'Access-Control-Allow-Methods',
     'GET, POST, PUT, PATCH, DELETE, OPTIONS'
   );
 
+  // preflight
   if (req.method === 'OPTIONS') {
-    return res.sendStatus(200);
+    return res.sendStatus(204);
   }
 
   next();
 });
 
-// ─────────────────────────────────────────────
-// 🛡️ SECURITY
-// ─────────────────────────────────────────────
+/* =====================================================
+   🛡️ SECURITY
+   ===================================================== */
 app.use(
   helmet({
-    crossOriginEmbedderPolicy: false,
     crossOriginResourcePolicy: false,
+    crossOriginEmbedderPolicy: false,
+    crossOriginOpenerPolicy: false,
   })
 );
 
 app.use(compression());
 app.use(hpp());
 
-// ─────────────────────────────────────────────
-// 📦 BODY PARSERS
-// ─────────────────────────────────────────────
-app.use(express.json({ limit: '10kb' }));
-app.use(express.urlencoded({ extended: false, limit: '10kb' }));
+/* =====================================================
+   📦 PARSERS
+   ===================================================== */
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
-// ─────────────────────────────────────────────
-// 🧭 TRACE + PERFORMANCE
-// ─────────────────────────────────────────────
-app.use(performanceMonitor.middleware());
-app.use((req, res, next) => {
-  req.id = randomUUID();
-  res.setHeader('X-Request-ID', req.id);
-  next();
-});
-
-// ─────────────────────────────────────────────
-// 🔐 AUTH
-// ─────────────────────────────────────────────
-app.use(checkForAuthenticationCookie('token'));
-
-// ─────────────────────────────────────────────
-// 📁 STATIC
-// ─────────────────────────────────────────────
-app.use(express.static(path.resolve('./public')));
-
-// ─────────────────────────────────────────────
-// 🩺 HEALTH
-// ─────────────────────────────────────────────
-app.get('/', (req, res) => {
-  res.json({
-    status: 'ok',
-    message: 'BlogyAM API is running',
+/* =====================================================
+   🛢️ DATABASE
+   ===================================================== */
+mongoose
+  .connect(process.env.MONGODB_URL)
+  .then(() => console.log('✅ MongoDB connected'))
+  .catch((err) => {
+    console.error(err);
+    process.exit(1);
   });
+
+/* =====================================================
+   🩺 HEALTH
+   ===================================================== */
+app.get('/', (req, res) => {
+  res.json({ status: 'ok', message: 'BlogyAM API running' });
 });
 
-// ─────────────────────────────────────────────
-// 🚏 API ROUTES
-// ─────────────────────────────────────────────
+/* =====================================================
+   🚏 API ROUTES
+   ===================================================== */
 app.use('/api', require('./routes/api'));
 
-// ─────────────────────────────────────────────
-// ❌ ERRORS
-// ─────────────────────────────────────────────
-app.use(notFoundHandler);
-app.use(errorHandler);
-
-// ─────────────────────────────────────────────
-// ☁️ SERVERLESS EXPORT
-// ─────────────────────────────────────────────
+/* =====================================================
+   ☁️ EXPORT
+   ===================================================== */
 module.exports = app;
-
-// ─────────────────────────────────────────────
-// 🖥️ LOCAL DEV
-// ─────────────────────────────────────────────
-if (require.main === module) {
-  const PORT = process.env.PORT || 8000;
-  app.listen(PORT, () =>
-    console.log(`🚀 Server running at http://localhost:${PORT}`)
-  );
-}
