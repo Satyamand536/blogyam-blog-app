@@ -145,7 +145,7 @@ export default function Home() {
                                 <div className="w-full lg:w-[55%] relative group-hover:scale-105 transition-transform duration-1000">
                                     <div className="absolute inset-0 bg-gradient-to-r from-slate-900 via-transparent to-transparent z-10 hidden lg:block" />
                                     <img 
-                                        src={`${API_URL}${bestOfWeek.coverImageURL}`} 
+                                        src={getImageUrl(bestOfWeek.coverImageURL)} 
                                         alt={bestOfWeek.title} 
                                         className="w-full h-full object-cover"
                                     />
@@ -213,7 +213,7 @@ export default function Home() {
                                 <div key={blog._id} className="group cursor-pointer" onClick={() => handleBlogClick(blog._id)}>
                                     <div className="relative aspect-[4/5] rounded-[2rem] overflow-hidden mb-6 border border-[var(--border-color)] shadow-lg group-hover:shadow-2xl transition-all duration-500">
                                         <img 
-                                            src={`${API_URL}${blog.coverImageURL}`} 
+                                            src={getImageUrl(blog.coverImageURL)} 
                                             alt={blog.title}
                                             className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
                                         />

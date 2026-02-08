@@ -40,23 +40,10 @@ Render dashboard ke **"Environment"** tab mein niche diye gaye variables add kar
 
 ## 🚀 **Manual Deployment Steps**
 
-1. **GitHub Push**: Sabse pehle code push karo.
-   ```bash
-   git add .
-   git commit -m "Admin and Navigation fixed for Render"
-   git push origin main
-   ```
-2. **Render Create**: Web Service banalo upar di gayi settings ke sath.
-3. **Wait**: Build hone mein 5-10 minute lag sakte hain.
+1. **GitHub Push**AB SAB KUCHH SET HAI! 🚀**
+- **Root Directory**: KHALLI (EMPTY) CHHODO.
+- **Build Command**: `npm install && npm run build` (Sabse safe rasta).
+- **Start Command**: `npm start`
+- **ENV Variables**: Bus MongoDB, JWT, OpenRouter aur Cloudinary ke keys dalo.
 
----
-
-## ✅ **Verification Checklist:**
-- [ ] Homepage loading as default (frontend).
-- [ ] `/api/health` status checked (backend).
-- [ ] AI features verified.
-- [ ] Admin Dashboard checked on mobile.
-
-**AB SAB KUCHH SET HAI! 🚀**
-- Build command: frontend build karega aur backend install karega.
-- Start command: backend start karega jo khud ki API aur frontend files dono handle karega.
+Ab tumhara project "Zero-Config" connect hoga aur pehli bar mein hi sahi chalega. Best of luck for the launch! 💎🔥
