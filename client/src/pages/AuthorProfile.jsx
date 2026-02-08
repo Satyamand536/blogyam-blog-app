@@ -46,7 +46,7 @@ export default function AuthorProfile() {
     }
 
     return (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 transition-colors duration-500">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-10 md:pt-10 transition-colors duration-500">
             {/* Header / Profile Card */}
             <div className="bg-[var(--bg-card)] rounded-3xl p-8 mb-16 border border-[var(--border-color)] shadow-sm flex flex-col md:flex-row items-center md:items-start gap-8">
                 <div className="w-32 h-32 md:w-40 md:h-40 flex-shrink-0">

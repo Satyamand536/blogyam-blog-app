@@ -202,7 +202,7 @@ export default function Dashboard() {
     const displayUser = dashboardUser || globalUser;
 
     return (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 transition-all duration-500">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-10 md:pt-10 transition-all duration-500">
             
             {/* Premium Hero Section */}
             <div className="relative mb-12 rounded-3xl overflow-hidden bg-gradient-to-r from-blue-900 via-indigo-900 to-purple-900 p-1px">

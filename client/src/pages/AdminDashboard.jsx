@@ -249,7 +249,7 @@ export default function AdminDashboard() {
     if (loading) return <div className="flex justify-center py-20"><Loader2 className="animate-spin text-primary-600" size={40} /></div>;
 
     return (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 transition-colors duration-500">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-10 md:pt-10 transition-colors duration-500">
             <h1 className="text-3xl font-serif font-bold text-[var(--text-primary)] mb-8 flex items-center gap-3">
                 <Shield className="text-primary-600" /> Admin Control Center
             </h1>
@@ -260,7 +260,8 @@ export default function AdminDashboard() {
                     <span className="text-xs font-bold text-primary-600 bg-primary-50 px-2 py-1 rounded-md uppercase tracking-wide">Platform Governance</span>
                 </div>
                 
-                <div className="overflow-x-auto">
+                {/* Responsive Table for Desktop */}
+                <div className="hidden md:block overflow-x-auto">
                     <table className="w-full text-left text-sm text-[var(--text-secondary)]">
                         <thead className="bg-[var(--bg-primary)] border-b border-[var(--border-color)]">
                             <tr>
@@ -283,9 +284,9 @@ export default function AdminDashboard() {
                                                 </div>
                                             )}
                                         </div>
-                                        {user.name}
+                                        <span className="truncate max-w-[150px]">{user.name}</span>
                                     </td>
-                                    <td className="px-6 py-4">{user.email}</td>
+                                    <td className="px-6 py-4 truncate max-w-[200px]">{user.email}</td>
                                     <td className="px-6 py-4">
                                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                                             user.role === 'owner' ? 'bg-purple-100 text-purple-800' :
@@ -331,38 +332,98 @@ export default function AdminDashboard() {
                         </tbody>
                     </table>
                 </div>
+
+                {/* Mobile Cards for Handhelds */}
+                <div className="md:hidden divide-y divide-[var(--border-color)]">
+                    {users.map(user => (
+                        <div key={user._id} className="p-4 space-y-4">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-full bg-slate-200 overflow-hidden shadow-sm">
+                                        {user.profileImageURL ? (
+                                            <img src={getImageUrl(user.profileImageURL)} alt="" className="w-full h-full object-cover" />
+                                        ) : (
+                                            <div className="w-full h-full flex items-center justify-center text-sm font-bold text-slate-500">
+                                                {(user.name || 'U')[0]}
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div>
+                                        <h4 className="text-[var(--text-primary)] font-bold">{user.name}</h4>
+                                        <p className="text-xs text-[var(--text-secondary)] truncate max-w-[180px]">{user.email}</p>
+                                    </div>
+                                </div>
+                                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${
+                                    user.role === 'owner' ? 'bg-purple-100 text-purple-800' :
+                                    user.role === 'author' ? 'bg-green-100 text-green-800' :
+                                    'bg-slate-100 text-slate-800'
+                                }`}>
+                                    {user.role}
+                                </span>
+                            </div>
+                            
+                            {user.role !== 'owner' && (
+                                <div className="flex gap-2 pt-2">
+                                    <button
+                                        onClick={() => toggleRole(user._id, user.role)}
+                                        disabled={actionLoading === user._id}
+                                        className={`flex-1 text-[10px] font-black uppercase tracking-widest py-3 rounded-xl transition-all border ${
+                                            user.role === 'author' 
+                                            ? 'text-amber-600 border-amber-200' 
+                                            : 'text-primary-600 border-primary-200'
+                                        }`}
+                                    >
+                                        {actionLoading === user._id ? (
+                                            <Loader2 size={12} className="animate-spin mx-auto" />
+                                        ) : (
+                                            user.role === 'author' ? "Demote to User" : "Make Author"
+                                        )}
+                                    </button>
+                                    {!user.isBanned && (
+                                        <button
+                                            onClick={() => handleModerationAction('ban', user._id, 'Community management')}
+                                            className="flex-1 text-[10px] font-black uppercase tracking-widest py-3 rounded-xl text-red-600 border border-red-200 transition-all"
+                                        >
+                                            Ban Account
+                                        </button>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    ))}
+                </div>
             </div>
 
             {/* Moderation Command Center */}
-            <div className="bg-red-950/20 rounded-2xl p-8 mb-12 shadow-xl border border-red-500/20 relative overflow-hidden backdrop-blur-sm">
-                <div className="absolute top-0 right-0 p-4 opacity-10">
+            <div className="bg-red-950/20 rounded-2xl p-4 sm:p-8 mb-12 shadow-xl border border-red-500/20 relative overflow-hidden backdrop-blur-sm">
+                <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
                     <Shield size={120} className="text-red-500" />
                 </div>
                 
                 <div className="relative z-10">
-                    <h2 className="text-2xl font-serif font-bold text-[var(--text-primary)] mb-2 flex items-center gap-3">
-                        <Shield className="text-red-500" /> Moderation Command Center
+                    <h2 className="text-xl sm:text-2xl font-serif font-bold text-[var(--text-primary)] mb-2 flex items-center gap-3">
+                        <Shield className="text-red-500" size={24} /> Moderation Commands
                     </h2>
-                    <p className="text-[var(--text-secondary)] text-sm mb-8 italic">Manual access control for high-risk IPs and malicious entities.</p>
+                    <p className="text-[var(--text-secondary)] text-xs sm:text-sm mb-6 sm:mb-8 italic">Manual access control for high-risk IPs and malicious entities.</p>
                     
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-8">
                         {/* IP Blacklist Form */}
-                        <div className="bg-[var(--bg-card)] p-6 rounded-xl border border-[var(--border-color)]">
+                        <div className="bg-[var(--bg-card)] p-4 sm:p-6 rounded-xl border border-[var(--border-color)]">
                             <h3 className="font-bold text-[var(--text-primary)] mb-4 flex items-center gap-2">
-                                <XCircle className="text-red-500" size={18} /> Blacklist IP Address
+                                <XCircle className="text-red-500" size={18} /> Blacklist IP
                             </h3>
-                            <div className="flex gap-2">
+                            <div className="flex flex-col sm:flex-row gap-2">
                                 <input 
                                     value={ipInput}
                                     onChange={(e) => setIpInput(e.target.value)}
                                     type="text" 
                                     placeholder="e.g. 192.168.1.1"
-                                    className="flex-1 bg-[var(--bg-primary)] border border-[var(--border-color)] text-[var(--text-primary)] px-4 py-2 rounded-lg text-sm focus:ring-2 focus:ring-red-500 transition-all outline-none"
+                                    className="flex-1 bg-[var(--bg-primary)] border border-[var(--border-color)] text-[var(--text-primary)] px-4 py-3 sm:py-2 rounded-lg text-sm focus:ring-2 focus:ring-red-500 transition-all outline-none"
                                 />
                                 <button 
                                     onClick={() => handleModerationAction('ip', ipInput, 'Manual IP block')}
                                     disabled={!ipInput}
-                                    className="px-4 py-2 bg-red-600 text-white text-xs font-black uppercase rounded-lg hover:bg-red-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="px-6 py-3 sm:py-2 bg-red-600 text-white text-[10px] font-black uppercase rounded-lg hover:bg-red-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     Block IP
                                 </button>
@@ -370,22 +431,22 @@ export default function AdminDashboard() {
                         </div>
 
                         {/* Email Blacklist Form */}
-                        <div className="bg-[var(--bg-card)] p-6 rounded-xl border border-[var(--border-color)]">
+                        <div className="bg-[var(--bg-card)] p-4 sm:p-6 rounded-xl border border-[var(--border-color)]">
                             <h3 className="font-bold text-[var(--text-primary)] mb-4 flex items-center gap-2">
-                                <Shield className="text-red-500" size={18} /> Blacklist Email Domain
+                                <Shield className="text-red-500" size={18} /> Blacklist Email
                             </h3>
-                            <div className="flex gap-2">
+                            <div className="flex flex-col sm:flex-row gap-2">
                                 <input 
                                     value={emailInput}
                                     onChange={(e) => setEmailInput(e.target.value)}
                                     type="email" 
                                     placeholder="e.g. spam@ghost.com"
-                                    className="flex-1 bg-[var(--bg-primary)] border border-[var(--border-color)] text-[var(--text-primary)] px-4 py-2 rounded-lg text-sm focus:ring-2 focus:ring-red-500 transition-all outline-none"
+                                    className="flex-1 bg-[var(--bg-primary)] border border-[var(--border-color)] text-[var(--text-primary)] px-4 py-3 sm:py-2 rounded-lg text-sm focus:ring-2 focus:ring-red-500 transition-all outline-none"
                                 />
                                 <button 
                                     onClick={() => handleModerationAction('email', emailInput, 'Manual Email block')}
                                     disabled={!emailInput}
-                                    className="px-4 py-2 bg-red-600 text-white text-xs font-black uppercase rounded-lg hover:bg-red-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="px-6 py-3 sm:py-2 bg-red-600 text-white text-[10px] font-black uppercase rounded-lg hover:bg-red-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     Block Email
                                 </button>
@@ -396,16 +457,16 @@ export default function AdminDashboard() {
             </div>
 
             {/* Direct Spotlight Search (Owner Superpower) */}
-            <div className="bg-slate-900 rounded-2xl p-8 mb-12 shadow-2xl border border-white/10 relative overflow-hidden">
-                <div className="absolute top-0 right-0 p-4 opacity-10">
+            <div className="bg-slate-900 rounded-2xl p-4 sm:p-8 mb-12 shadow-2xl border border-white/10 relative overflow-hidden">
+                <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
                     <Shield size={120} className="text-white" />
                 </div>
                 
                 <div className="relative z-10">
-                    <h2 className="text-2xl font-serif font-bold text-white mb-2 flex items-center gap-3">
-                        <Star className="text-amber-400" /> Direct Spotlight Assignment
+                    <h2 className="text-xl sm:text-2xl font-serif font-bold text-white mb-2 flex items-center gap-3">
+                        <Star className="text-amber-400" size={24} /> Spotlight Assignment
                     </h2>
-                    <p className="text-slate-400 text-sm mb-8 italic">Search for any story to instantly promote it to the Home page Hero.</p>
+                    <p className="text-slate-400 text-xs sm:text-sm mb-6 sm:mb-8 italic">Search for any story to instantly promote it to the Home page Hero.</p>
                     
                     <div className="relative max-w-2xl">
                         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -415,32 +476,32 @@ export default function AdminDashboard() {
                             type="text"
                             value={searchQuery}
                             onChange={(e) => handleDirectSearch(e.target.value)}
-                            placeholder="Type title of the blog to crown..."
-                            className="w-full bg-slate-800/50 border border-slate-700 text-white pl-12 pr-4 py-4 rounded-xl focus:ring-2 focus:ring-amber-500 transition-all placeholder:text-slate-600"
+                            placeholder="Type title to crown..."
+                            className="w-full bg-slate-800/50 border border-slate-700 text-white pl-12 pr-4 py-3 sm:py-4 rounded-xl focus:ring-2 focus:ring-amber-500 transition-all placeholder:text-slate-600 text-sm"
                         />
-                        {searching && <Loader2 className="absolute right-4 top-4 animate-spin text-amber-500" size={20} />}
+                        {searching && <Loader2 className="absolute right-4 top-3 sm:top-4 animate-spin text-amber-500" size={20} />}
                     </div>
 
                     {searchResults.length > 0 && (
-                        <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4 animate-fade-in">
+                        <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 animate-fade-in">
                             {searchResults.map(blog => (
-                                <div key={blog._id} className="bg-slate-800/80 border border-slate-700 rounded-xl p-4 flex items-center justify-between group hover:border-amber-500/50 transition-all">
+                                <div key={blog._id} className="bg-slate-800/80 border border-slate-700 rounded-xl p-3 sm:p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between group hover:border-amber-500/50 transition-all gap-3">
                                     <div className="flex-1 min-w-0 pr-4">
-                                        <h4 className="text-slate-200 font-bold truncate">{blog.title}</h4>
-                                        <p className="text-slate-500 text-[10px] uppercase font-black">By {blog.author?.name}</p>
+                                        <h4 className="text-slate-200 font-bold truncate text-sm sm:text-base">{blog.title}</h4>
+                                        <p className="text-slate-500 text-[9px] uppercase font-black">By {blog.author?.name}</p>
                                     </div>
-                                    <div className="flex gap-2">
+                                    <div className="flex gap-2 w-full sm:w-auto">
                                         <button 
                                             onClick={() => handleSetSpotlight(blog._id, 'bestOfWeek')}
-                                            className="px-3 py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 text-[10px] font-black rounded-lg transition-all"
+                                            className="flex-1 sm:flex-none px-3 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 text-[10px] font-black rounded-lg transition-all uppercase tracking-wider"
                                         >
                                             Supreme
                                         </button>
                                         <button 
                                             onClick={() => handleSetSpotlight(blog._id, 'featured')}
-                                            className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-black rounded-lg transition-all"
+                                            className="flex-1 sm:flex-none px-3 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-black rounded-lg transition-all uppercase tracking-wider"
                                         >
-                                            Elite Pick
+                                            Elite
                                         </button>
                                     </div>
                                 </div>
@@ -450,43 +511,39 @@ export default function AdminDashboard() {
                 </div>
             </div>
 
-            {/* Active Spotlight Management (Ownership Oversight) */}
+            {/* Active Spotlight Management */}
             <div className="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-color)] overflow-hidden shadow-xl mb-12 animate-fade-in delay-100">
-                <div className="px-8 py-6 border-b border-[var(--border-color)] bg-gradient-to-r from-amber-500/10 to-transparent flex items-center justify-between">
+                <div className="px-4 sm:px-8 py-6 border-b border-[var(--border-color)] bg-gradient-to-r from-amber-500/10 to-transparent flex items-center justify-between">
                     <div>
-                        <h2 className="text-xl font-serif font-bold text-[var(--text-primary)] flex items-center gap-2">
-                             <PenTool className="text-amber-600" /> Active Spotlight Archive
+                        <h2 className="text-lg sm:text-xl font-serif font-bold text-[var(--text-primary)] flex items-center gap-2">
+                             <PenTool className="text-amber-600" size={20} /> Active Spotlight
                         </h2>
-                        <p className="text-xs text-[var(--text-secondary)] mt-1 italic">Manage currently featured masterpieces and the Weekly Crown</p>
                     </div>
                 </div>
                 
-                <div className="p-8">
+                <div className="p-4 sm:p-8">
                     {activeSpotlight.length > 0 ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                             {activeSpotlight.map(blog => (
-                                <div key={blog._id} className={`relative group rounded-3xl p-6 border transition-all duration-500 hover:shadow-2xl ${
+                                <div key={blog._id} className={`relative group rounded-3xl p-5 sm:p-6 border transition-all duration-500 hover:shadow-2xl ${
                                     blog.spotlight === 'bestOfWeek' 
                                     ? 'bg-amber-50/30 border-amber-200 dark:bg-amber-950/10 dark:border-amber-900/50 shadow-amber-500/5' 
                                     : 'bg-[var(--bg-primary)] border-[var(--border-color)]'
                                 }`}>
                                     <div className="absolute top-4 right-4 z-10">
-                                        <div className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-[0.2em] shadow-sm flex items-center gap-1.5 border ${
+                                        <div className={`px-2.5 py-1 rounded-full text-[8px] font-black uppercase tracking-[0.1em] shadow-sm flex items-center gap-1 border ${
                                             blog.spotlight === 'bestOfWeek' 
                                             ? 'bg-amber-500 text-white border-amber-400' 
                                             : 'bg-indigo-600 text-white border-indigo-500'
                                         }`}>
-                                            {blog.spotlight === 'bestOfWeek' ? (
-                                                <><Award size={10} /> Supreme Award</>
-                                            ) : (
-                                                <><Star size={10} /> Elite Pick</>
-                                            )}
+                                            {blog.spotlight === 'bestOfWeek' ? <Award size={10} /> : <Star size={10} />}
+                                            {blog.spotlight === 'bestOfWeek' ? 'Supreme' : 'Elite'}
                                         </div>
                                     </div>
                                     
-                                    <div className="flex items-center gap-3 mb-5">
-                                        <div className={`w-9 h-9 rounded-full overflow-hidden border-2 ${
-                                            blog.spotlight === 'bestOfWeek' ? 'border-amber-400 shadow-amber-200' : 'border-indigo-100'
+                                    <div className="flex items-center gap-3 mb-4 sm:mb-5">
+                                        <div className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full overflow-hidden border-2 ${
+                                            blog.spotlight === 'bestOfWeek' ? 'border-amber-400' : 'border-indigo-100'
                                         }`}>
                                             <img 
                                                 src={blog.author?.profileImageURL ? getImageUrl(blog.author.profileImageURL) : '/uploads/default-avatar.png'} 
@@ -495,15 +552,12 @@ export default function AdminDashboard() {
                                             />
                                         </div>
                                         <div>
-                                            <p className="text-[10px] font-black text-[var(--text-primary)] uppercase tracking-wider">{blog.author?.name}</p>
-                                            <p className={`text-[8px] font-bold uppercase ${blog.spotlight === 'bestOfWeek' ? 'text-amber-600' : 'text-indigo-500'}`}>
-                                                {blog.spotlight === 'bestOfWeek' ? 'Crowned Master' : 'Elite Author'}
-                                            </p>
+                                            <p className="text-[10px] font-black text-[var(--text-primary)] uppercase tracking-tight line-clamp-1">{blog.author?.name}</p>
                                         </div>
                                     </div>
                                     
                                     <div className="mb-6">
-                                        <h4 className="font-serif font-bold text-[var(--text-primary)] text-base line-clamp-2 min-h-[2.5rem] leading-tight group-hover:text-primary-600 transition-colors">
+                                        <h4 className="font-serif font-bold text-[var(--text-primary)] text-sm sm:text-base line-clamp-2 min-h-[2.5rem] leading-tight group-hover:text-primary-600 transition-colors">
                                             {blog.title}
                                         </h4>
                                     </div>
@@ -512,9 +566,9 @@ export default function AdminDashboard() {
                                         <button 
                                             onClick={() => handleSetSpotlight(blog._id, 'none')}
                                             disabled={spotlightLoading === blog._id}
-                                            className="w-full py-2 bg-slate-100/80 text-slate-600 hover:bg-red-600 hover:text-white dark:bg-slate-800/80 dark:text-slate-300 dark:hover:bg-red-600 dark:hover:text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all flex items-center justify-center gap-2 border border-slate-200 dark:border-slate-700 shadow-sm"
+                                            className="w-full py-2.5 bg-slate-100/80 text-slate-600 hover:bg-red-600 hover:text-white dark:bg-slate-800/80 dark:text-slate-300 dark:hover:bg-red-600 dark:hover:text-white text-[9px] font-black uppercase tracking-widest rounded-xl transition-all flex items-center justify-center gap-2 border border-slate-200 dark:border-slate-700 shadow-sm"
                                         >
-                                            <XCircle size={14} /> Unset Spotlight
+                                            <XCircle size={14} /> Unset
                                         </button>
                                     </div>
                                     
@@ -527,9 +581,9 @@ export default function AdminDashboard() {
                             ))}
                         </div>
                     ) : (
-                        <div className="text-center py-16 flex flex-col items-center bg-slate-50/50 dark:bg-slate-900/20 rounded-3xl border-2 border-dashed border-[var(--border-color)]">
+                        <div className="text-center py-10 sm:py-16 flex flex-col items-center bg-slate-50/50 dark:bg-slate-900/20 rounded-3xl border-2 border-dashed border-[var(--border-color)]">
                             <PenTool size={32} className="text-slate-300 mb-2" />
-                            <p className="text-sm text-[var(--text-secondary)] font-medium">Spotlight Archive is currently empty.</p>
+                            <p className="text-xs sm:text-sm text-[var(--text-secondary)] font-medium">Archive is empty.</p>
                         </div>
                     )}
                 </div>
@@ -537,32 +591,28 @@ export default function AdminDashboard() {
 
             {/* Spotlight Curation Deck */}
             <div className="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-color)] overflow-hidden shadow-xl animate-fade-in">
-                <div className="px-8 py-6 border-b border-[var(--border-color)] bg-gradient-to-r from-[var(--bg-primary)] to-[var(--bg-card)] flex items-center justify-between">
+                <div className="px-4 sm:px-8 py-6 border-b border-[var(--border-color)] bg-gradient-to-r from-[var(--bg-primary)] to-[var(--bg-card)] flex items-center justify-between">
                     <div>
-                        <h2 className="text-xl font-serif font-bold text-[var(--text-primary)] flex items-center gap-2">
-                             <Award className="text-amber-500" /> Spotlight Curation Deck
+                        <h2 className="text-lg sm:text-xl font-serif font-bold text-[var(--text-primary)] flex items-center gap-2">
+                             <Award className="text-amber-50" size={20} /> Curation Deck
                         </h2>
-                        <p className="text-xs text-[var(--text-secondary)] mt-1 italic">Review nominations and select the elite 1%</p>
                     </div>
                 </div>
 
-                <div className="p-8">
+                <div className="p-4 sm:p-8">
                     {spotlightQueue.length > 0 ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                             {spotlightQueue.map(group => {
                                 const blog = group.blog;
                                 const nominators = group.nominators;
                                 if (!blog) return null;
 
                                 return (
-                                    <div key={blog._id} className="relative group bg-[var(--bg-primary)] rounded-3xl p-6 border border-[var(--border-color)] hover:shadow-2xl hover:border-amber-400/50 transition-all duration-500 overflow-hidden">
-                                        {/* Dynamic Gradient Background on Hover */}
-                                        <div className="absolute -inset-1 bg-gradient-to-r from-amber-500 to-indigo-600 rounded-3xl blur opacity-0 group-hover:opacity-10 transition duration-1000 group-hover:duration-200"></div>
-
+                                    <div key={blog._id} className="relative group bg-[var(--bg-primary)] rounded-3xl p-5 sm:p-6 border border-[var(--border-color)] hover:shadow-2xl hover:border-amber-400/50 transition-all duration-500 overflow-hidden">
                                         <div className="relative">
-                                            <div className="flex items-center justify-between mb-6">
+                                            <div className="flex items-center justify-between mb-4 sm:mb-6">
                                                 <div className="flex items-center gap-3">
-                                                    <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-amber-200 shadow-sm">
+                                                    <div className="w-9 h-9 rounded-full overflow-hidden border-2 border-amber-200 shadow-sm">
                                                         <img 
                                                             src={blog.author?.profileImageURL ? getImageUrl(blog.author.profileImageURL) : '/uploads/default-avatar.png'} 
                                                             alt={blog.author?.name} 
@@ -570,19 +620,16 @@ export default function AdminDashboard() {
                                                         />
                                                     </div>
                                                     <div>
-                                                        <p className="text-xs font-black text-[var(--text-primary)] uppercase tracking-widest">{blog.author?.name || 'Anonymous'}</p>
-                                                        <p className="text-[9px] text-amber-600 font-bold uppercase">Original Author</p>
+                                                        <p className="text-[10px] font-black text-[var(--text-primary)] uppercase tracking-tight">{blog.author?.name || 'Anonymous'}</p>
                                                     </div>
                                                 </div>
-                                                {/* Multi-Nominator Avatars */}
-                                                <div className="flex -space-x-3 hover:space-x-1 transition-all">
-                                                    {nominators.map((nominator, idx) => (
-                                                        <div key={idx} className="w-8 h-8 rounded-full border-2 border-[var(--bg-primary)] shadow-sm bg-indigo-50 flex items-center justify-center overflow-hidden z-[10]">
+                                                <div className="flex -space-x-3">
+                                                    {nominators.slice(0, 3).map((nominator, idx) => (
+                                                        <div key={idx} className="w-7 h-7 rounded-full border-2 border-[var(--bg-primary)] shadow-sm bg-indigo-50 flex items-center justify-center overflow-hidden">
                                                             <img 
                                                                 src={nominator?.profileImageURL ? getImageUrl(nominator.profileImageURL) : '/uploads/default-avatar.png'} 
                                                                 alt={nominator?.name} 
                                                                 className="w-full h-full object-cover" 
-                                                                title={nominator?.name}
                                                             />
                                                         </div>
                                                     ))}
@@ -590,42 +637,37 @@ export default function AdminDashboard() {
                                             </div>
 
                                             <div className="mb-4">
-                                                <div className="flex flex-col gap-2 mb-3">
-                                                    <span className="px-2 py-0.5 bg-indigo-100/50 text-indigo-700 text-[8px] font-black uppercase rounded-md w-fit">
-                                                        {nominators.length} {nominators.length === 1 ? 'Nomination' : 'Collective Nominations'}
-                                                    </span>
-                                                    <p className="text-[9px] text-[var(--text-secondary)] font-bold uppercase tracking-tighter line-clamp-1">
-                                                        By: {nominators.map(n => n.name).join(', ')}
-                                                    </p>
-                                                </div>
-                                                <h4 className="font-serif font-bold text-[var(--text-primary)] text-lg line-clamp-2 min-h-[3.5rem] group-hover:text-amber-600 transition-colors">
+                                                <span className="px-2 py-0.5 bg-indigo-100/50 text-indigo-700 text-[8px] font-black uppercase rounded-md mb-2 inline-block">
+                                                    {nominators.length} {nominators.length === 1 ? 'Nomination' : 'Nominations'}
+                                                </span>
+                                                <h4 className="font-serif font-bold text-[var(--text-primary)] text-sm sm:text-base line-clamp-2 min-h-[2.5rem] group-hover:text-amber-600 transition-colors">
                                                     {blog.title}
                                                 </h4>
                                             </div>
 
-                                            <div className="flex flex-col gap-3 pt-4 border-t border-[var(--border-color)]">
+                                            <div className="flex flex-col gap-2 pt-4 border-t border-[var(--border-color)]">
                                                 <div className="flex gap-2">
                                                     <button 
                                                         onClick={() => handleSetSpotlight(blog._id, 'bestOfWeek')}
                                                         disabled={spotlightLoading === blog._id}
-                                                        className="flex-1 flex items-center justify-center gap-1.5 py-3 bg-amber-500 hover:bg-amber-600 text-white text-[10px] font-black uppercase tracking-widest rounded-xl shadow-lg shadow-amber-500/20 transition-all active:scale-95 disabled:opacity-50"
+                                                        className="flex-1 flex items-center justify-center gap-1 py-3 bg-amber-500 hover:bg-amber-600 text-white text-[9px] font-black uppercase tracking-wider rounded-xl shadow-lg shadow-amber-500/10 transition-all active:scale-95 disabled:opacity-50"
                                                     >
-                                                        <Award size={14} /> Supreme
+                                                        Supreme
                                                     </button>
                                                     <button 
                                                         onClick={() => handleSetSpotlight(blog._id, 'featured')}
                                                         disabled={spotlightLoading === blog._id}
-                                                        className="flex-1 flex items-center justify-center gap-1.5 py-3 bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-black uppercase tracking-widest rounded-xl shadow-lg shadow-indigo-600/20 transition-all active:scale-95 disabled:opacity-50"
+                                                        className="flex-1 flex items-center justify-center gap-1 py-3 bg-indigo-600 hover:bg-indigo-700 text-white text-[9px] font-black uppercase tracking-wider rounded-xl shadow-lg shadow-indigo-600/10 transition-all active:scale-95 disabled:opacity-50"
                                                     >
-                                                        <Star size={14} /> Elite Pick
+                                                        Elite
                                                     </button>
                                                 </div>
                                                 <button 
                                                     onClick={() => handleSetSpotlight(blog._id, 'none')}
                                                     disabled={spotlightLoading === blog._id}
-                                                    className="w-full py-2 bg-[var(--bg-primary)] text-slate-500 hover:text-red-600 border border-[var(--border-color)] hover:border-red-200 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all active:scale-95 disabled:opacity-50"
+                                                    className="w-full py-2.5 bg-[var(--bg-primary)] text-slate-500 hover:text-red-600 border border-[var(--border-color)] text-[9px] font-black uppercase tracking-widest rounded-xl transition-all active:scale-95 disabled:opacity-50"
                                                 >
-                                                    Dismiss Nomination
+                                                    Dismiss
                                                 </button>
                                             </div>
                                             
@@ -640,12 +682,8 @@ export default function AdminDashboard() {
                             })}
                         </div>
                     ) : (
-                        <div className="text-center py-12 flex flex-col items-center">
-                            <div className="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mb-4 text-slate-400">
-                                <Award size={32} />
-                            </div>
-                            <h3 className="font-bold text-[var(--text-primary)]">All Caught Up!</h3>
-                            <p className="text-xs text-[var(--text-secondary)] mt-1">There are no new nominations to review right now. Everything is in order.</p>
+                        <div className="text-center py-10 flex flex-col items-center">
+                            <h3 className="font-bold text-[var(--text-primary)] text-sm">No nominations.</h3>
                         </div>
                     )}
                 </div>

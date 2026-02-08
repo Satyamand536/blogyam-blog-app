@@ -226,7 +226,7 @@ export default function Quotes() {
     return (
         <div className="min-h-screen bg-[var(--bg-primary)] transition-colors duration-500">
             {/* Header Section */}
-            <div className="bg-[var(--bg-primary)] border-b border-[var(--border-color)] py-8 transition-colors duration-500">
+            <div className="bg-[var(--bg-primary)] border-b border-[var(--border-color)] pt-20 pb-8 md:pt-8 transition-colors duration-500">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="text-center">
                         <div className="flex items-center justify-center gap-2 mb-4">

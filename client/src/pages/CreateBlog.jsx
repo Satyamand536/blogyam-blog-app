@@ -204,9 +204,9 @@ export default function CreateBlog() {
     if (!user) return null; // Or generic loading
 
     return (
-        <div className="max-w-5xl mx-auto px-4 py-10 transition-colors duration-500 min-h-screen">
+        <div className="max-w-5xl mx-auto px-4 pt-24 pb-10 md:pt-10 transition-colors duration-500 min-h-screen">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
-                <h1 className="text-4xl font-serif font-bold text-[var(--text-primary)]">
+                <h1 className="text-2xl sm:text-3xl md:text-4xl font-serif font-bold text-[var(--text-primary)]">
                     {fetching ? 'Loading Story...' : isEditMode ? 'Edit Your Story' : 'Draft a New Story'}
                 </h1>
                 

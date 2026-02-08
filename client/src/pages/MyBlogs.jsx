@@ -41,7 +41,7 @@ export default function MyBlogs() {
     }
 
     return (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 transition-colors duration-500">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-10 md:pt-10 transition-colors duration-500">
             <div className="flex justify-between items-center mb-8 border-b border-[var(--border-color)] pb-4">
                 <h1 className="text-3xl font-serif font-bold text-[var(--text-primary)]">My Stories</h1>
                 <Link to="/create" className="btn-primary">Write New Story</Link>

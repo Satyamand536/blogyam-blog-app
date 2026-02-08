@@ -148,9 +148,11 @@ export default function Navbar() {
                         {user ? (
                             <>
                                 <div className="w-full h-px bg-[var(--border-color)] my-4"></div>
-                                <Link to="/create" onClick={() => setIsOpen(false)} className="flex items-center gap-3 text-2xl font-medium text-primary-600">
-                                    <PenTool size={24} /> Write Story
-                                </Link>
+                                {user.role === 'owner' && (
+                                    <Link to="/admin" onClick={() => setIsOpen(false)} className="flex items-center gap-3 text-2xl font-medium text-amber-600">
+                                        <Shield size={24} /> Admin Panel
+                                    </Link>
+                                )}
                                 <Link to="/dashboard" onClick={() => setIsOpen(false)} className="flex items-center gap-3 text-2xl font-medium text-[var(--text-primary)]">
                                     <User size={24} /> Dashboard
                                 </Link>
