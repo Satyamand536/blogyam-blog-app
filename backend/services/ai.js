@@ -35,14 +35,14 @@ async function generateResponse(messages) {
 
     // List of strategic models for High Availability
     const MODELS = [
-        "deepseek/deepseek-r1:free", // Most reliable in current tests
+        "deepseek/deepseek-r1:free", 
         "google/gemini-2.0-flash-exp:free",
-        "google/gemini-2.0-flash-lite-preview-02-05:free",
-        "deepseek/deepseek-chat:free",
+        "google/gemini-2.0-pro-exp-02-05:free",
         "meta-llama/llama-3.3-70b-instruct:free",
-        "qwen/qwen-2.5-72b-instruct:free",
+        "qwen/qwen-2-7b-instruct:free",
         "mistralai/mistral-7b-instruct:free",
-        "openrouter/auto" // Strategic auto-fallback
+        "deepseek/deepseek-chat", // Non-free but very cheap fallback if needed
+        "openrouter/auto" 
     ];
 
     // Ensure messages is an array

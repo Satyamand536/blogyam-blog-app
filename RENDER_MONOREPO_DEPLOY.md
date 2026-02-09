@@ -32,7 +32,7 @@ Render dashboard ke **"Environment"** tab mein niche diye gaye variables add kar
 | `MONGODB_URL` | *(Aapki MongoDB URI)* |
 | `JWT_SECRET` | *(Koi bhi random string)* |
 | `OPENROUTER_API_KEY` | *(Aapki OpenRouter Key)* |
-| `CLOUDINARY_CLOUD_NAME` | `dxfqlr7y8` |
+| `CLOUDINARY_CLOUD_NAME` | `dxfojr7y8` |
 | `CLOUDINARY_API_KEY` | `388566182328988` |
 | `CLOUDINARY_API_SECRET` | `thqsggXGWH_C2WIgST9SdWyOYp8` |
 

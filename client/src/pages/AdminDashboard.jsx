@@ -59,6 +59,20 @@ export default function AdminDashboard() {
         }
     };
 
+    const handleBan = async (userId) => {
+        if (!window.confirm("CAUTION: Are you sure you want to BAN this user? They will lose access to their account immediately.")) return;
+        try {
+            const { data } = await api.post(`/admin/ban-user/${userId}`);
+            if (data.success) {
+                setUsers(data.users); // Assuming the API returns updated user list or we need to refetch
+                showToast("User banned successfully!", 'success');
+            }
+        } catch (error) {
+            console.error("Failed to ban user", error);
+            showToast(error.response?.data?.message || "Failed to ban user", 'error');
+        }
+    };
+
     const fetchUsers = async () => {
         try {
             const { data } = await api.get('/admin/users');
@@ -114,6 +128,7 @@ export default function AdminDashboard() {
             await api.patch(endpoint);
             // Optimistic update
             setUsers(users.map(u => u._id === userId ? { ...u, role: newRole } : u));
+            showToast(`User role updated to ${newRole}!`, 'success');
         } catch (error) {
             console.error("Failed to update role", error);
             setModalConfig({
@@ -258,6 +273,20 @@ export default function AdminDashboard() {
         });
     };
 
+    const handlePromote = async (userId) => {
+        if (!window.confirm("Bhai, are you sure you want to promote this user to Author? This will allow them to publish public blogs.")) return;
+        try {
+            const { data } = await api.patch(`/admin/make-author/${userId}`);
+            if (data.success) {
+                setUsers(users.map(u => u._id === userId ? { ...u, role: 'author' } : u));
+                showToast("User promoted to Author successfully!", 'success');
+            }
+        } catch (error) {
+            console.error("Failed to promote user to author", error);
+            showToast(error.response?.data?.message || "Failed to promote user", 'error');
+        }
+    };
+
     const handleDismissReport = async (reportId) => {
         try {
             const { data } = await api.patch(`/admin/reports/${reportId}/dismiss`);
@@ -384,6 +413,64 @@ export default function AdminDashboard() {
                             ))}
                         </tbody>
                     </table>
+                </div>
+
+                {/* Card-based Mobile View */}
+                <div className="md:hidden divide-y divide-[var(--border-color)]">
+                    {users.map(user => (
+                        <div key={user._id} className="p-4 flex flex-col gap-4">
+                            <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 rounded-full bg-slate-200 overflow-hidden shrink-0">
+                                    {user.profileImageURL ? (
+                                        <img src={getImageUrl(user.profileImageURL)} alt="" className="w-full h-full object-cover" />
+                                    ) : (
+                                        <div className="w-full h-full flex items-center justify-center text-sm font-bold text-slate-500">
+                                            {(user.name || 'U')[0]}
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="min-w-0 flex-1">
+                                    <h3 className="font-bold text-[var(--text-primary)] truncate">{user.name}</h3>
+                                    <p className="text-xs text-[var(--text-secondary)] truncate">{user.email}</p>
+                                </div>
+                                <span className={`shrink-0 inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                                    user.role === 'owner' ? 'bg-purple-100 text-purple-800' :
+                                    user.role === 'author' ? 'bg-green-100 text-green-800' :
+                                    'bg-slate-100 text-slate-800'
+                                }`}>
+                                    {user.role}
+                                </span>
+                            </div>
+                            
+                            {user.role !== 'owner' && (
+                                <div className="flex gap-2">
+                                    <button
+                                        onClick={() => toggleRole(user._id, user.role)}
+                                        disabled={actionLoading === user._id}
+                                        className={`flex-1 min-h-[48px] text-[10px] font-black uppercase tracking-widest rounded-xl transition-all border flex items-center justify-center gap-2 ${
+                                            user.role === 'author' 
+                                            ? 'text-amber-600 border-amber-200 bg-amber-50/50' 
+                                            : 'text-primary-600 border-primary-200 bg-primary-50/50'
+                                        }`}
+                                    >
+                                        {actionLoading === user._id ? (
+                                            <Loader2 size={16} className="animate-spin" />
+                                        ) : (
+                                            user.role === 'author' ? "Demote to User" : "Promote to Author"
+                                        )}
+                                    </button>
+                                    {!user.isBanned && (
+                                        <button
+                                            onClick={() => handleModerationAction('ban', user._id, 'Community management')}
+                                            className="flex-1 min-h-[48px] text-[10px] font-black uppercase tracking-widest rounded-xl text-red-600 border border-red-200 bg-red-50/50 transition-all flex items-center justify-center"
+                                        >
+                                            Ban User
+                                        </button>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    ))}
                 </div>
                 </div>
             )}

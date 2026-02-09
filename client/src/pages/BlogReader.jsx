@@ -5,6 +5,8 @@ import AIAssistant from '../components/AIAssistant';
 import MembershipGate from '../components/MembershipGate';
 import { Loader2, Heart, MessageCircle, Share2, Bookmark, Trash2, User, Tag, Sparkles, Edit3, Shield, CheckCircle, XCircle, AlertTriangle, X } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import PremiumModal from '../components/PremiumModal';
+import OptimizedImage from '../components/OptimizedImage';
 
 export default function BlogReader() {
     const { id } = useParams();
@@ -145,8 +147,14 @@ export default function BlogReader() {
         alert("Link copied to clipboard!");
     };
 
-    const handleDelete = async () => {
-        if (!window.confirm("Are you sure you want to delete this blog?")) return;
+    // Delete Confirmation State
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+    const handleDeleteClick = () => {
+        setShowDeleteModal(true);
+    };
+
+    const confirmDelete = async () => {
         try {
             const { data } = await api.delete(`/blogs/${id}`);
             if (data.success) {
@@ -154,7 +162,9 @@ export default function BlogReader() {
             }
         } catch (error) {
             console.error("Delete failed", error);
-            alert("Failed to delete blog");
+            showNotification("Failed to delete blog", "error");
+        } finally {
+            setShowDeleteModal(false);
         }
     };
 
@@ -265,7 +275,8 @@ export default function BlogReader() {
     const getImageUrl = (path) => {
         if (!path) return '';
         if (path.startsWith('http') || path.startsWith('data:')) return path;
-        return `${API_URL}${path}`;
+        const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+        return `${API_URL}${normalizedPath}`;
     };
 
     if (loading) return <div className="flex justify-center py-20"><Loader2 className="animate-spin text-primary-600" size={40} /></div>;
@@ -308,11 +319,14 @@ export default function BlogReader() {
                     </div>
                 </div>
 
-                <div className="rounded-2xl overflow-hidden shadow-lg mb-10">
-                    <img 
+                <div className="rounded-2xl overflow-hidden shadow-lg mb-10 aspect-video relative group border border-[var(--border-color)]">
+                    <OptimizedImage 
                         src={blog.coverImageURL ? getImageUrl(blog.coverImageURL) : '/images/default-blog.png'} 
                         alt={blog.title} 
-                        className="w-full h-80 object-cover"
+                        className="w-full h-full object-cover transition-opacity duration-500"
+                        containerClassName="w-full h-full"
+                        priority={true} 
+                        fallbackSrc="/images/default-blog.png"
                     />
                 </div>
 
@@ -497,7 +511,7 @@ export default function BlogReader() {
                                 {/* Delete: Author or Owner */}
                                 {(user._id === blog.author?._id || user.role === 'owner') && (
                                     <button 
-                                        onClick={handleDelete}
+                                        onClick={handleDeleteClick}
                                         title="Delete story"
                                         className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-full transition-colors"
                                     >
@@ -721,6 +735,17 @@ export default function BlogReader() {
                     </button>
                 </div>
             </div>
+            {/* Delete Confirmation Modal */}
+            <PremiumModal 
+                isOpen={showDeleteModal}
+                onClose={() => setShowDeleteModal(false)}
+                onConfirm={confirmDelete}
+                title="Delete Story?"
+                message="This action cannot be undone. Your story and all its comments will be permanently lost like tears in rain."
+                confirmText="Delete Forever"
+                cancelText="Keep Story"
+                type="danger"
+            />
         </div>
     );
 }

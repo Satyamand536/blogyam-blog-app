@@ -20,7 +20,7 @@ export default function BlogCard({ blog }) {
     const catClass = categoryColors[categoryKey] || categoryColors['general'];
     return (
         <div className="card group h-full flex flex-col overflow-hidden">
-            <div className="relative h-48 -mx-6 -mt-6 mb-4 overflow-hidden">
+            <div className="relative aspect-video -mx-4 -mt-4 mb-4 sm:-mx-6 sm:-mt-6 overflow-hidden">
                 <OptimizedImage 
                     src={blog.coverImageURL ? getImageUrl(blog.coverImageURL) : '/images/default-blog.png'} 
                     alt={blog.title} 

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import api, { API_URL } from '../api/axios';
+import { getImageUrl } from '../utils/imageUtils';
 import { Image as ImageIcon, Loader2, Globe, Lock, AlertCircle, Trash2, X } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import ReactQuill from 'react-quill-new';
@@ -145,19 +146,22 @@ export default function CreateBlog() {
         }
         if (file) formData.append('coverImage', file);
 
+        // Debug: Log file object
+        if (file) {
+            console.log('[CreateBlog Debug] Uploading file:', file.name, file.size, file.type);
+        } else {
+            console.log('[CreateBlog Debug] No file selected (or existing banner used)');
+        }
+
         try {
             if (isEditMode) {
                 console.log(`[Frontend] Patching blog ID: ${id}`);
-                const { data } = await api.patch(`/blogs/${id}`, formData, {
-                    headers: { 'Content-Type': 'multipart/form-data' }
-                });
+                const { data } = await api.patch(`/blogs/${id}`, formData);
                 if (data.success) {
                     navigate(`/blog/${id}`);
                 }
             } else {
-                const { data } = await api.post('/blogs', formData, {
-                    headers: { 'Content-Type': 'multipart/form-data' }
-                });
+                const { data } = await api.post('/blogs', formData);
                 if (data.success) {
                     navigate(`/blog/${data.blogId}`);
                 }
@@ -195,11 +199,8 @@ export default function CreateBlog() {
         'code-block'
     ];
 
-    const getImageUrl = (path) => {
-        if (!path) return '';
-        if (path.startsWith('http') || path.startsWith('data:')) return path;
-        return `${API_URL}${path}`;
-    };
+    // Local getImageUrl removed to use the imported utility from '../utils/imageUtils'
+    // which handles absolute URLs correctly.
 
     if (!user) return null; // Or generic loading
 
@@ -231,10 +232,32 @@ export default function CreateBlog() {
                     />
                 </div>
 
+                {/* Mobile Preview Area */}
+                {(file || (existingBanner && !removeBanner)) && (
+                    <div className="md:hidden w-full aspect-video rounded-2xl overflow-hidden border border-[var(--border-color)] shadow-inner relative group/mobile-preview">
+                        <img 
+                            src={file ? URL.createObjectURL(file) : getImageUrl(existingBanner)} 
+                            className="w-full h-full object-cover" 
+                            alt="Mobile Preview"
+                        />
+                        <button 
+                            type="button"
+                            onClick={() => {
+                                if (file) setFile(null);
+                                else setRemoveBanner(true);
+                            }}
+                            className="absolute top-4 right-4 p-3 bg-red-600/90 text-white rounded-full shadow-lg backdrop-blur-sm"
+                        >
+                            <Trash2 size={20} />
+                        </button>
+                    </div>
+                )}
+
                 {/* Controls Bar */}
-                <div className="flex flex-wrap gap-6 items-center p-4 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl shadow-sm">
-                    {/* Category */}
-                    <div className="flex flex-col gap-1">
+                <div className="flex flex-col md:flex-row gap-4 md:gap-6 items-stretch md:items-center p-4 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl shadow-sm mb-6">
+                    <div className="flex flex-wrap md:flex-nowrap gap-4 md:gap-6 items-center flex-1">
+                        {/* Category */}
+                        <div className="flex flex-col gap-1.5 min-w-[140px]">
                         <label className="text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider">Category</label>
                         <select 
                             value={category} 
@@ -285,11 +308,12 @@ export default function CreateBlog() {
                             </div>
                         </div>
                     )}
+                    </div>
 
-                     {/* Image Management */}
-                    <div className="flex-1 flex flex-col sm:flex-row justify-end items-center gap-4">
+                    {/* Image Management */}
+                    <div className="flex flex-col sm:flex-row justify-end items-stretch sm:items-center gap-4 border-t md:border-t-0 pt-4 md:pt-0 border-[var(--border-color)]">
                         {(file || (existingBanner && !removeBanner)) && (
-                            <div className="relative group/preview w-24 h-14 rounded-lg overflow-hidden border border-[var(--border-color)] shadow-sm">
+                            <div className="hidden md:block relative group/preview w-24 h-14 rounded-lg overflow-hidden border border-[var(--border-color)] shadow-sm">
                                 <img 
                                     src={file ? URL.createObjectURL(file) : getImageUrl(existingBanner)} 
                                     className="w-full h-full object-cover" 
@@ -311,8 +335,8 @@ export default function CreateBlog() {
                             </div>
                         )}
                         
-                        <div className="flex items-center gap-2">
-                            <label className="flex items-center gap-2 cursor-pointer text-primary-600 dark:text-primary-400 hover:bg-primary-100 dark:hover:bg-primary-900/30 font-semibold transition-all bg-primary-50 dark:bg-primary-900/10 px-4 py-2 rounded-xl text-sm border border-primary-200 dark:border-primary-800">
+                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                            <label className="flex items-center justify-center gap-2 cursor-pointer text-primary-600 dark:text-primary-400 hover:bg-primary-100 dark:hover:bg-primary-900/30 font-semibold transition-all bg-primary-50 dark:bg-primary-900/10 px-4 py-3 rounded-xl text-sm border border-primary-200 dark:border-primary-800 active:scale-95">
                                 <ImageIcon size={18} />
                                 <span>{(file || (existingBanner && !removeBanner)) ? "Change" : "Add Cover"}</span>
                                 <input 
@@ -332,7 +356,7 @@ export default function CreateBlog() {
                                 <button 
                                     type="button"
                                     onClick={() => setRemoveBanner(true)}
-                                    className="flex items-center gap-2 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30 font-semibold transition-all bg-red-50 dark:bg-red-900/10 px-4 py-2 rounded-xl text-sm border border-red-200 dark:border-red-800"
+                                    className="flex items-center justify-center gap-2 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30 font-semibold transition-all bg-red-50 dark:bg-red-900/10 px-4 py-3 rounded-xl text-sm border border-red-200 dark:border-red-800 active:scale-95"
                                 >
                                     <Trash2 size={18} />
                                     <span>Remove</span>
@@ -343,7 +367,7 @@ export default function CreateBlog() {
                                 <button 
                                     type="button"
                                     onClick={() => setRemoveBanner(false)}
-                                    className="flex items-center gap-2 text-orange-600 dark:text-orange-400 hover:bg-orange-100 dark:hover:bg-orange-900/30 font-semibold transition-all bg-orange-50 dark:bg-orange-900/10 px-4 py-2 rounded-xl text-sm border border-orange-200 dark:border-orange-800"
+                                    className="flex items-center justify-center gap-2 text-orange-600 dark:text-orange-400 hover:bg-orange-100 dark:hover:bg-orange-900/30 font-semibold transition-all bg-orange-50 dark:bg-orange-900/10 px-4 py-3 rounded-xl text-sm border border-orange-200 dark:border-orange-800 active:scale-95"
                                 >
                                     <X size={18} />
                                     <span>Undo Remove</span>
@@ -390,6 +414,8 @@ export default function CreateBlog() {
                         className="bg-transparent text-[var(--text-primary)]" 
                     />
                     <style>{`
+                        /* ROBUST MOBILE TOOLBAR FIXES */
+                        
                         .ql-container {
                             font-size: 1.125rem;
                             border: none !important;
@@ -397,30 +423,95 @@ export default function CreateBlog() {
                         }
                         .ql-editor {
                             min-height: 400px;
-                            padding: 1rem 0;
+                            padding: 1.5rem 0;
                             line-height: 1.8;
                             color: var(--text-primary);
                         }
-                        .ql-toolbar {
+
+                        /* Toolbar Container - Sticky & Consistent */
+                        .ql-toolbar.ql-snow {
                             border: none !important;
                             border-bottom: 1px solid var(--border-color) !important;
-                            margin-bottom: 2rem;
-                            padding: 10px 0 !important;
+                            background: var(--bg-card);
+                            border-radius: 12px 12px 0 0;
+                            margin-bottom: 1.5rem;
+                            padding: 12px 10px !important;
+                            position: sticky;
+                            top: 0;
+                            z-index: 50;
+                            transition: box-shadow 0.3s ease;
                         }
+
+                        /* MOBILE & TABLET OPTIMIZATIONS */
+                        @media (max-width: 1024px) {
+                            .ql-toolbar.ql-snow {
+                                display: flex !important;
+                                flex-wrap: wrap !important;
+                                gap: 8px !important;
+                                padding: 16px 12px !important;
+                                justify-content: flex-start;
+                                white-space: normal !important;
+                            }
+
+                            .ql-formats {
+                                display: flex !important;
+                                align-items: center;
+                                flex-wrap: wrap;
+                                gap: 6px;
+                                margin-right: 12px !important;
+                                padding: 4px;
+                                border-radius: 8px;
+                                background: rgba(0, 0, 0, 0.02);
+                                border-right: 1px solid var(--border-color) !important;
+                                margin-bottom: 8px !important;
+                            }
+
+                            /* Professional Touch Targets */
+                            .ql-toolbar.ql-snow button {
+                                width: 44px !important;
+                                height: 44px !important;
+                                padding: 8px !important;
+                                display: flex !important;
+                                align-items: center !important;
+                                justify-content: center !important;
+                                border-radius: 10px !important;
+                                background: transparent !important;
+                                transition: all 0.2s ease;
+                                margin: 0 !important;
+                            }
+
+                            .ql-toolbar.ql-snow .ql-picker-label {
+                                height: 44px !important;
+                                min-width: 65px !important;
+                                padding: 0 12px !important;
+                                border: 1px solid var(--border-color) !important;
+                                border-radius: 10px !important;
+                                display: flex !important;
+                                align-items: center !important;
+                                background: var(--bg-card) !important;
+                            }
+
+                            /* Icon visibility */
+                            .ql-snow .ql-stroke {
+                                stroke-width: 2.2px !important;
+                            }
+                        }
+
                         /* Enhanced 'Clear Format' Button */
                         .ql-clean {
                             width: auto !important;
-                            padding-right: 8px !important;
+                            padding-right: 16px !important;
+                            padding-left: 14px !important;
                             display: flex !important;
                             align-items: center !important;
-                            gap: 4px;
+                            gap: 6px;
                             border: 1px solid var(--border-color) !important;
-                            border-radius: 4px !important;
-                            margin-left: 8px !important;
+                            border-radius: 10px !important;
+                            height: 40px !important;
                         }
                         .ql-clean::after {
-                            content: "Clear Styling";
-                            font-size: 0.7rem;
+                            content: "Clear";
+                            font-size: 0.8rem;
                             font-weight: 600;
                         }
                     `}</style>

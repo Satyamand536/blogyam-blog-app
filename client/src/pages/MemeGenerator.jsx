@@ -140,7 +140,7 @@ export default function MemeGenerator() {
         <div className="min-h-screen bg-[var(--bg-primary)] transition-colors duration-500">
             {/* Sticky Notification */}
             {notification && (
-                <div className="fixed top-24 left-1/2 -translate-x-1/2 z-50 w-full max-w-md px-4 animate-in fade-in slide-in-from-top-4 duration-300">
+                <div className="fixed top-24 left-1/2 -translate-x-1/2 z-[100] w-full max-w-md px-4 animate-in fade-in slide-in-from-top-4 duration-300">
                     <div className="bg-red-600 text-white p-4 rounded-xl shadow-2xl flex items-center justify-between gap-4 border border-red-500">
                         <div className="flex items-center gap-3">
                             <AlertTriangle className="flex-shrink-0" size={24} />

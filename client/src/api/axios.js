@@ -9,7 +9,7 @@ const api = axios.create({
     withCredentials: true, // Required for cookie-based auth
     timeout: 30000,        // Increased to 30s for production resilience and cold starts
     headers: {
-        'Content-Type': 'application/json',
+        // Axios will automatically set the correct Content-Type for FormData
     },
 });
 

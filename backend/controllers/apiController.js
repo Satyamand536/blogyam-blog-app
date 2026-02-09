@@ -277,7 +277,9 @@ async function createBlog(req, res) {
         // 2. Create Blog
         let coverImageURL = '/uploads/default.jpg';
         if (req.file) {
-            coverImageURL = `/uploads/${req.file.filename}`;
+            // Cloudinary returns full URL in path, local multer returns filename
+            // FIX: Prioritize secure_url from Cloudinary response
+            coverImageURL = req.file.secure_url || req.file.url || req.file.path || `/uploads/${req.file.filename}`;
         }
         
         // Enforce visibility/status rules
@@ -304,13 +306,29 @@ async function createBlog(req, res) {
             author: req.user._id,
             visibility: finalVisibility,
             status: finalStatus,
-            tags: tags ? tags.split(',').map(t => xss(t.trim())) : [],
+            tags: tags ? (Array.isArray(tags) ? tags : tags.split(',')).map(t => xss(t.trim())) : [],
             isFeatured: false 
+        });
+        
+        console.log(`✅ Blog Created Successfully: ${blog._id}`, {
+            coverImageURL: blog.coverImageURL,
+            title: blog.title,
+            author: req.user._id
         });
         
         return res.json({ success: true, blogId: blog._id });
     } catch (error) {
-        return res.status(500).json({ success: false, error: error.message });
+        console.error("Create Blog Backend Error:", {
+            message: error.message,
+            stack: error.stack,
+            body: req.body,
+            file: req.file ? {
+                fieldname: req.file.fieldname,
+                originalname: req.file.originalname,
+                path: req.file.path
+            } : 'No file'
+        });
+        return res.status(500).json({ success: false, error: error.message || "Failed to create blog" });
     }
 }
 
@@ -562,20 +580,34 @@ async function updateBlog(req, res) {
             }
         }
         
-        if (tags) blog.tags = tags.split(',').map(t => xss(t.trim()));
+        if (tags) {
+            blog.tags = (Array.isArray(tags) ? tags : tags.split(',')).map(t => xss(t.trim()));
+        }
 
         if (req.body.removeCoverImage === 'true') {
             blog.coverImageURL = '';
         }
 
         if (req.file) {
-            blog.coverImageURL = `/uploads/${req.file.filename}`;
+            // FIX: Prioritize secure_url from Cloudinary response
+            blog.coverImageURL = req.file.secure_url || req.file.url || req.file.path || `/uploads/${req.file.filename}`;
         }
 
         await blog.save();
+        console.log(`✅ Blog Updated Successfully: ${blog._id}`, {
+            coverImageURL: blog.coverImageURL,
+            title: blog.title,
+            author: req.user._id
+        });
         return res.json({ success: true, message: "Blog updated successfully" });
     } catch (error) {
-        return res.status(500).json({ success: false, error: 'Failed to update blog' });
+        console.error("Update Blog Backend Error:", {
+            message: error.message,
+            stack: error.stack,
+            blogId: req.params.id,
+            body: req.body
+        });
+        return res.status(500).json({ success: false, error: error.message || 'Failed to update blog' });
     }
 }
 

@@ -142,7 +142,7 @@ export default function Home() {
                         
                         <div className="group relative bg-gradient-to-br from-slate-900 to-indigo-900 rounded-[2.5rem] overflow-hidden shadow-2xl transition-all duration-700 hover:shadow-indigo-500/20 border border-white/5">
                             <div className="flex flex-col lg:flex-row min-h-[550px]">
-                                <div className="w-full lg:w-[55%] relative group-hover:scale-105 transition-transform duration-1000">
+                                <div className="w-full lg:w-[55%] relative group-hover:scale-105 transition-transform duration-1000 aspect-video lg:aspect-auto">
                                     <div className="absolute inset-0 bg-gradient-to-r from-slate-900 via-transparent to-transparent z-10 hidden lg:block" />
                                     <img 
                                         src={getImageUrl(bestOfWeek.coverImageURL)} 
@@ -211,7 +211,7 @@ export default function Home() {
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                             {featuredBlogs.map(blog => (
                                 <div key={blog._id} className="group cursor-pointer" onClick={() => handleBlogClick(blog._id)}>
-                                    <div className="relative aspect-[4/5] rounded-[2rem] overflow-hidden mb-6 border border-[var(--border-color)] shadow-lg group-hover:shadow-2xl transition-all duration-500">
+                                    <div className="relative aspect-video rounded-[2rem] overflow-hidden mb-6 border border-[var(--border-color)] shadow-lg group-hover:shadow-2xl transition-all duration-500">
                                         <img 
                                             src={getImageUrl(blog.coverImageURL)} 
                                             alt={blog.title}

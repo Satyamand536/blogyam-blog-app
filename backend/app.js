@@ -135,6 +135,26 @@ app.use((req, res) => {
     });
 });
 
+// Global Error Handler
+app.use((err, req, res, next) => {
+    console.error("❌ [Global Error Handler]:", {
+        message: err.message,
+        stack: err.stack,
+        path: req.path,
+        method: req.method
+    });
+
+    // Handle Multer/Cloudinary errors specifically if needed
+    if (err.name === 'MulterError') {
+        return res.status(400).json({ success: false, error: `Upload error: ${err.message}` });
+    }
+
+    res.status(err.status || 500).json({
+        success: false,
+        error: err.message || "An unexpected server error occurred"
+    });
+});
+
 // Server startup
 if (require.main === module) {
     app.listen(PORT, () => {

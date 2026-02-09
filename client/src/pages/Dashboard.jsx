@@ -85,9 +85,7 @@ export default function Dashboard() {
         if (editFile) formData.append('profileImage', editFile);
 
         try {
-            const { data } = await api.patch('/user/profile', formData, {
-                headers: { 'Content-Type': 'multipart/form-data' }
-            });
+            const { data } = await api.patch('/user/profile', formData);
             if (data.success) {
                 setDashboardUser(prev => ({ ...prev, ...data.user }));
                 setIsEditing(false);

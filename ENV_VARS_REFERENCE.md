@@ -5,7 +5,7 @@
 MONGODB_URL=<your_mongodb_connection_string>
 JWT_SECRET=<your_jwt_secret>
 OPENROUTER_API_KEY=<your_openrouter_key>
-CLOUDINARY_CLOUD_NAME=dxfqlr7y8
+CLOUDINARY_CLOUD_NAME=dxfojr7y8
 CLOUDINARY_API_KEY=388566182328988
 CLOUDINARY_API_SECRET=thqsggXGWH_C2WIgST9SdWyOYp8
 CLIENT_URL=http://localhost:5173

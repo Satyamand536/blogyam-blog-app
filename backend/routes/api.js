@@ -73,9 +73,53 @@ router.use((req, res, next) => {
 
 const { checkForAuthenticationCookie, restrictToLoggedinUserOnly } = require('../middlewares/auth');
 
-router.post('/blogs', restrictToLoggedinUserOnly, upload.single('coverImage'), createBlog);
-router.patch('/blogs/:id', restrictToLoggedinUserOnly, upload.single('coverImage'), updateBlog);
-router.put('/blogs/:id', restrictToLoggedinUserOnly, upload.single('coverImage'), updateBlog); // Added PUT as fallback
+const fs = require('fs');
+
+const uploadMiddleware = (req, res, next) => {
+    const logFile = path.resolve(__dirname, '../debug_upload.log');
+    const log = (msg) => {
+        const timestamp = new Date().toISOString();
+        fs.appendFileSync(logFile, `[${timestamp}] ${msg}\n`);
+    };
+
+    // Use a try-catch block for the wrapper itself just in case
+    try {
+        upload.single('coverImage')(req, res, (err) => {
+            if (err) {
+                log(`[Multer Error]: ${err.message}`);
+                console.error('[Multer Error]:', err);
+                
+                 if (err instanceof multer.MulterError) {
+                    return res.status(400).json({ success: false, error: `Upload Error: ${err.message}` });
+                 } else if (err.message === 'File format is not allowed') { 
+                     return res.status(400).json({ success: false, error: 'Invalid file format' });
+                 }
+                 // If unknown error, proceed but log it
+                 log(`Proceeding despite error: ${err.message}`);
+            }
+            
+            if (req.file) {
+                log(`[Multer Success]: File uploaded. Path: ${req.file.path}, SecureURL: ${req.file.secure_url}`);
+            } else {
+                log('[Multer Warning]: req.file is MISSING');
+                if (req.headers && req.headers['content-type']) {
+                    log(`[Header Check]: Content-Type: ${req.headers['content-type']}`);
+                }
+                if (req.body) {
+                    log(`[Body Check]: Body keys present: ${Object.keys(req.body).join(', ')}`);
+                }
+            }
+            next();
+        });
+    } catch (wrapperError) {
+        log(`[Wrapper Error]: ${wrapperError.message}`);
+        next(wrapperError);
+    }
+};
+
+router.post('/blogs', restrictToLoggedinUserOnly, uploadMiddleware, createBlog);
+router.patch('/blogs/:id', restrictToLoggedinUserOnly, uploadMiddleware, updateBlog);
+router.put('/blogs/:id', restrictToLoggedinUserOnly, uploadMiddleware, updateBlog); // Added PUT as fallback
 router.delete('/blogs/:id', restrictToLoggedinUserOnly, deleteBlog);
 router.post('/blogs/:id/like', restrictToLoggedinUserOnly, toggleLike);
 router.post('/blogs/:id/save', restrictToLoggedinUserOnly, toggleSave);

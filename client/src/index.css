@@ -38,15 +38,20 @@
 :root {
   --bg-primary: #ffffff; /* pure white */
   --bg-card: #f8fafc; /* slate-50 */
-  --text-primary: #000000; /* true black for maximum visibility */
-  --text-secondary: #475569; /* slate-600 for better contrast */
-  --border-color: #e2e8f0;
+  --text-primary: #111827; /* gray-900 for premium readability */
+  --text-secondary: #4b5563; /* gray-600 */
+  --border-color: #e5e7eb;
+  
+  /* Fluid Typography Scale */
+  --fluid-body: clamp(1rem, 0.95rem + 0.25vw, 1.125rem); /* 16px - 18px */
+  --fluid-h1: clamp(2rem, 1.5rem + 2.5vw, 3.5rem);
+  --fluid-h2: clamp(1.5rem, 1.25rem + 1.25vw, 2.25rem);
 }
 
 [data-theme="dark"] {
   --bg-primary: #020617; /* navy-950 / slate-950 hybrid deep indigo */
   --bg-card: #1e293b; /* slate-800 or slightly lighter than main bg */
-  --text-primary: #f1f5f9; /* slate-100 */
+  --text-primary: #f8fafc; /* slate-50 */
   --text-secondary: #94a3b8; /* slate-400 */
   --border-color: #1e293b;
 }
@@ -56,11 +61,16 @@
     @apply font-sans antialiased transition-colors duration-500 ease-in-out;
     background-color: var(--bg-primary);
     color: var(--text-primary);
+    font-size: var(--fluid-body);
+    line-height: 1.6;
+    letter-spacing: -0.01em;
   }
 
   h1, h2, h3, h4, h5, h6 {
     @apply font-serif transition-colors duration-500;
     color: var(--text-primary);
+    line-height: 1.25;
+    letter-spacing: -0.02em;
   }
   
   /* Smooth scrolling */

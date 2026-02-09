@@ -20,7 +20,7 @@ services:
       - key: OPENROUTER_API_KEY
         sync: false
       - key: CLOUDINARY_CLOUD_NAME
-        value: dxfqlr7y8
+        value: dxfojr7y8
       - key: CLOUDINARY_API_KEY
         value: 388566182328988
       - key: CLOUDINARY_API_SECRET

@@ -140,6 +140,11 @@ export default function Navbar() {
                     </div>
 
                     <div className="flex flex-col items-center space-y-6 w-full max-w-xs">
+                        {user && (
+                            <Link to="/create" onClick={() => setIsOpen(false)} className="flex items-center gap-3 text-2xl font-medium text-primary-600 animate-pulse">
+                                <PenTool size={24} /> Write a Story
+                            </Link>
+                        )}
                         <Link to="/" onClick={() => setIsOpen(false)} className="text-2xl font-medium text-[var(--text-primary)] hover:text-primary-600 transition-colors">Home</Link>
                         <Link to="/authors" onClick={() => setIsOpen(false)} className="text-2xl font-medium text-[var(--text-primary)] hover:text-primary-600 transition-colors">Authors</Link>
                         <Link to="/quotes" onClick={() => setIsOpen(false)} className="text-2xl font-medium text-[var(--text-primary)] hover:text-wisdom-500 transition-colors">Quotes</Link>
