@@ -42,7 +42,7 @@ export default function Wisdom() {
                     Daily Wisdom
                 </h1>
                 <div className="max-w-3xl mx-auto relative z-10">
-                    <p className="text-xl md:text-2xl text-wisdom-900 italic font-serif leading-relaxed">
+                    <p className="text-xl md:text-2xl text-wisdom-900 font-serif leading-relaxed">
                         "{dailyScripture.text}"
                     </p>
                     <p className="mt-4 text-wisdom-900 font-bold uppercase tracking-widest text-sm">
@@ -71,7 +71,7 @@ export default function Wisdom() {
                             </div>
                         ) : (
                             <div className="text-center py-20">
-                                <p className="text-[var(--text-secondary)] italic font-serif opacity-80">"Silence is sometimes the best answer." — Dalai Lama</p>
+                                <p className="text-[var(--text-secondary)] font-serif opacity-80">"Silence is sometimes the best answer." — Dalai Lama</p>
                                 <p className="mt-4 text-[var(--text-secondary)] text-sm opacity-60">(No spiritual blogs found yet. Be the first to write one!)</p>
                             </div>
                         )}

@@ -4,26 +4,62 @@ const axios = require("axios");
 const OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions";
 
 const SYSTEM_PROMPT = `
-You are a BLOG INTELLIGENCE ASSISTANT. Your primary role is to explain, summarize, and analyze blog content.
+You are Blogam Intelligence, an advanced AI assistant embedded within a blogging platform.
+Your primary role is to assist users with reading, understanding, and creating content on Blogam.
 
-CORE RESPONSIBILITIES:
-1. Explain a full blog in simple language.
-2. Summarize the entire blog.
-3. Explain the meaning of a blog line-by-line.
-4. Explain the meaning of selected paragraphs or lines.
-5. Handle blogs of ANY category (Technology, AI, Spirituality, Life, Poems, Songs, etc.).
+CRITICAL INSTRUCTIONS:
 
-STRICT RULES:
-- If the user asks a question NOT related to a blog (and no blog context is provided), answer the question correctly but MUST end with EXACTLY this line:
-"Note: please ask some blog related questions."
-- Support languages: English, Hindi, Hinglish. Default to Hinglish if not specified.
-- Prioritize blog-related questions.
-- Maintain a professional, helpful, and "top 1%" quality tone.
-- Do NOT hallucinate. If you don't know, say so.
+1. **Language Support**: 
+   - You MUST understand and fluently respond in **English**, **Hindi**, and **Hinglish** (Hindi written in English script). 
+   - Detect the user's language and reply in the same language/style. 
+   - If the user uses a mix, reply in Hinglish.
 
-REAL-TIME DATA DISCLAIMER:
-- If the user asks about current news, live data, real-time events, stock prices, or time-sensitive info, you MUST say: "I can provide information only up to my last training data. I do not have access to real-time or current updates." BEFORE giving any context.
+2. **Context Awareness**: 
+   - **Specific Blog**: If the user asks about the specific blog post they are reading, answer strictly based on that blog's content.
+   - **Selection Elaboration**: If the user selects a specific part of the blog text, **elaborate** on it in detail. Explain the concepts clearly, provide examples, and simplify complex terms.
+   - **Blog-Related Topics**: Answer questions about blogging, writing, this platform, or the current blog content.
+   - **Off-Topic Detection**: If asked about completely unrelated topics (like "What is the capital of France?", "Who won the cricket match?", etc.), you should STILL answer helpfully, but the system will add a note.
+
+3. **Tone**: Be helpful, encouraging, and intelligent. Use formatting (bullet points, bold text) to make answers readable.
+
+4. **Brevity**: Keep answers concise unless asked to elaborate or explain a specific section.
 `;
+
+// Helper function to detect if question is blog-related
+function isBlogRelated(userMessage, contextExists) {
+    const msg = userMessage.toLowerCase();
+    
+    // If there's blog context, these are clearly blog-related
+    const blogKeywords = [
+        'blog', 'post', 'article', 'write', 'writing', 'author', 'publish',
+        'summarize', 'summary', 'explain', 'meaning', 'what does this mean',
+        'elaborate', 'tell me more', 'what is this about', 'blogam'
+    ];
+    
+    // Check if question contains blog-related keywords
+    if (blogKeywords.some(keyword => msg.includes(keyword))) {
+        return true;
+    }
+    
+    // If message is asking about "this" or "that" and we have blog context, it's blog-related
+    if (contextExists && (msg.includes('this') || msg.includes('that') || msg.includes('here'))) {
+        return true;
+    }
+    
+    // Generic knowledge questions (clearly off-topic)
+    const offTopicPatterns = [
+        'capital of', 'who is', 'what is the', 'when did', 'where is',
+        'how to make', 'recipe', 'weather', 'score', 'match', 'movie',
+        'song', 'game', 'cricket', 'football', 'price of', 'buy online'
+    ];
+    
+    if (offTopicPatterns.some(pattern => msg.includes(pattern))) {
+        return false; // Clearly off-topic
+    }
+    
+    // Default: assume blog-related if we're on a blog page
+    return contextExists;
+}
 
 async function generateResponse(messages) {
     const apiKey = process.env.OPENROUTER_API_KEY;
@@ -33,39 +69,71 @@ async function generateResponse(messages) {
         return "Configuration Error: API Key is missing. Please add OPENROUTER_API_KEY to your .env file.";
     }
 
-    // List of strategic models for High Availability
+    // List of RELIABLE Free Models (8 models for extreme coverage)
     const MODELS = [
-        "deepseek/deepseek-r1:free", 
-        "google/gemini-2.0-flash-exp:free",
+        // 1. Google Gemini Pro (Most Reliable)
         "google/gemini-2.0-pro-exp-02-05:free",
+        
+        // 2. DeepSeek Chat V3 (High Capacity)
+        "deepseek/deepseek-chat:free",
+        
+        // 3. Anthropic Claude (Excellent for reasoning)
+        "anthropic/claude-3.5-haiku:free",
+
+        // 4. Mistral Small (Fast and Reliable)
+        "mistralai/mistral-small-24b-instruct-2501:free",
+        
+        // 5. Qwen 2.5 72B (Large Capacity)
+        "qwen/qwen-2.5-72b-instruct:free",
+        
+        // 6. Meta Llama (Backup)
         "meta-llama/llama-3.3-70b-instruct:free",
-        "qwen/qwen-2-7b-instruct:free",
-        "mistralai/mistral-7b-instruct:free",
-        "deepseek/deepseek-chat", // Non-free but very cheap fallback if needed
-        "openrouter/auto" 
+
+        // 7. Cohere Command (Good for multi-language)
+        "cohere/command-r:free",
+
+        // 8. OpenRouter Auto (Final Fallback)
+        "openrouter/auto"
     ];
 
     // Ensure messages is an array
     const conversation = Array.isArray(messages) ? messages : [{ role: "user", content: messages }];
 
-    if (conversation.length === 0 || conversation[0].role !== "system") {
+    if (conversation.length === 0 || (conversation[0] && conversation[0].role !== "system")) {
         conversation.unshift({ role: "system", content: SYSTEM_PROMPT });
     }
 
-    let retryCount = 0;
-    const MAX_RETRIES = 5; // We will try up to 5 different models if failures occur
+    // Detect if current question is blog-related
+    const userMessages = conversation.filter(m => m.role === 'user');
+    const currentMessage = userMessages[userMessages.length - 1]?.content || '';
+    
+    // Check if there's blog context (indicated by a context message at start)
+    const hasContext = conversation.some(m => m.content && m.content.includes('Context for the following questions'));
+    
+    const isCurrentQuestionBlogRelated = isBlogRelated(currentMessage, hasContext);
+    
+    // Count previous off-topic questions in conversation
+    let offTopicCount = 0;
+    for (let i = 0; i < userMessages.length - 1; i++) {
+        if (!isBlogRelated(userMessages[i].content, hasContext)) {
+            offTopicCount++;
+        }
+    }
+    
+    // Simplified logic: Always answer, but add note if off-topic
+    const noteMessage = "\n\n---\n💡 *Note: While I'm here to help with all your questions, I'm specialized in assisting with this blog and the BlogYam platform!*";
 
+    let lastError = null;
+    
     for (let i = 0; i < MODELS.length; i++) {
         const model = MODELS[i];
         try {
-            console.log(`[AI HA] Attempt ${retryCount + 1}: Using Model ${model}`);
+            console.log(`[AI] Attempt ${i + 1} with ${model}`);
             const response = await axios.post(
                 OPENROUTER_API_URL,
                 {
                     model: model,
                     messages: conversation,
-                    temperature: 0.4,
-                    max_tokens: 500
                 },
                 {
                     headers: {
@@ -74,35 +142,38 @@ async function generateResponse(messages) {
                         "HTTP-Referer": process.env.CLIENT_URL || "http://localhost:8000",
                         "X-Title": "BlogYam Intelligence"
                     },
-                    timeout: 15000 // Increased to 15s for better stability
+                    timeout: 20000 
                 }
             );
 
             if (response.data && response.data.choices && response.data.choices.length > 0) {
-                 return response.data.choices[0].message.content;
-            } else {
-                 throw new Error("Empty response or model error");
+                 const content = response.data.choices[0].message.content;
+                 if (content) {
+                     // If current question is off-topic, add the note
+                     if (!isCurrentQuestionBlogRelated) {
+                         return content + noteMessage;
+                     }
+                     return content;
+                 }
             }
-
         } catch (error) {
-            retryCount++;
-            const status = error.response ? error.response.status : error.message;
-            const data = error.response ? JSON.stringify(error.response.data) : "No response data";
-            console.warn(`[AI HA] Model ${model} failed | Status: ${status} | Error: ${data}`);
+            // Detailed error logging for debugging
+            const status = error.response ? error.response.status : "NETWORK_ERROR";
+            console.warn(`[AI] Model ${model} failed (${status}):`, error.message);
             
-            if (retryCount >= MAX_RETRIES && i < MODELS.length - 1) {
-                i += 2; // Jump ahead slightly
+            // Explicitly handle known error codes
+            if ([404, 408, 402, 400, 429, 503].includes(status) || error.code === 'ECONNABORTED') {
+                continue; // Try next model immediately
             }
             
-            if (error.response && error.response.status === 401) {
-                return "AI Authentication Error: Your API key appears to be invalid.";
-            }
-
-            continue; 
+            // Continue to next model for any other error
+            continue;
         }
     }
 
-    return "I'm sorry, bhai. The AI assistant is currently experiencing high load. Please try again in 30 seconds or ask a simpler question.";
+    // Simple failure message as requested
+    console.error("[AI] All models failed.");
+    return "I apologize, but all AI models are currently busy or unavailable. Please try again in a few moments.";
 }
 
 async function summarizeBlog(content) {

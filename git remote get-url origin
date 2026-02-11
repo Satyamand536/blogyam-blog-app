@@ -1,0 +1,31 @@
+[33m6667cb3[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m image uploading issues, editorial,write in menu
+[33m39e38e4[m supreme changes
+[33m287c1c7[m admindashboard changes
+[33m02bfcb0[m memes,ui,comments,reported comments,blog images
+[33m4657f44[m Hardening: Transition to Express 4 and Node LTS for production stability
+[33me87623a[m Final: Production-ready audit and Express 5 wildcard fix
+[33mc5d8783[m Final: Production-ready audit and Express 5 wildcard fix
+[33m7913ce2[m axios changes for vite url
+[33md3f2a28[m ai,mobile,tablet responsiveness changes
+[33m755f442[m for render fullstack at once changes
+[33m907cfd3[m render changes
+[33md780f16[m cross site cookies fixed
+[33mad007f9[m manual cors
+[33mc7a51f7[m final changes cors removed
+[33mbb659fe[m axios changes
+[33md9d0fd5[m cors final fixer
+[33m478b747[m final cors changes
+[33m94902f6[m cors fixed
+[33mc04adf0[m in app backend satus showing message
+[33m698eda5[m logger changes
+[33ma200bbd[m serverless file changes
+[33mce83ea5[m app.serverless made and vercel.json transferred to backend folder
+[33mfcba365[m vercel.json and env vars reference.md
+[33mb9cb0fe[m Add Vercel monorepo configuration
+[33m9f445e2[m  Copied all backend source code from /backend to /api
+[33ma9bddbe[m Fix production deployment, add serverless adapter, improve UI and error handling
+[33m43096b3[m centralised client api url changes
+[33m1aa3e0b[m api url changes
+[33mb7a7550[m cloudinary and login errors updated
+[33me7996ab[m frontend + backend update
+[33mb5603be[m first commit

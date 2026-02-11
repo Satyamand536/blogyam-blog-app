@@ -172,14 +172,14 @@ export default function Dashboard() {
         const fetchDashboard = async () => {
             try {
                 const { data } = await api.get('/user/dashboard');
-                if (data.success) {
+                if (data.success && data.user) {
                     setStats(data.stats);
                     setDashboardUser(data.user);
-                    setSavedBlogs(data.savedBlogs);
+                    setSavedBlogs(data.savedBlogs || []);
                     setRecentHistory(data.recentHistory || []);
                     setWrittenBlogs(data.writtenBlogs || []);
                     setMyNominations(data.myNominations || []);
-                    setEditName(data.user.name);
+                    setEditName(data.user.name || '');
                     setEditBio(data.user.bio || '');
                 }
             } catch (error) {
@@ -212,7 +212,7 @@ export default function Dashboard() {
                             <div className="relative group">
                                 <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-purple-800 rounded-full blur opacity-25 group-hover:opacity-50 transition duration-1000"></div>
                                 <img 
-                                    src={displayUser?.profileImageURL ? `${API_URL}${displayUser.profileImageURL}` : '/images/hacker.png'} 
+                                    src={getImageUrl(displayUser?.profileImageURL || '/images/hacker.png')} 
                                     alt="Profile" 
                                     className="relative w-32 h-32 rounded-full border-4 border-[var(--bg-card)] shadow-xl object-cover"
                                 />
@@ -424,9 +424,13 @@ export default function Dashboard() {
                                                 {historyItem.blogId.title}
                                             </h3>
                                             <div className="mt-auto pt-4 border-t border-[var(--border-color)] flex justify-between items-center">
-                                                {historyItem.blogId.author && (
+                                                {historyItem.blogId.author?.name ? (
                                                     <span className="text-[10px] uppercase font-bold tracking-widest text-primary-600">
-                                                        {historyItem.blogId.author.name?.split(' ')[0]}
+                                                        {historyItem.blogId.author.name.split(' ')[0]}
+                                                    </span>
+                                                ) : (
+                                                    <span className="text-[10px] uppercase font-bold tracking-widest text-primary-600">
+                                                        ANONYMOUS
                                                     </span>
                                                 )}
                                                 <span className="text-[10px] text-[var(--text-secondary)] font-medium">
@@ -461,14 +465,14 @@ export default function Dashboard() {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                 {savedBlogs.map(saved => (
                                     <div key={saved._id} className="relative group">
-                                        <BlogCard blog={saved.blog} />
-                                        {confirmingRemovalId === saved.blog._id ? (
+                                        {saved.blog ? <BlogCard blog={saved.blog} /> : <div className="p-4 bg-[var(--bg-card)] rounded-2xl border border-[var(--border-color)] text-[var(--text-secondary)] text-sm">Blog no longer available</div>}
+                                        {confirmingRemovalId === saved.blog?._id ? (
                                             <div className="absolute top-4 right-4 z-20 flex items-center gap-2 animate-fade-in bg-red-50 dark:bg-red-900/90 px-3 py-1.5 rounded-full border border-red-200 shadow-xl backdrop-blur-sm">
                                                 <span className="text-[10px] font-bold text-red-600 uppercase tracking-widest whitespace-nowrap">Remove?</span>
                                                 <button 
                                                     onClick={(e) => {
                                                         e.preventDefault();
-                                                        executeRemoveSaved(saved.blog._id);
+                                                        if (saved.blog?._id) executeRemoveSaved(saved.blog._id);
                                                     }}
                                                     className="p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors shadow-sm"
                                                     title="Yes, Remove"
@@ -489,7 +493,7 @@ export default function Dashboard() {
                                             <button
                                                 onClick={(e) => {
                                                     e.preventDefault();
-                                                    handleRemoveSaved(saved.blog._id);
+                                                    if (saved.blog?._id) handleRemoveSaved(saved.blog._id);
                                                 }}
                                                 className="absolute top-4 right-4 p-2 bg-white dark:bg-slate-800 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-red-50 dark:hover:bg-red-900/20 text-slate-400 hover:text-red-500 z-10 transform translate-y-2 group-hover:translate-y-0"
                                                 title="Remove from Saved"

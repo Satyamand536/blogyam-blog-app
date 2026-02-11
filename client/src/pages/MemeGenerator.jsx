@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import api from '../api/axios';
-import { RefreshCw, Download, Sparkles, AlertTriangle, X } from 'lucide-react';
+import { RefreshCw, Download, AlertTriangle, X } from 'lucide-react';
+import { HiPhoto } from 'react-icons/hi2';
 import OptimizedImage from '../components/OptimizedImage';
+import { getImageUrl } from '../utils/imageUtils';
 
 export default function MemeGenerator() {
     const [memes, setMemes] = useState([]);
@@ -133,7 +135,7 @@ export default function MemeGenerator() {
         };
         
         // Try original URL, let onload handle it, or use fallback if explicitly known to be broken
-        image.src = currentMeme.url;
+        image.src = getImageUrl(currentMeme.url);
     };
 
     return (
@@ -163,7 +165,7 @@ export default function MemeGenerator() {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="text-center">
                         <div className="flex items-center justify-center gap-2 mb-4">
-                            <Sparkles className="text-primary-600" size={32} />
+                            <HiPhoto className="text-primary-600" size={32} />
                             <h1 className="text-4xl md:text-5xl font-serif font-bold text-[var(--text-primary)]">
                                 Meme Generator
                             </h1>
@@ -190,9 +192,9 @@ export default function MemeGenerator() {
                                     {currentMeme && (
                                         <>
                                             <OptimizedImage
-                                                src={currentMeme.url}
+                                                src={getImageUrl(currentMeme.url)}
                                                 alt={currentMeme.name}
-                                                fallbackSrc={currentMeme.fallback}
+                                                fallbackSrc={getImageUrl(currentMeme.fallback)}
                                                 className="w-full h-auto object-contain"
                                                 style={{ maxHeight: '500px' }}
                                                 priority={true} // Priority as it's the main interaction point

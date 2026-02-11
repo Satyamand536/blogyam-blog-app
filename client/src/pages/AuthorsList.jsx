@@ -36,17 +36,17 @@ export default function AuthorsList() {
     }
 
     if (!user) {
-        return <MembershipGate title="Meet the Masters." message="Our author community is the heart of BlogYam. Join us to discover the brilliant minds behind these perspectives." />;
+        return <MembershipGate title="Members only" message="Sign in to explore our community of writers and connect with the people behind the stories you love." />;
     }
 
     return (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-16 md:pt-16 transition-colors duration-500">
-            <div className="text-center mb-16">
-                <h1 className="text-4xl md:text-5xl font-serif font-bold text-[var(--text-primary)] mb-4">Our Writers</h1>
-                <p className="text-lg text-[var(--text-secondary)] max-w-2xl mx-auto">Meet the voices behind the stories. Explore their perspectives and wisdom.</p>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-16 md:pt-16 transition-colors duration-500">
+            <div className="text-center mb-10 md:mb-16">
+                <h1 className="text-3xl md:text-5xl font-serif font-bold text-[var(--text-primary)] mb-2 md:mb-4">Our Writers</h1>
+                <p className="text-xs md:text-lg text-[var(--text-secondary)] max-w-2xl mx-auto">Discover the voices behind the stories. Explore their work and connect with their ideas.</p>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-8">
                 {authors.map(author => (
                     <Link to={`/authors/${author._id}`} key={author._id} className="group">
                         <div className="bg-[var(--bg-card)] rounded-2xl p-6 border border-[var(--border-color)] shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col items-center text-center h-full">
@@ -56,13 +56,13 @@ export default function AuthorsList() {
                                     alt={author.name} 
                                     className="w-full h-full rounded-full object-cover ring-4 ring-primary-50 dark:ring-primary-900/20 group-hover:scale-105 transition-transform duration-300"
                                 />
-                                <div className="absolute bottom-0 right-0 bg-blue-500 text-white p-1 rounded-full border-2 border-[var(--bg-card)]" title="Verified Author">
+                                <div className="absolute bottom-0 right-0 bg-green-500 text-white p-1 rounded-full border-2 border-[var(--bg-card)]" title="Verified Author">
                                     <UserCheck size={12} />
                                 </div>
                             </div>
                             
-                            <h3 className="text-xl font-bold text-[var(--text-primary)] mb-1 group-hover:text-primary-600 transition-colors">{author.name}</h3>
-                            <p className="text-sm text-[var(--text-secondary)] mb-4 line-clamp-2">{author.bio || "Writer & Thinker"}</p>
+                            <h3 className="text-lg md:text-xl font-bold text-[var(--text-primary)] mb-1 group-hover:text-primary-600 transition-colors uppercase tracking-tight">{author.name}</h3>
+                            <p className="text-xs md:text-sm text-[var(--text-secondary)] mb-4 line-clamp-2 md:line-clamp-none">{author.bio || "Writer & Thinker"}</p>
                             
                             <div className="mt-auto w-full pt-4 border-t border-[var(--border-color)]">
                                 <span className="text-xs font-semibold uppercase tracking-wider text-primary-600">View Profile</span>

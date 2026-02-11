@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import api from '../api/axios';
-import { RefreshCw, Quote, Sparkles, ChevronLeft, ChevronRight, CheckCircle } from 'lucide-react';
+import { RefreshCw, Quote, ChevronLeft, ChevronRight, CheckCircle } from 'lucide-react';
+import { HiBookOpen } from 'react-icons/hi2';
 import OptimizedImage from '../components/OptimizedImage';
 import { getRandomLocalQuote } from '../data/localQuotes';
+import { getImageUrl } from '../utils/imageUtils';
 
 export default function Quotes() {
     // Daily Quote State
@@ -230,12 +232,12 @@ export default function Quotes() {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="text-center">
                         <div className="flex items-center justify-center gap-2 mb-4">
-                            <Sparkles className="text-primary-600" size={32} />
+                            <HiBookOpen className="text-primary-600" size={32} />
                             <h1 className="text-4xl md:text-5xl font-serif font-bold text-[var(--text-primary)]">
                                 Daily Wisdom
                             </h1>
                         </div>
-                        <p className="text-[var(--text-secondary)] text-lg font-serif italic">
+                        <p className="text-[var(--text-secondary)] text-lg font-serif">
                             Discover timeless wisdom from around the world
                         </p>
                     </div>
@@ -302,7 +304,7 @@ export default function Quotes() {
                             {(!loading && !imageError && backgroundImage) ? (
                                 <>
                                     <OptimizedImage
-                                        src={backgroundImage}
+                                        src={getImageUrl(backgroundImage)}
                                         alt={category}
                                         priority={true} // LCP Candidate
                                         className="w-full h-full object-cover"
@@ -383,7 +385,7 @@ export default function Quotes() {
 
                 {/* Info Section */}
                 <div className="mb-12 text-center px-4">
-                    <p className="text-[var(--text-secondary)] font-serif italic">
+                    <p className="text-[var(--text-secondary)] font-serif">
                         "Arise, awake, and stop not till the goal is reached."
                     </p>
                     <p className="mt-2 text-[var(--text-secondary)] opacity-70 text-sm">— Swami Vivekananda</p>
@@ -455,7 +457,7 @@ function QuoteGrid({ category }) {
                                 <Quote className="text-white fill-current" size={24} />
                             </div>
                             
-                            <blockquote className="text-2xl font-serif text-[var(--text-primary)] mb-12 leading-relaxed font-semibold italic">
+                            <blockquote className="text-2xl font-serif text-[var(--text-primary)] mb-12 leading-relaxed font-semibold">
                                 "{q.text}"
                             </blockquote>
                         </div>
@@ -465,7 +467,7 @@ function QuoteGrid({ category }) {
                                 <div className="w-14 h-14 rounded-full border-2 border-white dark:border-slate-800 overflow-hidden bg-slate-200 shadow-sm transition-transform duration-500 group-hover:scale-105">
                                     {q.image ? (
                                          <OptimizedImage 
-                                            src={q.image.url || q.image} 
+                                            src={getImageUrl(q.image.url || q.image)} 
                                             alt={q.author}
                                             className="w-full h-full object-cover grayscale opacity-80 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-700"
                                             fallbackSrc={`https://ui-avatars.com/api/?name=${encodeURIComponent(q.author)}&background=random&color=fff&size=128&bold=true`}
@@ -481,7 +483,7 @@ function QuoteGrid({ category }) {
                                         {q.author}
                                     </span>
                                     <span className="text-[10px] uppercase tracking-[0.3em] font-black text-primary-600 opacity-80 flex items-center gap-1">
-                                        <Sparkles size={10} /> Signature Thinker
+                                        Featured
                                     </span>
                                 </div>
                             </div>

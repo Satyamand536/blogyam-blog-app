@@ -36,6 +36,7 @@ const {
 const { addComment, reportComment, updateComment } = require('../controllers/commentController');
 
 const { requireOwner, requireAuthorOrOwner, requireRole } = require('../middlewares/roles');
+const { signupRateLimiter } = require('../middlewares/rateLimit');
 
 // Cloudinary Setup
 const { storage } = require('../utils/cloudinary');
@@ -43,7 +44,7 @@ const upload = multer({ storage: storage });
 
 // Auth Routes
 router.post('/signin', signin);
-router.post('/signup', signup);
+router.post('/signup', signupRateLimiter, signup);
 router.post('/logout', logout);
 
 // Public Routes

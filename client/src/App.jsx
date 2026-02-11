@@ -21,11 +21,14 @@ import AuthorsList from './pages/AuthorsList';
 import AuthorProfile from './pages/AuthorProfile';
 import AdminDashboard from './pages/AdminDashboard';
 
+import { ToastProvider } from './context/ToastContext';
+
 function App() {
   return (
     <AuthProvider>
       <ThemeProvider>
-      <Router>
+        <ToastProvider>
+          <Router>
         <ScrollToTop />
         <div className="min-h-screen flex flex-col transition-colors duration-500 ease-in-out">
           <Navbar />
@@ -50,7 +53,8 @@ function App() {
           </main>
           <Footer />
         </div>
-      </Router>
+        </Router>
+        </ToastProvider>
       </ThemeProvider>
     </AuthProvider>
   );

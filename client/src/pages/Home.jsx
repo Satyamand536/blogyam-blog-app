@@ -134,63 +134,62 @@ export default function Home() {
                 {!debouncedSearch && bestOfWeek && (
                     <div className="mb-24 animate-fade-in">
                         <div className="flex items-center gap-6 mb-8">
-                            <h2 className="text-sm font-black text-amber-500 uppercase tracking-[0.3em] flex items-center gap-2">
+                            <h2 className="text-sm font-black text-orange-500 uppercase tracking-[0.3em] flex items-center gap-2">
                                 <Award size={18} /> Supreme Masterpiece
                             </h2>
-                            <div className="h-px bg-gradient-to-r from-amber-500/50 to-transparent flex-1"></div>
+                            <div className="h-px bg-gradient-to-r from-orange-500/50 to-transparent flex-1"></div>
                         </div>
                         
-                        <div className="group relative bg-gradient-to-br from-slate-900 to-indigo-900 rounded-[2.5rem] overflow-hidden shadow-2xl transition-all duration-700 hover:shadow-indigo-500/20 border border-white/5">
-                            <div className="flex flex-col lg:flex-row min-h-[550px]">
-                                <div className="w-full lg:w-[55%] relative group-hover:scale-105 transition-transform duration-1000 aspect-video lg:aspect-auto">
-                                    <div className="absolute inset-0 bg-gradient-to-r from-slate-900 via-transparent to-transparent z-10 hidden lg:block" />
+                        <div className="group relative bg-violet-50/50 dark:bg-violet-950 rounded-[2rem] overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-700 hover:shadow-orange-500/10 border border-violet-100 dark:border-violet-800/30 max-w-5xl mx-auto">
+                            <div className="flex flex-col md:flex-row items-stretch">
+                                {/* Image Section */}
+                                <div className="w-full md:w-[60%] relative min-h-[240px] md:min-h-[500px] flex-grow overflow-hidden">
+                                    <div className="absolute inset-0 bg-gradient-to-r from-white/10 dark:from-[rgba(17,17,17,0.6)] via-transparent to-transparent z-10 opacity-100 dark:opacity-40 hidden md:block transition-all duration-500" />
                                     <img 
                                         src={getImageUrl(bestOfWeek.coverImageURL)} 
                                         alt={bestOfWeek.title} 
-                                        className="w-full h-full object-cover"
+                                        className="absolute inset-0 w-full h-full object-cover object-center transform group-hover:scale-105 transition-transform duration-1000"
                                     />
                                     <div className="absolute top-6 left-6 z-20">
-                                        <div className="px-5 py-2 bg-amber-500 text-white font-black text-xs rounded-full uppercase tracking-widest shadow-xl flex items-center gap-2 animate-pulse">
+                                        <div className="px-5 py-2 bg-orange-600 text-white font-black text-xs rounded-full uppercase tracking-widest shadow-xl flex items-center gap-2 animate-pulse">
                                             <Award size={14} /> Supreme Award
                                         </div>
                                     </div>
                                 </div>
-                                <div className="w-full lg:w-[45%] p-10 lg:p-16 flex flex-col justify-center text-white relative z-20">
-                                    <div className="flex items-center gap-3 mb-6 text-indigo-300 font-bold uppercase tracking-widest text-xs">
+                                <div className="w-full md:w-[40%] p-3 md:p-8 lg:p-10 flex flex-col justify-between text-[var(--text-primary)] relative z-20 bg-orange-50 dark:bg-transparent md:min-h-[500px] flex-grow">
+                                    <div className="flex items-center gap-3 mb-1.5 md:mb-6 text-orange-600 dark:text-orange-300 font-bold uppercase tracking-widest text-xs">
                                         <span>{bestOfWeek.category}</span>
-                                        <span className="w-1 h-1 bg-white/30 rounded-full"></span>
+                                        <span className="w-1 h-1 bg-current opacity-30 rounded-full"></span>
                                         <span>{bestOfWeek.readTime} min read</span>
                                     </div>
                                     <h3 
-                                        className="text-4xl md:text-5xl lg:text-6xl font-serif font-bold mb-8 leading-[1.1] hover:text-amber-400 transition-colors cursor-pointer"
+                                        className="text-xl md:text-3xl lg:text-3xl font-serif font-bold mb-2 md:mb-5 leading-tight text-black dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors cursor-pointer"
                                         onClick={() => handleBlogClick(bestOfWeek._id)}
                                     >
                                         {bestOfWeek.title}
                                     </h3>
-                                    <p className="text-slate-300 text-lg leading-relaxed mb-10 opacity-80 line-clamp-3 font-serif italic">
+                                    <p className="text-gray-800 dark:text-gray-300 text-base md:text-lg leading-relaxed mb-2 md:mb-10 line-clamp-3 font-serif italic">
                                         "{stripHtml(bestOfWeek.body).slice(0, 180)}..."
                                     </p>
-                                    <div className="mt-auto pt-8 border-t border-white/10 flex flex-col gap-6">
-                                        <div className="flex items-center gap-5">
+                                    <div className="mt-auto pt-4 md:pt-8 border-t border-[var(--border-color)] dark:border-white/10 flex flex-col items-center gap-4 md:gap-6 md:-ml-[460px] lg:-ml-[500px] relative z-30">
+                                        <div className="flex items-center gap-5 bg-white/80 dark:bg-violet-900/80 backdrop-blur-md p-3 rounded-2xl shadow-xl md:shadow-2xl border border-orange-100 dark:border-violet-700/30">
                                             <img 
                                                 src={getImageUrl(bestOfWeek.author.profileImageURL)} 
                                                 alt={bestOfWeek.author.name} 
-                                                className="w-16 h-16 rounded-full border-2 border-amber-500/50 object-cover shrink-0 shadow-lg"
+                                                className="w-12 h-12 md:w-16 md:h-16 rounded-full border-2 border-orange-500/50 object-cover shrink-0 shadow-lg"
                                             />
                                             <div className="flex flex-col">
-                                                <p className="font-bold text-xl text-white">{bestOfWeek.author.name}</p>
-                                                <p className="text-xs text-amber-500 font-black uppercase tracking-[0.2em]">Master Author</p>
+                                                <p className="font-bold text-lg md:text-xl text-black dark:text-white">{bestOfWeek.author.name}</p>
+                                                <p className="text-[10px] md:text-xs text-orange-500 font-black uppercase tracking-[0.2em]">Master Author</p>
                                             </div>
                                         </div>
                                         
-                                        <div className="flex sm:justify-start">
-                                            <button 
-                                                onClick={() => handleBlogClick(bestOfWeek._id)} 
-                                                className="px-10 py-4 bg-white text-slate-900 rounded-full font-black uppercase tracking-widest text-sm hover:bg-amber-500 hover:text-white transition-all transform hover:scale-105 shadow-xl"
-                                            >
-                                                Explore Masterpiece
-                                            </button>
-                                        </div>
+                                        <button 
+                                            onClick={() => handleBlogClick(bestOfWeek._id)} 
+                                            className="px-10 md:px-32 py-2.5 md:py-4 bg-orange-600 text-white rounded-full font-bold uppercase tracking-widest text-[11px] md:text-sm hover:bg-orange-700 transition-all transform hover:scale-105 shadow-xl shadow-orange-600/40 whitespace-nowrap"
+                                        >
+                                            Explore Masterpiece
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -202,26 +201,26 @@ export default function Home() {
                 {!debouncedSearch && featuredBlogs.length > 0 && (
                     <div className="mb-24 animate-fade-in delay-200">
                         <div className="flex items-center gap-6 mb-10">
-                            <h2 className="text-sm font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-[0.3em] flex items-center gap-2">
+                            <h2 className="text-sm font-black text-orange-500 uppercase tracking-[0.3em] flex items-center gap-2">
                                 <PenTool size={18} /> Elite Selects
                             </h2>
-                            <div className="h-px bg-gradient-to-r from-indigo-500/30 to-transparent flex-1"></div>
+                            <div className="h-px bg-gradient-to-r from-orange-500/30 to-transparent flex-1"></div>
                         </div>
                         
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                             {featuredBlogs.map(blog => (
                                 <div key={blog._id} className="group cursor-pointer" onClick={() => handleBlogClick(blog._id)}>
-                                    <div className="relative aspect-video rounded-[2rem] overflow-hidden mb-6 border border-[var(--border-color)] shadow-lg group-hover:shadow-2xl transition-all duration-500">
+                                    <div className="relative aspect-video rounded-[2rem] overflow-hidden mb-6 border border-white/10 shadow-lg group-hover:shadow-orange-500/20 transition-all duration-500">
                                         <img 
                                             src={getImageUrl(blog.coverImageURL)} 
                                             alt={blog.title}
                                             className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
                                         />
-                                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-8">
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent flex flex-col justify-end p-8">
                                             <span className="px-3 py-1 bg-white/10 backdrop-blur-md border border-white/20 text-white rounded-full text-[10px] font-black uppercase tracking-widest self-start mb-4">
                                                 {blog.category}
                                             </span>
-                                            <h4 className="text-xl font-serif font-bold text-white mb-2 line-clamp-2 leading-tight group-hover:text-primary-400 transition-colors">
+                                            <h4 className="text-xl font-serif font-bold text-white mb-2 line-clamp-2 leading-tight group-hover:text-orange-400 transition-colors">
                                                 {blog.title}
                                             </h4>
                                             <p className="text-white/60 text-xs font-medium uppercase tracking-widest">
@@ -248,8 +247,8 @@ export default function Home() {
                                 onClick={() => setFilter(cat)}
                                 className={`px-5 py-2.5 rounded-full text-sm font-bold transition-all duration-300 ${
                                     filter === cat 
-                                    ? 'bg-primary-600 text-white shadow-lg shadow-primary-600/25 scale-105' 
-                                    : 'bg-[var(--bg-card)] text-[var(--text-secondary)] border border-[var(--border-color)] hover:border-primary-600 hover:text-primary-600'
+                                    ? 'bg-orange-600 text-white shadow-lg shadow-orange-600/25 scale-105' 
+                                    : 'bg-[var(--bg-card)] text-[var(--text-secondary)] border border-[var(--border-color)] hover:border-orange-500 hover:text-orange-600'
                                 }`}
                             >
                                 {cat}

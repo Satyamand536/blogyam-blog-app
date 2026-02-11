@@ -1,12 +1,30 @@
 import { useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 export default function BackButton() {
     const navigate = useNavigate();
     const location = useLocation();
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-    // Hide on Home page
-    if (location.pathname === '/') return null;
+    // Check menu state on mount and when body overflow changes
+    useEffect(() => {
+        const checkMenuState = () => {
+            setIsMenuOpen(document.body.style.overflow === 'hidden');
+        };
+        
+        // Check immediately
+        checkMenuState();
+        
+        // Set up observer for body style changes
+        const observer = new MutationObserver(checkMenuState);
+        observer.observe(document.body, { attributes: true, attributeFilter: ['style'] });
+        
+        return () => observer.disconnect();
+    }, []);
+
+    // Hide on Home page OR when mobile menu is open
+    if (location.pathname === '/' || isMenuOpen) return null;
 
     return (
         <button

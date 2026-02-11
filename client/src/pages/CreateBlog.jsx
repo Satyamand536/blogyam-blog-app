@@ -4,12 +4,13 @@ import api, { API_URL } from '../api/axios';
 import { getImageUrl } from '../utils/imageUtils';
 import { Image as ImageIcon, Loader2, Globe, Lock, AlertCircle, Trash2, X } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 import ReactQuill from 'react-quill-new';
 import 'react-quill-new/dist/quill.snow.css';
 
-// Configure Quill for font sizes
+// Configure Quill for numeric font sizes (MS Word Style)
 const Size = ReactQuill.Quill.import('attributors/style/size');
-Size.whitelist = ['small', false, 'large', 'huge'];
+Size.whitelist = ['12px', '14px', '16px', '18px', '20px', '24px', '28px', '32px', '36px', '48px', '64px'];
 ReactQuill.Quill.register(Size, true);
 
 // Configure Quill for Colors and Alignment
@@ -22,6 +23,7 @@ export default function CreateBlog() {
     const navigate = useNavigate();
     const { id } = useParams(); // For Edit Mode
     const { user } = useAuth();
+    const { showToast } = useToast();
     const [loading, setLoading] = useState(false);
     const [fetching, setFetching] = useState(false);
     
@@ -50,7 +52,7 @@ export default function CreateBlog() {
                         const { blog } = data;
                         // Check specifically for author match in edit mode
                         if (user && blog.author._id !== user._id) {
-                            alert("Only the author of this blog can edit it.");
+                            showToast("Only the author of this blog can edit it.", "error");
                             navigate('/');
                             return;
                         }
@@ -168,24 +170,16 @@ export default function CreateBlog() {
             }
         } catch (error) {
             console.error("Failed to save blog", error);
-            alert("Failed to save blog. Please try again.");
+            showToast("Failed to save blog. Please check your connection and try again.", "error");
         } finally {
             setLoading(false);
         }
     };
 
     const modules = {
-        toolbar: [
-            [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
-            [{ 'size': ['small', false, 'large', 'huge'] }],
-            ['bold', 'italic', 'underline', 'strike', 'blockquote'],
-            [{ 'color': [] }, { 'background': [] }],
-            [{ 'script': 'sub'}, { 'script': 'super' }],
-            [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-            [{ 'align': [] }],
-            ['link', 'image', 'video'],
-            ['code-block', 'clean']
-        ],
+        toolbar: {
+            container: "#toolbar",
+        }
     };
 
     const formats = [
@@ -205,21 +199,21 @@ export default function CreateBlog() {
     if (!user) return null; // Or generic loading
 
     return (
-        <div className="max-w-5xl mx-auto px-4 pt-24 pb-10 md:pt-10 transition-colors duration-500 min-h-screen">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
-                <h1 className="text-2xl sm:text-3xl md:text-4xl font-serif font-bold text-[var(--text-primary)]">
+        <div className="max-w-5xl mx-auto px-4 pt-20 pb-10 md:pt-10 transition-colors duration-500 min-h-screen">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 md:mb-8 gap-3 md:gap-4">
+                <h1 className="text-xl sm:text-3xl md:text-4xl font-serif font-bold text-[var(--text-primary)]">
                     {fetching ? 'Loading Story...' : isEditMode ? 'Edit Your Story' : 'Draft a New Story'}
                 </h1>
                 
                 {!isAuthorOrOwner && (
-                    <div className="flex items-center gap-2 px-4 py-2 bg-yellow-50 dark:bg-yellow-900/10 text-yellow-700 dark:text-yellow-400 rounded-lg text-sm font-medium border border-yellow-200 dark:border-yellow-800">
-                        <Lock size={16} />
+                    <div className="flex items-center gap-2 px-3 py-1.5 bg-yellow-50 dark:bg-yellow-900/10 text-yellow-700 dark:text-yellow-400 rounded-lg text-xs font-medium border border-yellow-200 dark:border-yellow-800">
+                        <Lock size={14} />
                         <span>Public publishing restricted to Authors</span>
                     </div>
                 )}
             </div>
             
-            <form onSubmit={handleSubmit} className="space-y-8">
+            <form onSubmit={handleSubmit} className="space-y-4 md:space-y-8">
                 {/* Title Input */}
                 <div className="group">
                     <input
@@ -227,7 +221,7 @@ export default function CreateBlog() {
                         value={title}
                         onChange={e => setTitle(e.target.value)}
                         placeholder="Title..."
-                        className="w-full text-5xl font-serif font-bold border-none focus:ring-0 placeholder:text-slate-300 dark:placeholder:text-slate-600 px-0 bg-transparent text-[var(--text-primary)] transition-all duration-300"
+                        className="w-full text-3xl sm:text-4xl md:text-5xl font-serif font-bold border-none focus:ring-0 placeholder:text-slate-300 dark:placeholder:text-slate-600 px-0 bg-transparent text-[var(--text-primary)] transition-all duration-300"
                         required
                     />
                 </div>
@@ -254,8 +248,8 @@ export default function CreateBlog() {
                 )}
 
                 {/* Controls Bar */}
-                <div className="flex flex-col md:flex-row gap-4 md:gap-6 items-stretch md:items-center p-4 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl shadow-sm mb-6">
-                    <div className="flex flex-wrap md:flex-nowrap gap-4 md:gap-6 items-center flex-1">
+                <div className="flex flex-col md:flex-row gap-3 md:gap-6 items-stretch md:items-center p-3 md:p-4 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl shadow-sm mb-4 md:mb-6">
+                    <div className="flex flex-wrap md:flex-nowrap gap-3 md:gap-6 items-center flex-1">
                         {/* Category */}
                         <div className="flex flex-col gap-1.5 min-w-[140px]">
                         <label className="text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider">Category</label>
@@ -343,9 +337,16 @@ export default function CreateBlog() {
                                     type="file" 
                                     className="hidden" 
                                     onChange={e => {
-                                        if(e.target.files[0]) {
-                                            setFile(e.target.files[0]);
+                                        const selectedFile = e.target.files[0];
+                                        if(selectedFile) {
+                                            const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp', 'image/avif'];
+                                            if (!allowedTypes.includes(selectedFile.type)) {
+                                                showToast("File type not supported. Please use JPG, PNG, or WEBP.", "warning");
+                                                return;
+                                            }
+                                            setFile(selectedFile);
                                             setRemoveBanner(false);
+                                            showToast("Cover image selected successfully!", "success");
                                         }
                                     }} 
                                     accept="image/*"
@@ -379,30 +380,81 @@ export default function CreateBlog() {
 
                 {/* Editor Section */}
                 <div className="prose-editor">
-                    <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
-                        <div className="flex items-center gap-3">
+                    <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
+                        <div className="flex items-center gap-2 md:gap-3">
                             <button 
                                 type="button"
                                 onClick={() => setHindiMode(!hindiMode)}
-                                className={`flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-xl transition-all border ${
+                                className={`flex items-center gap-2 text-xs md:text-sm font-semibold px-3 py-1.5 md:px-4 md:py-2 rounded-xl transition-all border ${
                                     hindiMode 
                                     ? 'bg-orange-50 dark:bg-orange-900/20 text-orange-600 border-orange-200 shadow-sm' 
                                     : 'bg-[var(--bg-card)] text-[var(--text-secondary)] border-[var(--border-color)] hover:bg-[var(--bg-primary)]'
                                 }`}
                             >
-                                <span className="text-lg">ॐ</span>
-                                {hindiMode ? 'Hindi Transliteration: ON' : 'Enable Hindi Typing'}
+                                <span className="text-base md:text-lg">ॐ</span>
+                                {hindiMode ? 'Hindi: ON' : 'Hindi Mode'}
                             </button>
                             {hindiMode && (
-                                <span className="text-[11px] text-orange-500 animate-pulse font-medium">
-                                    Phonetic Mode: Type 'namaste' -&gt; नमस्ते
+                                <span className="text-[10px] text-orange-500 animate-pulse font-medium">
+                                    Type 'namaste' -&gt; नमस्ते
                                 </span>
                             )}
                         </div>
-                        <div className="flex items-center gap-2 text-[10px] text-[var(--text-secondary)] bg-slate-100 dark:bg-slate-800/50 px-3 py-1 rounded-full border border-[var(--border-color)]">
-                            <AlertCircle size={12} />
-                            <span>Tip: Use '-Tx' icon in toolbar to reset font styles.</span>
+                        <div className="flex items-center gap-1.5 text-[9px] text-[var(--text-secondary)] bg-slate-100 dark:bg-slate-800/50 px-2.5 py-1 rounded-full border border-[var(--border-color)]">
+                            <AlertCircle size={10} />
+                            <span>Tip: Use '-Tx' icon to reset.</span>
                         </div>
+                    </div>
+
+                    {/* Custom Toolbar with Tooltips */}
+                    <div id="toolbar" className="flex flex-wrap gap-1 md:gap-2 p-1.5 md:p-2 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-t-xl mb-0!">
+                        <span className="ql-formats">
+                            <select className="ql-header" title="Heading Level">
+                                <option value="1"></option>
+                                <option value="2"></option>
+                                <option value="3"></option>
+                                <option value=""></option>
+                            </select>
+                            <select className="ql-size" title="Font Size" defaultValue="16px">
+                                <option value="12px">12</option>
+                                <option value="14px">14</option>
+                                <option value="16px">16</option>
+                                <option value="18px">18</option>
+                                <option value="20px">20</option>
+                                <option value="24px">24</option>
+                                <option value="28px">28</option>
+                                <option value="32px">32</option>
+                                <option value="36px">36</option>
+                                <option value="48px">48</option>
+                                <option value="64px">64</option>
+                            </select>
+                        </span>
+                        <span className="ql-formats text-black dark:text-white">
+                            <button className="ql-bold" title="Bold (Ctrl+B)"></button>
+                            <button className="ql-italic" title="Italic (Ctrl+I)"></button>
+                            <button className="ql-underline" title="Underline (Ctrl+U)"></button>
+                            <button className="ql-strike" title="Strikethrough"></button>
+                        </span>
+                        <span className="ql-formats">
+                            <select className="ql-color" title="Text Color"></select>
+                            <select className="ql-background" title="Background Color"></select>
+                        </span>
+                        <span className="ql-formats">
+                            <button className="ql-list" value="ordered" title="Numbered List"></button>
+                            <button className="ql-list" value="bullet" title="Bullet List"></button>
+                        </span>
+                        <span className="ql-formats">
+                            <button className="ql-blockquote" title="Quote Block"></button>
+                            <button className="ql-code-block" title="Code Block"></button>
+                            <button className="ql-link" title="Insert Link"></button>
+                        </span>
+                        <span className="ql-formats">
+                            <button className="ql-image" title="Insert Image"></button>
+                            <button className="ql-video" title="Insert Video"></button>
+                        </span>
+                        <span className="ql-formats">
+                            <button className="ql-clean" title="Clear Formatting"></button>
+                        </span>
                     </div>
 
                     <ReactQuill 
@@ -411,7 +463,7 @@ export default function CreateBlog() {
                         onChange={handleBodyChange}
                         modules={modules}
                         placeholder="Tell your story... (Type phonetically in Hindi Mode)"
-                        className="bg-transparent text-[var(--text-primary)]" 
+                        className="bg-transparent text-black dark:text-white border-t-0!" 
                     />
                     <style>{`
                         /* ROBUST MOBILE TOOLBAR FIXES */
@@ -419,38 +471,45 @@ export default function CreateBlog() {
                         .ql-container {
                             font-size: 1.125rem;
                             border: none !important;
-                            min-height: 400px;
+                            min-height: 500px; /* Taller editor for better UX */
                         }
                         .ql-editor {
-                            min-height: 400px;
-                            padding: 1.5rem 0;
+                            min-height: 500px; /* Matches container */
+                            padding: 1.5rem 0.5rem;
                             line-height: 1.8;
                             color: var(--text-primary);
                         }
+                        
+                        /* Straighten placeholder text - remove italic */
+                        .ql-editor.ql-blank::before {
+                            font-style: normal !important;
+                            color: var(--text-secondary) !important;
+                            opacity: 0.5;
+                        }
 
-                        /* Toolbar Container - Sticky & Consistent */
+                        /* Toolbar Container - Lower z-index to prevent hiding headers */
                         .ql-toolbar.ql-snow {
-                            border: none !important;
-                            border-bottom: 1px solid var(--border-color) !important;
+                            border: 1px solid var(--border-color) !important;
                             background: var(--bg-card);
                             border-radius: 12px 12px 0 0;
-                            margin-bottom: 1.5rem;
+                            margin-bottom: 0 !important;
                             padding: 12px 10px !important;
                             position: sticky;
-                            top: 0;
-                            z-index: 50;
+                            top: 70px; /* Below navbar - prevents hiding "Write" header */
+                            z-index: 10; /* Lower than navbar (z-50) */
                             transition: box-shadow 0.3s ease;
+                            display: flex;
+                            flex-wrap: wrap;
+                            gap: 4px;
                         }
 
                         /* MOBILE & TABLET OPTIMIZATIONS */
                         @media (max-width: 1024px) {
                             .ql-toolbar.ql-snow {
-                                display: flex !important;
-                                flex-wrap: wrap !important;
-                                gap: 8px !important;
-                                padding: 16px 12px !important;
-                                justify-content: flex-start;
-                                white-space: normal !important;
+                                position: relative !important; /* Remove sticky on mobile - prevents overlapping */
+                                top: auto !important;
+                                padding: 8px 4px !important;
+                                z-index: 10 !important;
                             }
 
                             .ql-formats {
@@ -458,19 +517,17 @@ export default function CreateBlog() {
                                 align-items: center;
                                 flex-wrap: wrap;
                                 gap: 6px;
-                                margin-right: 12px !important;
-                                padding: 4px;
+                                margin-right: 4px !important;
+                                padding: 2px !important;
                                 border-radius: 8px;
                                 background: rgba(0, 0, 0, 0.02);
-                                border-right: 1px solid var(--border-color) !important;
-                                margin-bottom: 8px !important;
+                                border-right: none !important;
                             }
 
                             /* Professional Touch Targets */
                             .ql-toolbar.ql-snow button {
-                                width: 44px !important;
-                                height: 44px !important;
-                                padding: 8px !important;
+                                width: 36px !important;
+                                height: 36px !important;
                                 display: flex !important;
                                 align-items: center !important;
                                 justify-content: center !important;
@@ -481,9 +538,8 @@ export default function CreateBlog() {
                             }
 
                             .ql-toolbar.ql-snow .ql-picker-label {
-                                height: 44px !important;
-                                min-width: 65px !important;
-                                padding: 0 12px !important;
+                                height: 36px !important;
+                                min-width: 50px !important;
                                 border: 1px solid var(--border-color) !important;
                                 border-radius: 10px !important;
                                 display: flex !important;
@@ -495,6 +551,13 @@ export default function CreateBlog() {
                             .ql-snow .ql-stroke {
                                 stroke-width: 2.2px !important;
                             }
+                        }
+
+                        /* Ensure dropdowns stay within viewport */
+                        .ql-snow .ql-picker-options {
+                            background-color: var(--bg-card) !important;
+                            color: var(--text-primary) !important;
+                            border: 1px solid var(--border-color) !important;
                         }
 
                         /* Enhanced 'Clear Format' Button */

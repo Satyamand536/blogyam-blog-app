@@ -71,4 +71,39 @@ const memeRateLimiter = async (req, res, next) => {
     }
 };
 
-module.exports = { rateLimiter, memeRateLimiter };
+/**
+ * Signup Rate Limiter
+ * Prevents mass user registration attacks
+ * Limit: 3 signups per IP per hour
+ */
+const signupRateLimiter = async (req, res, next) => {
+    const ip = req.ip || req.connection.remoteAddress;
+    const cacheKey = `ratelimit:signup:${ip}`;
+    
+    try {
+        const cached = await cacheClient.get(cacheKey);
+        let requests = cached ? JSON.parse(cached) : [];
+        
+        const now = Date.now();
+        const windowStart = now - 60 * 60 * 1000; // 1 hour window
+        
+        // Filter out old requests
+        requests = requests.filter(timestamp => timestamp > windowStart);
+        
+        if (requests.length >= 3) {
+            return res.status(429).json({
+                success: false,
+                error: "Too many signup attempts. Please try again after an hour."
+            });
+        }
+        
+        requests.push(now);
+        await cacheClient.setex(cacheKey, 3600, JSON.stringify(requests)); // 1 hour TTL
+        next();
+    } catch (error) {
+        console.error('Signup rate limiter error:', error);
+        next(); 
+    }
+};
+
+module.exports = { rateLimiter, memeRateLimiter, signupRateLimiter };

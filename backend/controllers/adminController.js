@@ -203,11 +203,19 @@ async function banUser(req, res) {
 async function blacklistIP(req, res) {
     try {
         const { ip, reason } = req.body;
-        if (!ip || ip.trim() === '') {
-            return res.status(400).json({ success: false, message: 'IP address is required' });
+        
+        // ENTERPRISE VALIDATION: Strict IPv4/IPv6 Regex
+        const ipRegex = /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$|^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$/;
+        
+        if (!ip || !ipRegex.test(ip.trim())) {
+            return res.status(400).json({ success: false, error: 'Write valid IP address to block.' });
         }
-        const entry = await Blacklist.create({ type: 'ip', value: ip, reason: reason || "Abusive activity", bannedBy: req.user._id });
-        return res.json({ success: true, message: `IP ${ip} blacklisted.` });
+
+        const existing = await Blacklist.findOne({ type: 'ip', value: ip.trim() });
+        if (existing) return res.status(400).json({ success: false, error: 'IP is already blacklisted.' });
+
+        await Blacklist.create({ type: 'ip', value: ip.trim(), reason: reason || "Abusive activity", bannedBy: req.user._id });
+        return res.json({ success: true, message: `IP ${ip} blacklisted successfully.` });
     } catch (error) {
         return res.status(500).json({ success: false, error: error.message });
     }
@@ -216,11 +224,24 @@ async function blacklistIP(req, res) {
 async function blacklistEmail(req, res) {
     try {
         const { email, reason } = req.body;
-        if (!email || email.trim() === '') {
-            return res.status(400).json({ success: false, message: 'Email address is required' });
+        
+        // ENTERPRISE VALIDATION: Strict Email Regex
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        
+        if (!email || !emailRegex.test(email.trim())) {
+            return res.status(400).json({ success: false, error: 'Write valid email address to block.' });
         }
-        const entry = await Blacklist.create({ type: 'email', value: email, reason: reason || "Abusive behavior", bannedBy: req.user._id });
-        return res.json({ success: true, message: `Email ${email} blacklisted.` });
+
+        const existing = await Blacklist.findOne({ type: 'email', value: email.trim().toLowerCase() });
+        if (existing) return res.status(400).json({ success: false, error: 'Email is already blacklisted.' });
+
+        await Blacklist.create({ 
+            type: 'email', 
+            value: email.trim().toLowerCase(), 
+            reason: reason || "Abusive behavior", 
+            bannedBy: req.user._id 
+        });
+        return res.json({ success: true, message: `Email ${email} blacklisted successfully.` });
     } catch (error) {
         return res.status(500).json({ success: false, error: error.message });
     }

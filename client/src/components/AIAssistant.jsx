@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
-import { Bot, X, Send, Sparkles, UserPlus } from 'lucide-react';
+import { Bot, X, Send, UserPlus } from 'lucide-react';
+import { HiSparkles } from 'react-icons/hi2';
 import { useAuth } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
 import api from '../api/axios';
@@ -115,8 +116,8 @@ export default function AIAssistant({ contextContent, initialContext }) {
         } catch (error) {
             console.error("AI Error:", error);
             if (error.response && error.response.status === 429) {
-                setNotification("you can ask only 5 questions in a minute");
-                setMessages(prev => [...prev, { role: 'system', content: "Rate limit reached. Please wait a moment." }]);
+                setNotification("Too many questions. Please wait a minute before asking again.");
+                setMessages(prev => [...prev, { role: 'system', content: "You've reached the rate limit (5 questions per minute). Please wait a moment and try again." }]);
             } else {
                 setMessages(prev => [...prev, { role: 'system', content: "Error communicating with AI service." }]);
             }

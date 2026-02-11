@@ -32,8 +32,8 @@ app.use(cors({
 // Logging
 app.use(morgan('dev'));
 
-// Timeout Middleware (30s)
-app.use(timeout('30s'));
+// Timeout Middleware (45s)
+app.use(timeout('45s'));
 
 // Global Rate Limiting (Scalability & Protection)
 const limiter = rateLimit({
@@ -46,20 +46,27 @@ const limiter = rateLimit({
 app.use(limiter);
 
 // Security & Performance
+app.disable('x-powered-by'); // Top 1% Practice: Prevent technology fingerprinting
+
 app.use(helmet({
     contentSecurityPolicy: {
         directives: {
             defaultSrc: ["'self'"],
             scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
             styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
-            imgSrc: ["'self'", "data:", "https:", "http:"],
-            fontSrc: ["'self'", "https://fonts.gstatic.com"],
+            imgSrc: ["'self'", "data:", "https://upload.wikimedia.org", "https://res.cloudinary.com", "https://ui-avatars.com", "https://images.unsplash.com", "https://www.transparenttextures.com"],
+            fontSrc: ["'self'", "https://fonts.gstatic.com", "data:"],
             connectSrc: ["'self'", "https:", "http:", "https://openrouter.ai"],
+            frameAncestors: ["'none'"], // Prevent clickjacking
         },
     },
     crossOriginResourcePolicy: { policy: "cross-origin" },
-    crossOriginEmbedderPolicy: false,
-    crossOriginOpenerPolicy: false,
+    referrerPolicy: { policy: "strict-origin-when-cross-origin" },
+    xContentTypeOptions: true,
+    xDnsPrefetchControl: { allow: false },
+    xFrameOptions: { action: "deny" },
+    xPermittedCrossDomainPolicies: { permittedPolicies: "none" },
+    xXssProtection: true,
 }));
 app.use(compression());
 app.use(hpp());
@@ -89,9 +96,9 @@ app.use(express.static(path.resolve('./public')));
 
 // Database Connection
 mongoose.connect(process.env.MONGODB_URL, {
-    maxPoolSize: 10, // Maintain up to 10 socket connections
-    serverSelectionTimeoutMS: 10000, // Keep trying to send operations for 10s
-    socketTimeoutMS: 45000, // Close sockets after 45s of inactivity
+    maxPoolSize: 20,
+    serverSelectionTimeoutMS: 15000,
+    socketTimeoutMS: 60000,
 })
     .then(() => {
         console.log('✅ MongoDB connected');
@@ -135,23 +142,30 @@ app.use((req, res) => {
     });
 });
 
-// Global Error Handler
+// Global Error Handler - ENTERPRISE HARDENING
 app.use((err, req, res, next) => {
-    console.error("❌ [Global Error Handler]:", {
+    // INTERNAL LOGGING: Capture everything for developers
+    console.error("❌ [Internal Error]:", {
         message: err.message,
-        stack: err.stack,
+        stack: process.env.NODE_ENV === 'production' ? 'MASKED' : err.stack,
         path: req.path,
         method: req.method
     });
 
-    // Handle Multer/Cloudinary errors specifically if needed
+    // Handle Multer/Cloudinary errors specifically
     if (err.name === 'MulterError') {
         return res.status(400).json({ success: false, error: `Upload error: ${err.message}` });
     }
 
-    res.status(err.status || 500).json({
+    // PRODUCTION RESPONSE: Never leak internal details, file paths, or DB errors
+    const isProduction = process.env.NODE_ENV === 'production';
+    const status = err.status || 500;
+    
+    res.status(status).json({
         success: false,
-        error: err.message || "An unexpected server error occurred"
+        error: isProduction 
+            ? (status === 500 ? "An unexpected server error occurred. Please try again later." : err.message)
+            : err.message
     });
 });
 

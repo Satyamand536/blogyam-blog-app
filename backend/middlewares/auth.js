@@ -4,7 +4,10 @@ const { validateToken } = require("../services/authentication");
 
 function checkForAuthenticationCookie(cookieName){
     return (req,res,next)=>{
-        const tokenCookieValue=req.cookies[cookieName];
+        // ENTERPRISE HARDENING: Dynamically resolve cookie name for stealth
+        const activeCookieName = process.env.NODE_ENV === 'production' ? "__Host-session_auth" : (cookieName || "token");
+        const tokenCookieValue = req.cookies[activeCookieName];
+
         if(!tokenCookieValue){
             return next();
         }
@@ -13,6 +16,7 @@ function checkForAuthenticationCookie(cookieName){
             req.user=userPayload;
     }
         catch (error) {
+            // Silently fail if token is invalid, req.user remains undefined
         };
         return next()
     }

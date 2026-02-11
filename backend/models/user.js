@@ -1,35 +1,35 @@
-const {Schema,model}=require('mongoose');
-const { createHash, randomBytes } = require('crypto');
+const bcrypt = require('bcryptjs');
+const { Schema, model } = require('mongoose');
 const { createTokenForUser } = require('../services/authentication');
-const userSchema=new Schema({
-    name:{
-        type:String,
-        required:true,
+
+const userSchema = new Schema({
+    name: {
+        type: String,
+        required: true,
         default: function() {
-            // Generate name from email if not provided
             return this.email ? this.email.split('@')[0] : 'User';
         }
     },
-    email:{
-        type:String,
-        required:true,
-        unique:true,
+    email: {
+        type: String,
+        required: true,
+        unique: true,
     },
-    salt:{
-        type:String,
-        
+    salt: {
+        type: String,
+        // salt is no longer needed for new bcrypt hashes, but kept for legacy check
     },
-    password:{
-        type:String,
-        required:true,
+    password: {
+        type: String,
+        required: true,
     },
-    profileImageURL:{
-        type:String,
-        default:'/images/hacker.png'
+    profileImageURL: {
+        type: String,
+        default: '/images/hacker.png'
     },
     role: {
         type: String,
-        enum: ['user', 'author', 'owner', 'USER', 'ADMIN'], // Keeping USER/ADMIN for backward compatibility if needed, but 'user' is default
+        enum: ['user', 'author', 'owner', 'USER', 'ADMIN'],
         default: 'user',
     },
     bio: {
@@ -47,12 +47,11 @@ const userSchema=new Schema({
     readingHistory: [{
         blogId: { type: Schema.Types.ObjectId, ref: 'blog' },
         readAt: { type: Date, default: Date.now },
-        progress: { type: Number, default: 0 } // Percentage
+        progress: { type: Number, default: 0 }
     }],
     lastReadAt: {
         type: Date,
     },
-    // --- MODERATION STACK ---
     isBanned: {
         type: Boolean,
         default: false,
@@ -81,12 +80,10 @@ userSchema.pre(/^find/, function(next) {
     next();
 });
 
-// Index for scalable author lookups
 userSchema.index({ role: 1 });
 
-//jab bhi hum userschema ko save krne lagenge to hmare paas next function aayega to
-userSchema.pre('save',function (next){
-    const user=this;//user ko le rhe hain then 
+userSchema.pre('save', async function (next) {
+    const user = this;
     
     // Auto-generate name from email if missing and lowercase email
     if (user.email) {
@@ -96,21 +93,18 @@ userSchema.pre('save',function (next){
         }
     }
     
-    if(!user.isModified('password')) return next(); // FIXED: Must call next() to continue save
+    if (!user.isModified('password')) return next();
+    
+    // Generate a unique custom salt for this user (different from Bcrypt's internal salt)
+    const crypto = require('crypto');
+    user.salt = crypto.randomBytes(16).toString('hex');
 
-    const salt = randomBytes(16).toString('hex');
-    const hashedPassword = createHash('sha256')
-        .update(user.password + salt)
-        .digest('hex');
-
-    this.salt = salt;
-    this.password = hashedPassword;
+    // Use Bcrypt to hash the 'password + customSalt' string
+    const bcryptSalt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(user.password + user.salt, bcryptSalt);
 
     next();
-
-})
-
-//to ise krna se ye fayda hoga ki jab hum user ko save krne ka try karenge to ye function run krega aur user ke paasword ko hash krega.
+});
 
 userSchema.methods.recordReadingActivity = async function(blogId) {
     const today = new Date();
@@ -123,7 +117,6 @@ userSchema.methods.recordReadingActivity = async function(blogId) {
         lastReadCopy.setHours(0, 0, 0, 0);
     }
 
-    // Calculate new streak
     let newStreak = 1;
     if (!lastRead) {
         newStreak = 1;
@@ -136,13 +129,11 @@ userSchema.methods.recordReadingActivity = async function(blogId) {
         } else if (diffDays > 1) {
             newStreak = 1;
         } else {
-            newStreak = this.streak; // Same day, keep current streak
+            newStreak = this.streak;
         }
     }
 
-    // Use atomic update to prevent version conflicts
-    const User = require('./user');
-    const updated = await User.findByIdAndUpdate(
+    const updated = await model('user').findByIdAndUpdate(
         this._id,
         {
             $set: { 
@@ -154,8 +145,7 @@ userSchema.methods.recordReadingActivity = async function(blogId) {
         { new: false }
     );
 
-    // Now add to front
-    await User.findByIdAndUpdate(
+    await model('user').findByIdAndUpdate(
         this._id,
         {
             $push: { 
@@ -171,30 +161,44 @@ userSchema.methods.recordReadingActivity = async function(blogId) {
     return updated;
 };
 
-userSchema.static('matchPasswordAndGenerateToken',async function(email,password){
+userSchema.static('matchPasswordAndGenerateToken', async function(email, password) {
     const normalizedEmail = email.toLowerCase();
-    const user=await this.findOne({email: normalizedEmail});
-    if(!user) throw new Error('User not found!');
-console.log(user);
-    const salt=user.salt;
-    const hashedPassword=user.password;
+    const user = await this.findOne({ email: normalizedEmail });
+    if (!user) throw new Error('User not found!');
 
-    const userProvidedHash=createHash('sha256')
-    .update(password + salt)
-    .digest('hex');
+    const storedPassword = user.password;
+    const salt = user.salt;
+    let isMatch = false;
 
-    if(hashedPassword!==userProvidedHash) {
-        console.log(`Password mismatch for ${email}`);
-        console.log(`Stored Hash: ${hashedPassword}`);
-        console.log(`Computed Hash: ${userProvidedHash}`);
-        console.log(`Salt used: ${salt}`);
+    // Check if it's a Bcrypt hash (starts with $2a$ or $2b$)
+    if (storedPassword.startsWith('$2a$') || storedPassword.startsWith('$2b$')) {
+        // Use password + salt if salt exists, else just password (for transitional users)
+        const checkValue = salt ? (password + salt) : password;
+        isMatch = await bcrypt.compare(checkValue, storedPassword);
+    } else {
+        // LEGACY SHA256 CHECK
+        const { createHash } = require('crypto');
+        const userProvidedHash = createHash('sha256')
+            .update(password + salt)
+            .digest('hex');
+            
+        isMatch = (storedPassword === userProvidedHash);
+        
+        // AUTO-MIGRATE TO BCRYPT ON SUCCESSFUL LOGIN
+        if (isMatch) {
+            console.log(`[Security] Migrating user ${email} from legacy SHA256 to Bcrypt...`);
+            user.password = password; // pre-save hook will hash it with Bcrypt
+            await user.save();
+        }
+    }
+
+    if (!isMatch) {
         throw new Error('incorrect password');
     }
 
-    const token=createTokenForUser(user);
+    const token = createTokenForUser(user);
     return token;
+});
 
-})
-
-const User=model('user',userSchema);
-module.exports=User;
+const User = model('user', userSchema);
+module.exports = User;

@@ -7,7 +7,7 @@ export const API_URL = rawUrl.replace(/\/api\/?$/, '').replace(/\/$/, '');
 const api = axios.create({
     baseURL: `${API_URL}/api`,
     withCredentials: true, // Required for cookie-based auth
-    timeout: 30000,        // Increased to 30s for production resilience and cold starts
+    timeout: 45000,        // Increased to 45s for AI service reliability
     headers: {
         // Axios will automatically set the correct Content-Type for FormData
     },

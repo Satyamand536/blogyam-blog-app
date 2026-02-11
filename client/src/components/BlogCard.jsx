@@ -6,12 +6,12 @@ import { stripHtml } from '../utils/textUtils';
 import OptimizedImage from './OptimizedImage';
 
 const categoryColors = {
-    'technology': 'bg-black text-white border-black dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800',
-    'spiritual': 'bg-black text-white border-black dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-800',
-    'lifestyle': 'bg-black text-white border-black dark:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-800',
-    'career': 'bg-black text-white border-black dark:bg-purple-900/30 dark:text-purple-300 dark:border-purple-800',
-    'poem': 'bg-black text-white border-black dark:bg-rose-900/30 dark:text-rose-300 dark:border-rose-800',
-    'general': 'bg-black text-white border-black dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700'
+    'technology': 'bg-blue-50 text-blue-600 border-blue-100',
+    'spiritual': 'bg-orange-50 text-orange-600 border-orange-100',
+    'lifestyle': 'bg-emerald-50 text-emerald-600 border-emerald-100',
+    'career': 'bg-purple-50 text-purple-600 border-purple-100',
+    'poem': 'bg-rose-50 text-rose-600 border-rose-100',
+    'general': 'bg-gray-50 text-gray-600 border-gray-100'
 };
 
 export default function BlogCard({ blog }) {

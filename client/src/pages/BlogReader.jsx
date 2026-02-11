@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import api, { API_URL } from '../api/axios';
+import { getImageUrl } from '../utils/imageUtils';
 import AIAssistant from '../components/AIAssistant';
 import MembershipGate from '../components/MembershipGate';
-import { Loader2, Heart, MessageCircle, Share2, Bookmark, Trash2, User, Tag, Sparkles, Edit3, Shield, CheckCircle, XCircle, AlertTriangle, X } from 'lucide-react';
+import { Loader2, Heart, MessageCircle, Share2, Bookmark, Trash2, User, Tag, Edit3, Shield, CheckCircle, XCircle, AlertTriangle, X } from 'lucide-react';
+import { HiStar } from 'react-icons/hi2';
 import { useAuth } from '../context/AuthContext';
 import PremiumModal from '../components/PremiumModal';
 import OptimizedImage from '../components/OptimizedImage';
@@ -272,12 +274,7 @@ export default function BlogReader() {
         setNominating(false);
     };
 
-    const getImageUrl = (path) => {
-        if (!path) return '';
-        if (path.startsWith('http') || path.startsWith('data:')) return path;
-        const normalizedPath = path.startsWith('/') ? path : `/${path}`;
-        return `${API_URL}${normalizedPath}`;
-    };
+
 
     if (loading) return <div className="flex justify-center py-20"><Loader2 className="animate-spin text-primary-600" size={40} /></div>;
     if (!blog) return <div className="text-center py-20">Blog not found.</div>;
@@ -367,7 +364,7 @@ export default function BlogReader() {
                         overflow-wrap: break-word;
                     }
                     .ql-editor-display p {
-                        margin-bottom: 1.5rem;
+                        margin-bottom: 1.25rem;
                     }
                     .ql-editor-display .ql-size-small { font-size: 0.75em; }
                     .ql-editor-display .ql-size-large { font-size: 1.5em; font-weight: 600; }
@@ -402,7 +399,7 @@ export default function BlogReader() {
                     }
                     .ql-editor-display img {
                         border-radius: 1rem;
-                        margin: 2rem auto;
+                        margin: 1.5rem auto;
                         box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
                     }
                     .ql-editor-display a {
@@ -428,61 +425,68 @@ export default function BlogReader() {
                     }
                 `}</style>
 
-                <div className="border-t border-[var(--border-color)] mt-12 py-8 flex justify-between items-center">
-                    <div className="flex gap-4">
+                {/* Action Bar: Responsive & Role-Aware */}
+                <div className="border-t border-[var(--border-color)] mt-8 md:mt-12 py-6 md:py-8 flex flex-col sm:flex-row justify-between items-center gap-4 md:gap-6">
+                    <div className="flex gap-4 w-full sm:w-auto justify-center sm:justify-start">
                         <button 
                             onClick={handleLike}
                             title="Like this story"
-                            className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all duration-300 ${
+                            className={`flex items-center gap-2 px-6 py-3 sm:px-4 sm:py-2 rounded-2xl transition-all duration-300 ${
                                 liked 
-                                ? 'bg-red-50 dark:bg-red-900/20 text-red-500' 
+                                ? 'bg-red-50 dark:bg-red-900/20 text-red-500 shadow-sm' 
                                 : 'bg-[var(--bg-card)] text-[var(--text-secondary)] hover:bg-[var(--bg-primary)] border border-[var(--border-color)] hover:border-red-200'
                             }`}
                         >
                             <Heart size={20} className={liked ? 'fill-current' : ''} />
-                            <span className="font-medium">{likeCount}</span>
+                            <span className="font-bold">{likeCount}</span>
                         </button>
                         
                         <button 
-                            title="Comments"
-                            className="flex items-center gap-2 px-4 py-2 bg-[var(--bg-card)] text-[var(--text-secondary)] hover:bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-xl transition-all duration-300"
+                            onClick={() => {
+                                document.getElementById('discussion-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                            }}
+                            title="Go to comments"
+                            className="flex items-center gap-2 px-6 py-3 sm:px-4 sm:py-2 bg-[var(--bg-card)] text-[var(--text-secondary)] hover:bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-2xl transition-all duration-300"
                         >
                             <MessageCircle size={20} />
-                            <span className="font-medium">{comments.length}</span>
+                            <span className="font-bold">{comments.length}</span>
                         </button>
                     </div>
-                    <div className="flex gap-2">
-                        {unsaving ? (
-                            <div className="flex items-center gap-2 animate-fade-in bg-red-50 dark:bg-red-900/10 px-3 py-1 rounded-full border border-red-200">
-                                <span className="text-[10px] font-bold text-red-600 uppercase tracking-widest">Remove?</span>
+                    <div className="grid grid-cols-2 sm:flex items-center gap-x-1 gap-y-5 sm:gap-6 md:gap-8 lg:gap-2 w-full sm:w-auto mt-4 sm:mt-0">
+                        <div className="flex justify-center sm:block">
+                            {unsaving ? (
+                                <div className="flex items-center gap-2 animate-fade-in bg-red-50 dark:bg-red-900/10 px-3 py-1 rounded-full border border-red-200">
+                                    <span className="text-[10px] font-bold text-red-600 uppercase tracking-widest">Remove?</span>
+                                    <button 
+                                        onClick={confirmUnsave}
+                                        className="text-xs font-bold text-white bg-red-500 hover:bg-red-600 px-3 py-1 rounded-full transition-colors shadow-sm"
+                                        title="Yes, Remove"
+                                    >
+                                        Yes
+                                    </button>
+                                    <button 
+                                        onClick={cancelUnsave}
+                                        className="text-xs font-bold text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 px-2 transition-colors"
+                                    >
+                                        No
+                                    </button>
+                                </div>
+                            ) : (
                                 <button 
-                                    onClick={confirmUnsave}
-                                    className="text-xs font-bold text-white bg-red-500 hover:bg-red-600 px-3 py-1 rounded-full transition-colors shadow-sm"
-                                    title="Yes, Remove"
+                                    onClick={handleSave}
+                                    title={saved ? "Remove from saved" : "Save for later"}
+                                    className={`p-2 border rounded-xl transition-all duration-300 ${
+                                        saved 
+                                        ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 border-primary-200' 
+                                        : 'bg-[var(--bg-card)] text-[var(--text-secondary)] hover:text-primary-600 hover:bg-[var(--bg-primary)] border-[var(--border-color)]'
+                                    }`}
                                 >
-                                    Yes
+                                    <Bookmark size={20} className={saved ? 'fill-current' : ''} />
                                 </button>
-                                <button 
-                                    onClick={cancelUnsave}
-                                    className="text-xs font-bold text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 px-2 transition-colors"
-                                >
-                                    No
-                                </button>
-                            </div>
-                        ) : (
-                            <button 
-                                onClick={handleSave}
-                                title={saved ? "Remove from saved" : "Save for later"}
-                                className={`p-2 border rounded-xl transition-all duration-300 ${
-                                    saved 
-                                    ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 border-primary-200' 
-                                    : 'bg-[var(--bg-card)] text-[var(--text-secondary)] hover:text-primary-600 hover:bg-[var(--bg-primary)] border-[var(--border-color)]'
-                                }`}
-                            >
-                                <Bookmark size={20} className={saved ? 'fill-current' : ''} />
-                            </button>
-                        )}
-                        <div className="relative group">
+                            )}
+                        </div>
+
+                        <div className="flex justify-center sm:block">
                              <button 
                                 onClick={() => {
                                     const url = window.location.href;
@@ -495,68 +499,74 @@ export default function BlogReader() {
                                 <Share2 size={20} />
                             </button>
                         </div>
+
                         {user && blog && (
-                             <div className="flex gap-2">
+                            <>
                                 {/* Edit: Author Only */}
                                 {user._id === blog.author?._id && (
-                                    <Link 
-                                        to={`/edit/${blog._id}`}
-                                        title="Edit story"
-                                        className="p-2 text-primary-500 hover:text-primary-700 hover:bg-primary-50 rounded-full transition-colors"
-                                    >
-                                        <Edit3 size={20} />
-                                    </Link>
+                                    <div className="flex justify-center sm:block">
+                                        <Link 
+                                            to={`/edit/${blog._id}`}
+                                            title="Edit story"
+                                            className="p-2 text-primary-500 hover:text-primary-700 hover:bg-primary-50 rounded-full transition-colors"
+                                        >
+                                            <Edit3 size={20} />
+                                        </Link>
+                                    </div>
                                 )}
                                 
                                 {/* Delete: Author or Owner */}
                                 {(user._id === blog.author?._id || user.role === 'owner') && (
-                                    <button 
-                                        onClick={handleDeleteClick}
-                                        title="Delete story"
-                                        className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-full transition-colors"
-                                    >
-                                        <Trash2 size={20} />
-                                    </button>
+                                    <div className="flex justify-center sm:block">
+                                        <button 
+                                            onClick={handleDeleteClick}
+                                            title="Delete story"
+                                            className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-full transition-colors"
+                                        >
+                                            <Trash2 size={20} />
+                                        </button>
+                                    </div>
                                 )}
-
 
                                 {/* Nominate: Any Logged-in User */}
-                                {hasNominated ? (
-                                    <div className="flex items-center gap-2 px-3 py-2 bg-green-50 dark:bg-green-900/10 text-green-600 dark:text-green-400 rounded-full border border-green-200 dark:border-green-800" title="You have nominated this story">
-                                        <CheckCircle size={16} className="fill-current text-green-600 dark:text-green-400" />
-                                        <span className="text-xs font-bold uppercase tracking-wider">Nominated</span>
-                                    </div>
-                                ) : nominating ? (
-                                    <div className="flex items-center gap-2 animate-fade-in bg-amber-50 dark:bg-amber-900/10 px-3 py-1 rounded-full border border-amber-200">
+                                <div className="flex justify-center sm:block col-span-2 sm:col-auto">
+                                    {hasNominated ? (
+                                        <div className="flex items-center gap-2 px-3 py-2 bg-green-50 dark:bg-green-900/10 text-green-600 dark:text-green-400 rounded-full border border-green-200 dark:border-green-800" title="You have nominated this story">
+                                            <CheckCircle size={16} className="fill-current text-green-600 dark:text-green-400" />
+                                            <span className="text-xs font-bold uppercase tracking-wider">Nominated</span>
+                                        </div>
+                                    ) : nominating ? (
+                                        <div className="flex items-center gap-2 animate-fade-in bg-amber-50 dark:bg-amber-900/10 px-3 py-1 rounded-full border border-amber-200">
+                                            <button 
+                                                onClick={confirmNominate}
+                                                className="text-xs font-bold text-white bg-amber-500 hover:bg-amber-600 px-3 py-1 rounded-full transition-colors shadow-sm"
+                                                title="Confirm Nomination"
+                                            >
+                                                Yes
+                                            </button>
+                                            <button 
+                                                onClick={cancelNominate}
+                                                className="text-xs font-bold text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 px-2 transition-colors"
+                                            >
+                                                No
+                                            </button>
+                                        </div>
+                                    ) : (
                                         <button 
-                                            onClick={confirmNominate}
-                                            className="text-xs font-bold text-white bg-amber-500 hover:bg-amber-600 px-3 py-1 rounded-full transition-colors shadow-sm"
-                                            title="Confirm Nomination"
+                                            onClick={handleNominateClick}
+                                            title="Nominate for Spotlight"
+                                            className="p-2 text-amber-500 hover:text-amber-700 hover:bg-amber-50 rounded-full transition-colors"
                                         >
-                                            Yes
+                                            <HiStar size={20} />
                                         </button>
-                                        <button 
-                                            onClick={cancelNominate}
-                                            className="text-xs font-bold text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 px-2 transition-colors"
-                                        >
-                                            No
-                                        </button>
-                                    </div>
-                                ) : (
-                                    <button 
-                                        onClick={handleNominateClick}
-                                        title="Nominate for Spotlight"
-                                        className="p-2 text-amber-500 hover:text-amber-700 hover:bg-amber-50 rounded-full transition-colors"
-                                    >
-                                        <Sparkles size={20} />
-                                    </button>
-                                )}
-                             </div>
+                                    )}
+                                </div>
+                            </>
                         )}
                     </div>
                 </div>
 
-                <div className="mt-10 pt-10 border-t border-[var(--border-color)] dark:border-slate-800">
+                <div className="mt-8 pt-8 border-t border-[var(--border-color)] dark:border-slate-800">
                     <h3 className="text-2xl font-serif font-bold text-[var(--text-primary)] mb-6">Discussion</h3>
                     
                     {/* Comment Form with User Info */}

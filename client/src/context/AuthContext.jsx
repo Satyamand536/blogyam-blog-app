@@ -8,6 +8,7 @@ export const useAuth = () => useContext(AuthContext);
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [notification, setNotification] = useState(null); // { type: 'success' | 'error', message: string }
 
     useEffect(() => {
         checkUserLoggedIn();
@@ -70,14 +71,42 @@ export const AuthProvider = ({ children }) => {
         try {
             await api.post('/logout');
             setUser(null);
+            setNotification({ type: 'success', message: 'Successfully logged out. See you soon!' });
+            setTimeout(() => setNotification(null), 4000);
         } catch (error) {
             setUser(null); // Force logout locally anyway
+            setNotification({ type: 'success', message: 'Logged out successfully.' });
+            setTimeout(() => setNotification(null), 4000);
         }
     };
 
     return (
-        <AuthContext.Provider value={{ user, login, signup, logout, loading, refreshUser: checkUserLoggedIn }}>
+        <AuthContext.Provider value={{ user, login, signup, logout, loading, refreshUser: checkUserLoggedIn, notification }}>
             {children}
+            
+            {/* Professional Notification Toast */}
+            {notification && (
+                <div className="fixed top-20 right-4 z-[100] animate-slide-in-right">
+                    <div className={`px-6 py-4 rounded-xl shadow-2xl border-2 ${
+                        notification.type === 'success' 
+                            ? 'bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/30 dark:to-emerald-900/30 border-green-500 dark:border-green-400' 
+                            : 'bg-gradient-to-r from-red-50 to-rose-50 dark:from-red-900/30 dark:to-rose-900/30 border-red-500 dark:border-red-400'
+                    } backdrop-blur-sm`}>
+                        <div className="flex items-center gap-3">
+                            <div className={`w-2 h-2 rounded-full ${
+                                notification.type === 'success' ? 'bg-green-500' : 'bg-red-500'
+                            } animate-pulse`}></div>
+                            <p className={`font-semibold text-sm ${
+                                notification.type === 'success' 
+                                    ? 'text-green-800 dark:text-green-200' 
+                                    : 'text-red-800 dark:text-red-200'
+                            }`}>
+                                {notification.message}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            )}
         </AuthContext.Provider>
     );
 };

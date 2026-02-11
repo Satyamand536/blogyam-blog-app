@@ -13,11 +13,11 @@ export default function Footer() {
                     <div className="text-center md:text-left">
                         <Link to="/" className="inline-block">
                             <h3 className="text-2xl font-serif font-bold text-primary-600 mb-2">
-                                BlogYam
+                                Blogam
                             </h3>
                         </Link>
-                        <p className="text-[var(--text-secondary)] font-serif italic text-sm max-w-xs mx-auto md:mx-0">
-                            "Share your wisdom, ignite the world."
+                        <p className="text-[var(--text-secondary)] font-serif text-sm max-w-xs mx-auto md:mx-0">
+                            Share your wisdom, ignite the world.
                         </p>
                         <p className="text-slate-400 dark:text-slate-500 text-xs mt-2">
                             Knowledge increases by sharing.
@@ -101,7 +101,7 @@ export default function Footer() {
                 <div className="border-t border-slate-100 mt-8 pt-8">
                     <div className="flex flex-col md:flex-row justify-between items-center gap-4">
                         <p className="text-slate-500 text-sm text-center md:text-left">
-                            © {currentYear} BlogYam. All rights reserved.
+                            © {currentYear} Blogam. All rights reserved.
                         </p>
                         <p className="text-slate-400 text-xs flex items-center gap-1">
                             Made with <Heart size={14} className="text-red-500 fill-current" /> for knowledge sharing

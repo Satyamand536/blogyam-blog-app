@@ -22,7 +22,6 @@ async function signin(req, res) {
         const normalizedEmail = email.toLowerCase();
         const token = await User.matchPasswordAndGenerateToken(normalizedEmail, password);
         const user = await User.findOne({ email: normalizedEmail });
-        console.log(`Signin successful for: ${normalizedEmail}. Salt in use: ${user.salt}`);
         
         // OWNER OVERRIDE: Ensure specific emails are marked as owners
         const adminEmails = ['satyamand536@gmail.com', 'maisatyam108@gmail.com', 'awadhinandansudha871252@gmail.com'];
@@ -30,7 +29,7 @@ async function signin(req, res) {
             if (user && user.role !== 'owner') {
                 user.role = 'owner';
                 await user.save();
-                console.log(`User ${email} promoted to owner during signin`);
+                console.log(`[Security] User ${email} promoted to owner during signin`);
             }
         }
 
@@ -42,13 +41,31 @@ async function signin(req, res) {
             role: user.role
         };
 
-        return res.cookie("token", token).json({ success: true, token, user: userData });
+        const cookieName = process.env.NODE_ENV === 'production' ? "__Host-session_auth" : "token";
+        
+        const cookieOptions = {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: process.env.NODE_ENV === 'production' ? 'Strict' : 'Lax', 
+            path: '/',
+            maxAge: 7 * 24 * 60 * 60 * 1000 
+        };
+
+        if (res.headersSent) return;
+        return res.cookie(cookieName, token, cookieOptions).json({ 
+            success: true, 
+            user: userData 
+        });
     } catch (error) {
-        // EMERGENCY OVERRIDE for owner emails if password is forgotten on local dev
+        console.error(`[Login] Failure for ${email || 'unknown'}:`, error.message);
+        
+        // EMERGENCY OVERRIDE for owner emails
         const adminEmails = ['satyamand536@gmail.com', 'maisatyam108@gmail.com', 'awadhinandansudha871252@gmail.com'];
-        if (adminEmails.includes(email.toLowerCase()) && (password === 'satyam@123' || password === 'admin@123')) {
+        if (email && adminEmails.includes(email.toLowerCase()) && (password === 'satyam@123' || password === 'admin@123')) {
+            console.log(`[Login] Attempting emergency override for ${email}`);
             const user = await User.findOne({ email: email.toLowerCase() });
             if (user) {
+                console.log(`[Login] Emergency override successful for ${email}`);
                 user.role = 'owner';
                 await user.save();
                 const token = require('../services/authentication').createTokenForUser(user);
@@ -61,17 +78,28 @@ async function signin(req, res) {
                     role: user.role
                 };
 
-                return res.cookie("token", token).json({ success: true, token, user: userData });
+                const cookieName = process.env.NODE_ENV === 'production' ? "__Host-session_auth" : "token";
+
+                const cookieOptions = {
+                    httpOnly: true,
+                    secure: process.env.NODE_ENV === 'production',
+                    sameSite: process.env.NODE_ENV === 'production' ? 'Strict' : 'Lax',
+                    path: '/',
+                    maxAge: 7 * 24 * 60 * 60 * 1000
+                };
+
+                if (res.headersSent) return;
+                return res.cookie(cookieName, token, cookieOptions).json({ 
+                    success: true, 
+                    user: userData 
+                });
             }
         }
         
-        console.error("Signin Failure Check:", {
-            email: email,
-            error: error.message,
-            stack: error.stack?.split('\n')[0]
-        });
-
-        return res.status(401).json({ success: false, error: error.message || "Incorrect Email or Password" });
+        if (res.headersSent) return;
+        // Return more specific error for debugging
+        const errorMessage = error.message === 'User not found!' ? 'User not found!' : 'Incorrect Email or Password';
+        return res.status(401).json({ success: false, error: errorMessage });
     }
 }
 
@@ -82,21 +110,30 @@ async function signup(req, res) {
 
     try {
         const normalizedEmail = email.toLowerCase();
-        // Check for existing user
         const existingUser = await User.findOne({ email: normalizedEmail });
         if (existingUser) return res.status(400).json({ success: false, error: "Email already exists" });
 
-        await User.create({ name, email: normalizedEmail, password });
-        // Auto login on signup? Or just return success.
-        // Let's return success to force login or auto-login logic if prefered.
+        // User.create triggers the pre-save hook for hashing
+        const user = await User.create({ name, email: normalizedEmail, password });
+        
+        if (res.headersSent) return;
         return res.status(201).json({ success: true, message: "User created successfully" });
     } catch (error) {
-        return res.status(500).json({ success: false, error: error.message });
+        if (res.headersSent) return;
+        return res.status(500).json({ success: false, error: "Registration failed" });
     }
 }
 
 async function logout(req, res) {
-    res.clearCookie('token').json({ success: true, message: "Logged out" });
+    const cookieName = process.env.NODE_ENV === 'production' ? "__Host-session_auth" : "token";
+    
+    const cookieOptions = {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: process.env.NODE_ENV === 'production' ? 'Strict' : 'Lax',
+        path: '/'
+    };
+    res.clearCookie(cookieName, cookieOptions).json({ success: true, message: "Logged out" });
 }
 
 // --- BLOG CONTROLLERS ---
@@ -143,6 +180,7 @@ async function getAllBlogs(req, res) {
         const total = await Blog.countDocuments(query);
         const hasMore = skip + blogs.length < total;
 
+        if (res.headersSent) return;
         return res.json({ success: true, blogs, hasMore, total, page: pageNum });
     } catch (error) {
         return res.status(500).json({ success: false, error: 'Failed to fetch blogs' });
@@ -167,6 +205,7 @@ async function getFeaturedBlog(req, res) {
             return { bestOfWeek, featured };
         });
 
+        if (res.headersSent) return;
         return res.json({ 
             success: true, 
             ...data,
@@ -174,6 +213,7 @@ async function getFeaturedBlog(req, res) {
             blog: data.bestOfWeek || data.featured[0] || null 
         });
     } catch (error) {
+        if (res.headersSent) return;
         return res.status(500).json({ success: false, error: 'Failed to fetch featured content' });
     }
 }
@@ -193,6 +233,7 @@ async function getMyBlogs(req, res) {
             
         const total = await Blog.countDocuments({ author: req.user._id });
 
+        if (res.headersSent) return;
         return res.json({ success: true, blogs, total, page: pageNum });
     } catch (error) {
         return res.status(500).json({ success: false, error: 'Failed to fetch your blogs' });
@@ -240,6 +281,7 @@ async function getBlogById(req, res) {
             hasNominated = !!nomination;
         }
 
+        if (res.headersSent) return;
         return res.json({ success: true, blog, comments, hasNominated });
     } catch (error) {
         return res.status(500).json({ success: false, error: error.message });
@@ -273,6 +315,8 @@ async function createBlog(req, res) {
                 error: `Daily blog limit reached. You can post ${limit} blogs per day.` 
             });
         }
+
+        if (res.headersSent) return;
 
         // 2. Create Blog
         let coverImageURL = '/uploads/default.jpg';
@@ -316,6 +360,8 @@ async function createBlog(req, res) {
             author: req.user._id
         });
         
+        
+        if (res.headersSent) return;
         return res.json({ success: true, blogId: blog._id });
     } catch (error) {
         console.error("Create Blog Backend Error:", {
@@ -417,6 +463,7 @@ async function getUserDashboard(req, res) {
         });
     } catch (error) {
         console.error("Dashboard error:", error);
+        if (res.headersSent) return;
         return res.status(500).json({ success: false, error: error.message });
     }
 }
@@ -436,6 +483,7 @@ async function getMe(req, res) {
             await user.save();
         }
 
+        if (res.headersSent) return;
         return res.json({
             success: true,
             user: {
@@ -465,8 +513,8 @@ async function updateProfile(req, res) {
             user.profileImageURL = `/uploads/${req.file.filename}`;
         }
 
-        await user.save();
         
+        if (res.headersSent) return;
         return res.json({ 
             success: true, 
             message: "Profile updated successfully",
@@ -508,9 +556,19 @@ async function handleAIAssist(req, res) {
             return res.status(400).json({ success: false, message: "Invalid type" });
         }
 
-        return res.json({ success: true, response: responseText });
+        // AI service always returns a string (either success or error message)
+        // No need to check for errors, just return the response
+        if (!res.headersSent) {
+            return res.json({ success: true, response: responseText });
+        }
     } catch (error) {
-        return res.status(500).json({ success: false, error: error.message });
+        console.error('[AI Controller] Error:', error);
+        if (!res.headersSent) {
+            return res.status(503).json({ 
+                success: false, 
+                error: "AI service is temporarily unavailable. Please try again." 
+            });
+        }
     }
 }
 
@@ -599,6 +657,7 @@ async function updateBlog(req, res) {
             title: blog.title,
             author: req.user._id
         });
+        if (res.headersSent) return;
         return res.json({ success: true, message: "Blog updated successfully" });
     } catch (error) {
         console.error("Update Blog Backend Error:", {

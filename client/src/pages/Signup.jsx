@@ -1,136 +1,109 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
-import { Mail, Lock, User, ArrowRight } from 'lucide-react';
+import { HiUser, HiEnvelope, HiLockClosed } from 'react-icons/hi2';
 
 export default function Signup() {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [errors, setErrors] = useState({ name: '', email: '', password: '', submit: '' });
+    const [error, setError] = useState('');
     const { signup, login } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
     const from = location.state?.from || '/';
 
-    // Industry Standard Validations
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).{8,}$/;
-    const nameRegex = /^[a-zA-Z]{1,}\s+[a-zA-Z]{1,}.*$/;
-
-    const validateField = (fieldName, value) => {
-        let error = '';
-        if (fieldName === 'name') {
-            if (!value || value.length < 3 || !nameRegex.test(value.trim())) {
-                error = "Please enter your full name (first name and surname)";
-            }
-        } else if (fieldName === 'email') {
-            if (!value || !emailRegex.test(value)) {
-                error = "Please enter a valid email address.";
-            }
-        } else if (fieldName === 'password') {
-            if (!value || !passwordRegex.test(value)) {
-                error = "Password must be at least 8 characters long and include uppercase, lowercase, number, and special character.";
-            }
-        }
-        setErrors(prev => ({ ...prev, [fieldName]: error, submit: '' }));
-    };
-
-    const handleChange = (e) => {
-        const { name: fieldName, value } = e.target;
-        if (fieldName === 'name') setName(value);
-        else if (fieldName === 'email') setEmail(value);
-        else if (fieldName === 'password') setPassword(value);
-        validateField(fieldName, value);
-    };
-
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
-        // Final check
-        if (errors.name || errors.email || errors.password) return;
+        setError('');
 
-        const success = await signup(name, email, password);
-        if (success) {
-            const loginSuccess = await login(email, password);
-            if (loginSuccess) navigate(from);
-            else navigate('/login', { state: { from } });
+        const result = await signup(name, email, password);
+        if (result.success) {
+            const loginResult = await login(email, password);
+            if (loginResult.success) {
+                navigate(from);
+            } else {
+                navigate('/login');
+            }
         } else {
-            setErrors(prev => ({ ...prev, submit: 'Failed to create account. Email might already exist.' }));
+            setError(result.error || 'Failed to create account');
         }
     };
 
     return (
-        <div className="min-h-[calc(100vh-64px)] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-[var(--bg-primary)] transition-colors duration-500">
-            <div className="max-w-md w-full space-y-8 card">
-                <div>
-                    <h2 className="mt-6 text-center text-3xl font-serif font-extrabold text-[var(--text-primary)]">
-                        Join BlogYam
+        <div className="min-h-screen flex items-center justify-center py-12 px-4 relative overflow-hidden">
+            {/* Animated Background Elements */}
+            <div className="absolute inset-0 overflow-hidden">
+                <div className="absolute -top-1/2 -left-1/2 w-full h-full bg-purple-600/20 rounded-full blur-3xl animate-pulse"></div>
+                <div className="absolute -bottom-1/2 -right-1/2 w-full h-full bg-indigo-600/20 rounded-full blur-3xl animate-pulse" style={{animationDelay: '2s'}}></div>
+            </div>
+
+            <div className="max-w-md w-full glass-card p-10 rounded-2xl relative z-10">
+                <div className="text-center mb-8">
+                    <h2 className="text-4xl font-black text-[var(--text-primary)] mb-2 tracking-tight transition-colors duration-500">
+                        Join Blogam
                     </h2>
-                    <p className="mt-2 text-center text-sm text-[var(--text-secondary)]">
+                    <p className="text-[var(--text-secondary)] font-medium tracking-wide transition-colors duration-500">
                         Share your wisdom with the world
                     </p>
                 </div>
-                <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-                    {errors.submit && (
-                        <div className="text-red-500 text-sm text-center">
-                            {typeof errors.submit === 'string' ? errors.submit : "An unexpected error occurred"}
+
+                <form onSubmit={handleSubmit} className="space-y-5">
+                    {error && (
+                        <div className="text-sm text-red-300 text-center bg-red-900/40 backdrop-blur-sm p-3 rounded-lg border border-red-500/30">
+                            {error}
                         </div>
                     )}
-                    <div className="space-y-4">
-                        <div className="relative">
-                            <User className="absolute left-3 top-3 text-slate-400" size={20} />
-                            <input
-                                type="text"
-                                required
-                                name="name"
-                                value={name}
-                                onChange={handleChange}
-                                className={`input-field pl-10 ${errors.name ? 'border-red-500 shadow-[0_0_0_1px_rgba(239,68,68,0.5)]' : ''}`}
-                                placeholder="Full Name"
-                            />
-                            {errors.name && <p className="text-[10px] text-red-500 mt-1 ml-1">{errors.name}</p>}
-                        </div>
-                        <div className="relative">
-                            <Mail className="absolute left-3 top-3 text-slate-400" size={20} />
-                            <input
-                                type="email"
-                                required
-                                name="email"
-                                value={email}
-                                onChange={handleChange}
-                                className={`input-field pl-10 ${errors.email ? 'border-red-500 shadow-[0_0_0_1px_rgba(239,68,68,0.5)]' : ''}`}
-                                placeholder="Email address"
-                            />
-                            {errors.email && <p className="text-[10px] text-red-500 mt-1 ml-1">{errors.email}</p>}
-                        </div>
-                        <div className="relative">
-                            <Lock className="absolute left-3 top-3 text-slate-400" size={20} />
-                            <input
-                                type="password"
-                                required
-                                name="password"
-                                value={password}
-                                onChange={handleChange}
-                                className={`input-field pl-10 ${errors.password ? 'border-red-500 shadow-[0_0_0_1px_rgba(239,68,68,0.5)]' : ''}`}
-                                placeholder="Password"
-                            />
-                            {errors.password && <p className="text-[10px] text-red-500 mt-1 ml-1 leading-tight">{errors.password}</p>}
-                        </div>
+
+                    <div className="relative">
+                        <HiUser className="absolute left-4 top-1/2 -translate-y-1/2 text-purple-300" size={20} />
+                        <input
+                            type="text"
+                            required
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                            className="w-full pl-12 pr-4 py-4 bg-white/5 backdrop-blur-3xl border border-white/10 rounded-2xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all duration-300"
+                            placeholder="Full Name"
+                        />
                     </div>
 
-                    <div>
-                        <button
-                            type="submit"
-                            className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
-                        >
-                            Create Account
-                            <ArrowRight className="ml-2" size={16} />
-                        </button>
+                    <div className="relative">
+                        <HiEnvelope className="absolute left-4 top-1/2 -translate-y-1/2 text-purple-300" size={20} />
+                        <input
+                            type="email"
+                            required
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            className="w-full pl-12 pr-4 py-4 bg-white/5 backdrop-blur-3xl border border-white/10 rounded-2xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all duration-300"
+                            placeholder="Email address"
+                        />
                     </div>
-                    <div className="text-center">
-                         <Link to="/login" className="font-medium text-primary-600 hover:text-primary-500">Already have an account? Sign in</Link>
+
+                    <div className="relative">
+                        <HiLockClosed className="absolute left-4 top-1/2 -translate-y-1/2 text-purple-300" size={20} />
+                        <input
+                            type="password"
+                            required
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            className="w-full pl-12 pr-4 py-4 bg-white/5 backdrop-blur-3xl border border-white/10 rounded-2xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all duration-300"
+                            placeholder="Password"
+                        />
                     </div>
+
+                    <button
+                        type="submit"
+                        className="w-full py-4 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-black rounded-2xl transition-all shadow-2xl shadow-purple-900/40 hover:shadow-purple-500/50 active:scale-95 flex items-center justify-center gap-3 tracking-widest uppercase text-sm"
+                    >
+                        Create Account
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                        </svg>
+                    </button>
+
+                    <p className="text-center text-sm text-[var(--text-secondary)] mt-8 font-medium transition-colors duration-500">
+                        Already have an account? <Link to="/login" className="text-primary-600 dark:text-purple-400 hover:text-primary-500 dark:hover:text-purple-300 font-bold underline decoration-primary-500/50 dark:decoration-purple-500/50 transition-colors">Sign in</Link>
+                    </p>
                 </form>
             </div>
         </div>
