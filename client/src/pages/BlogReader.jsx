@@ -316,11 +316,11 @@ export default function BlogReader() {
                     </div>
                 </div>
 
-                <div className="rounded-2xl overflow-hidden shadow-lg mb-10 aspect-video relative group border border-[var(--border-color)]">
+                <div className="rounded-2xl overflow-hidden shadow-lg mb-10 relative group border border-[var(--border-color)] w-full max-h-[50vh] md:max-h-[70vh]">
                     <OptimizedImage 
                         src={blog.coverImageURL ? getImageUrl(blog.coverImageURL) : '/images/default-blog.png'} 
                         alt={blog.title} 
-                        className="w-full h-full object-cover transition-opacity duration-500"
+                        className="w-full h-full object-cover object-center transition-opacity duration-500"
                         containerClassName="w-full h-full"
                         priority={true} 
                         fallbackSrc="/images/default-blog.png"

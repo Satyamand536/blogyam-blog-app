@@ -206,8 +206,8 @@ export default function CreateBlog() {
                 </h1>
                 
                 {!isAuthorOrOwner && (
-                    <div className="flex items-center gap-2 px-3 py-1.5 bg-yellow-50 dark:bg-yellow-900/10 text-yellow-700 dark:text-yellow-400 rounded-lg text-xs font-medium border border-yellow-200 dark:border-yellow-800">
-                        <Lock size={14} />
+                    <div className="flex items-center gap-2 px-3 py-2 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-900 dark:text-emerald-300 rounded-lg text-xs font-bold border-2 border-emerald-600 dark:border-emerald-700 shadow-md">
+                        <Lock size={14} className="flex-shrink-0" />
                         <span>Public publishing restricted to Authors</span>
                     </div>
                 )}
@@ -228,10 +228,10 @@ export default function CreateBlog() {
 
                 {/* Mobile Preview Area */}
                 {(file || (existingBanner && !removeBanner)) && (
-                    <div className="md:hidden w-full aspect-video rounded-2xl overflow-hidden border border-[var(--border-color)] shadow-inner relative group/mobile-preview">
+                    <div className="md:hidden w-full max-h-[40vh] rounded-2xl overflow-hidden border border-[var(--border-color)] shadow-inner relative group/mobile-preview">
                         <img 
                             src={file ? URL.createObjectURL(file) : getImageUrl(existingBanner)} 
-                            className="w-full h-full object-cover" 
+                            className="w-full h-full object-cover object-center" 
                             alt="Mobile Preview"
                         />
                         <button 

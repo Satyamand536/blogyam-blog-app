@@ -54,7 +54,7 @@ app.use(helmet({
             defaultSrc: ["'self'"],
             scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
             styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
-            imgSrc: ["'self'", "data:", "https://upload.wikimedia.org", "https://res.cloudinary.com", "https://ui-avatars.com", "https://images.unsplash.com", "https://www.transparenttextures.com"],
+            imgSrc: ["'self'", "data:", "blob:", "https://upload.wikimedia.org", "https://res.cloudinary.com", "https://ui-avatars.com", "https://images.unsplash.com", "https://www.transparenttextures.com", "https://i.imgflip.com"],
             fontSrc: ["'self'", "https://fonts.gstatic.com", "data:"],
             connectSrc: ["'self'", "https:", "http:", "https://openrouter.ai"],
             frameAncestors: ["'none'"], // Prevent clickjacking

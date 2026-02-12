@@ -179,18 +179,32 @@ export default function Navbar() {
             </div>
 
             {/* Full-Screen Mobile Menu */}
-            <div className={`fixed inset-0 z-[60] bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 transition-all duration-500 ease-in-out sm:hidden ${isOpen ? 'opacity-100 visible' : 'opacity-0 invisible pointer-events-none'}`}>
+            <div className={`fixed inset-0 z-[60] transition-all duration-500 ease-in-out sm:hidden ${
+                isOpen ? 'opacity-100 visible' : 'opacity-0 invisible pointer-events-none'
+            } ${
+                theme === 'dark' 
+                    ? 'bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900' 
+                    : 'bg-gradient-to-br from-orange-50 via-white to-orange-100'
+            }`}>
                 {/* Close Button Inside Menu */}
                 <div className="absolute top-4 right-4 z-[70]">
-                    <button onClick={() => setIsOpen(false)} className="p-2 text-[var(--text-primary)] hover:text-primary-600 dark:hover:text-purple-500 transition-colors">
+                    <button onClick={() => setIsOpen(false)} className={`p-2 transition-colors ${
+                        theme === 'dark' 
+                            ? 'text-white hover:text-purple-400' 
+                            : 'text-slate-800 hover:text-orange-600'
+                    }`}>
                         <X size={32} />
                     </button>
                 </div>
 
                 <div className="flex flex-col items-center justify-center h-full space-y-8 px-6 animate-fade-in relative z-50">
                     <div className="flex flex-col items-center space-y-2 mb-4">
-                        <span className="text-4xl font-serif font-black text-[var(--text-primary)]">Blogam</span>
-                        <div className="w-12 h-1 bg-primary-600 dark:bg-purple-500 rounded-full"></div>
+                        <span className={`text-4xl font-serif font-black ${
+                            theme === 'dark' ? 'text-white' : 'text-slate-900'
+                        }`}>Blogam</span>
+                        <div className={`w-12 h-1 rounded-full ${
+                            theme === 'dark' ? 'bg-purple-500' : 'bg-orange-500'
+                        }`}></div>
                     </div>
 
                     <div className="flex flex-col items-center space-y-6 w-full max-w-xs">
@@ -199,14 +213,32 @@ export default function Navbar() {
                                 <PenTool size={24} /> Write a Story
                             </Link>
                         )}
-                        <Link to="/" onClick={() => setIsOpen(false)} className="text-2xl font-medium text-[var(--text-primary)] hover:text-primary-600 dark:hover:text-purple-400 transition-colors">Home</Link>
-                        <Link to="/authors" onClick={() => setIsOpen(false)} className="text-2xl font-medium text-[var(--text-primary)] hover:text-primary-600 dark:hover:text-purple-400 transition-colors">Authors</Link>
-                        <Link to="/quotes" onClick={() => setIsOpen(false)} className="text-2xl font-medium text-[var(--text-primary)] hover:text-primary-600 dark:hover:text-purple-400 transition-colors">Quotes</Link>
-                        <Link to="/meme-generator" onClick={() => setIsOpen(false)} className="text-2xl font-medium text-[var(--text-primary)] hover:text-primary-600 dark:hover:text-purple-400 transition-colors">Memes</Link>
+                        <Link to="/" onClick={() => setIsOpen(false)} className={`text-2xl font-medium transition-colors ${
+                            theme === 'dark' 
+                                ? 'text-white hover:text-purple-400' 
+                                : 'text-slate-800 hover:text-orange-600'
+                        }`}>Home</Link>
+                        <Link to="/authors" onClick={() => setIsOpen(false)} className={`text-2xl font-medium transition-colors ${
+                            theme === 'dark' 
+                                ? 'text-white hover:text-purple-400' 
+                                : 'text-slate-800 hover:text-orange-600'
+                        }`}>Authors</Link>
+                        <Link to="/quotes" onClick={() => setIsOpen(false)} className={`text-2xl font-medium transition-colors ${
+                            theme === 'dark' 
+                                ? 'text-white hover:text-purple-400' 
+                                : 'text-slate-800 hover:text-orange-600'
+                        }`}>Quotes</Link>
+                        <Link to="/meme-generator" onClick={() => setIsOpen(false)} className={`text-2xl font-medium transition-colors ${
+                            theme === 'dark' 
+                                ? 'text-white hover:text-purple-400' 
+                                : 'text-slate-800 hover:text-orange-600'
+                        }`}>Memes</Link>
                         
                         {user ? (
                             <>
-                                <div className="w-full h-px bg-white/10 my-4"></div>
+                                <div className={`w-full h-px my-4 ${
+                                    theme === 'dark' ? 'bg-white/10' : 'bg-slate-300/50'
+                                }`}></div>
                                 {user.role === 'owner' && (
                                     <Link to="/admin" onClick={() => setIsOpen(false)} className="flex items-center gap-3 text-2xl font-medium text-amber-500">
                                         <Shield size={24} /> Admin Panel
@@ -221,18 +253,30 @@ export default function Navbar() {
                             </>
                         ) : (
                             <>
-                                <div className="w-full h-px bg-white/10 my-4"></div>
+                                <div className={`w-full h-px my-4 ${
+                                    theme === 'dark' ? 'bg-white/10' : 'bg-slate-300/50'
+                                }`}></div>
                                 <Link to="/signup" onClick={() => setIsOpen(false)} className="w-full text-center py-4 bg-orange-600 text-white rounded-2xl font-bold text-xl shadow-lg shadow-orange-600/30 active:scale-95 transition-all">Sign Up</Link>
-                                <Link to="/login" onClick={() => setIsOpen(false)} className="text-2xl font-medium text-white hover:text-orange-500">Login</Link>
+                                <Link to="/login" onClick={() => setIsOpen(false)} className={`text-2xl font-medium transition-colors ${
+                                    theme === 'dark' 
+                                        ? 'text-white hover:text-orange-400' 
+                                        : 'text-slate-700 hover:text-orange-600'
+                                }`}>Login</Link>
                             </>
                         )}
                     </div>
 
                     <div className="absolute bottom-10 left-0 right-0 flex justify-center items-center gap-8">
-                        <span className="text-base font-bold text-orange-500 uppercase tracking-widest">Theme Mode</span>
+                        <span className={`text-base font-bold uppercase tracking-widest ${
+                            theme === 'dark' ? 'text-orange-500' : 'text-orange-600'
+                        }`}>Theme Mode</span>
                         <button 
                             onClick={toggleTheme} 
-                            className="p-4 bg-white/10 border border-white/20 text-orange-500 hover:text-orange-400 transition-all rounded-2xl shadow-sm active:scale-90"
+                            className={`p-4 border transition-all rounded-2xl shadow-sm active:scale-90 ${
+                                theme === 'dark' 
+                                    ? 'bg-white/10 border-white/20 text-orange-500 hover:text-orange-400' 
+                                    : 'bg-orange-100/50 border-orange-300 text-orange-600 hover:bg-orange-200/50'
+                            }`}
                         >
                             {theme === 'dark' ? <Sun size={28} /> : <Moon size={28} />}
                         </button>

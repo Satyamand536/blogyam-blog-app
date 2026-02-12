@@ -15,7 +15,7 @@ const templates = [
     {
         name: "Drake Hotline Bling",
         imageUrl: "https://i.imgflip.com/30b1gx.jpg",
-        fallbackUrl: "/images/memes/drake.jpg",
+        fallbackUrl: "https://i.imgflip.com/30b1gx.jpg",
         category: "Classic",
         boxCount: 2,
         priority: 10
@@ -23,7 +23,7 @@ const templates = [
     {
         name: "Distracted Boyfriend",
         imageUrl: "https://i.imgflip.com/1ur9b0.jpg",
-        fallbackUrl: "/images/memes/distracted_boyfriend.jpg",
+        fallbackUrl: "https://i.imgflip.com/1ur9b0.jpg",
         category: "Classic",
         boxCount: 3,
         priority: 9
@@ -31,7 +31,7 @@ const templates = [
     {
         name: "Two Buttons",
         imageUrl: "https://i.imgflip.com/1g8my4.jpg",
-        fallbackUrl: "/images/memes/two_buttons.jpg",
+        fallbackUrl: "https://i.imgflip.com/1g8my4.jpg",
         category: "Classic",
         boxCount: 2,
         priority: 8
@@ -39,7 +39,7 @@ const templates = [
     {
         name: "Change My Mind",
         imageUrl: "https://i.imgflip.com/24y43o.jpg",
-        fallbackUrl: "/images/memes/change_my_mind.jpg",
+        fallbackUrl: "https://i.imgflip.com/24y43o.jpg",
         category: "Modern",
         boxCount: 2,
         priority: 7
@@ -47,7 +47,7 @@ const templates = [
     {
         name: "Batman Slapping Robin",
         imageUrl: "https://i.imgflip.com/9ehk.jpg",
-        fallbackUrl: "/images/memes/batman_slapping_robin.jpg",
+        fallbackUrl: "https://i.imgflip.com/9ehk.jpg",
         category: "Classic",
         boxCount: 2,
         priority: 6
@@ -55,7 +55,7 @@ const templates = [
     {
         name: "Success Kid",
         imageUrl: "https://i.imgflip.com/1bip.jpg",
-        fallbackUrl: "/images/memes/success_kid.jpg",
+        fallbackUrl: "https://i.imgflip.com/1bip.jpg",
         category: "Classic",
         boxCount: 2,
         priority: 5
@@ -63,7 +63,7 @@ const templates = [
     {
         name: "Expanding Brain",
         imageUrl: "https://i.imgflip.com/1jwhww.jpg",
-        fallbackUrl: "/images/memes/expanding_brain.jpg",
+        fallbackUrl: "https://i.imgflip.com/1jwhww.jpg",
         category: "Modern",
         boxCount: 4,
         priority: 4
@@ -71,7 +71,7 @@ const templates = [
     {
         name: "One Does Not Simply",
         imageUrl: "https://i.imgflip.com/1bij.jpg",
-        fallbackUrl: "/images/memes/one_does_not_simply.jpg",
+        fallbackUrl: "https://i.imgflip.com/1bij.jpg",
         category: "Classic",
         boxCount: 2,
         priority: 3
@@ -79,7 +79,7 @@ const templates = [
     {
         name: "Grumpy Cat",
         imageUrl: "https://i.imgflip.com/8p0a.jpg",
-        fallbackUrl: "/images/memes/grumpy_cat.jpg",
+        fallbackUrl: "https://i.imgflip.com/8p0a.jpg",
         category: "Reaction",
         boxCount: 2,
         priority: 2
@@ -87,7 +87,7 @@ const templates = [
     {
         name: "Disaster Girl",
         imageUrl: "https://i.imgflip.com/23ls.jpg",
-        fallbackUrl: "/images/memes/disaster_girl.jpg",
+        fallbackUrl: "https://i.imgflip.com/23ls.jpg",
         category: "Reaction",
         boxCount: 2,
         priority: 1
@@ -95,7 +95,7 @@ const templates = [
     {
         name: "Mocking Spongebob",
         imageUrl: "https://i.imgflip.com/1otk96.jpg",
-        fallbackUrl: "/images/memes/mocking_spongebob.jpg",
+        fallbackUrl: "https://i.imgflip.com/1otk96.jpg",
         category: "Reaction",
         boxCount: 2,
         priority: 11
@@ -103,7 +103,7 @@ const templates = [
     {
         name: "Left Exit 12 Off Ramp",
         imageUrl: "https://i.imgflip.com/22bdq6.jpg",
-        fallbackUrl: "/images/memes/left_exit_12.jpg",
+        fallbackUrl: "https://i.imgflip.com/22bdq6.jpg",
         category: "Modern",
         boxCount: 3,
         priority: 12
@@ -111,7 +111,7 @@ const templates = [
     {
         name: "Bernie I Am Once Again Asking",
         imageUrl: "https://i.imgflip.com/3oevdk.jpg",
-        fallbackUrl: "/images/memes/bernie_asking.jpg",
+        fallbackUrl: "https://i.imgflip.com/3oevdk.jpg",
         category: "Modern",
         boxCount: 2,
         priority: 13
@@ -119,7 +119,7 @@ const templates = [
     {
         name: "Always Has Been",
         imageUrl: "https://i.imgflip.com/43a45p.jpg",
-        fallbackUrl: "/images/memes/always_has_been.jpg",
+        fallbackUrl: "https://i.imgflip.com/43a45p.jpg",
         category: "Space",
         boxCount: 2,
         priority: 14
@@ -127,7 +127,7 @@ const templates = [
     {
         name: "Buff Doge vs. Cheems",
         imageUrl: "https://i.imgflip.com/434i5j.jpg",
-        fallbackUrl: "/images/memes/buff_doge.jpg",
+        fallbackUrl: "https://i.imgflip.com/434i5j.jpg",
         category: "Modern",
         boxCount: 4,
         priority: 15
@@ -135,7 +135,7 @@ const templates = [
     {
         name: "Sad Pablo Escobar",
         imageUrl: "https://i.imgflip.com/1c1uej.jpg",
-        fallbackUrl: "/images/memes/sad_pablo.jpg",
+        fallbackUrl: "https://i.imgflip.com/1c1uej.jpg",
         category: "Reaction",
         boxCount: 3,
         priority: 16
@@ -143,7 +143,7 @@ const templates = [
     {
         name: "Woman Yelling At Cat",
         imageUrl: "https://i.imgflip.com/26am.jpg",
-        fallbackUrl: "/images/memes/woman_cat.jpg",
+        fallbackUrl: "https://i.imgflip.com/26am.jpg",
         category: "Reaction",
         boxCount: 2,
         priority: 17
@@ -151,7 +151,7 @@ const templates = [
     {
         name: "Markiplier E",
         imageUrl: "https://i.imgflip.com/261o3j.jpg",
-        fallbackUrl: "/images/memes/e.jpg",
+        fallbackUrl: "https://i.imgflip.com/261o3j.jpg",
         category: "Surreal",
         boxCount: 1,
         priority: 18
@@ -159,7 +159,7 @@ const templates = [
     {
         name: "Is This A Pigeon",
         imageUrl: "https://i.imgflip.com/1w7ygt.jpg",
-        fallbackUrl: "/images/memes/pigeon.jpg",
+        fallbackUrl: "https://i.imgflip.com/1w7ygt.jpg",
         category: "Anime",
         boxCount: 3,
         priority: 19
