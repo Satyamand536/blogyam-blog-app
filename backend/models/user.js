@@ -161,41 +161,58 @@ userSchema.methods.recordReadingActivity = async function(blogId) {
     return updated;
 };
 
-userSchema.static('matchPasswordAndGenerateToken', async function(email, password) {
-    const normalizedEmail = email.toLowerCase();
-    const user = await this.findOne({ email: normalizedEmail });
-    if (!user) throw new Error('User not found!');
+userSchema.static("matchPasswordAndGenerateToken", async function (email, password) {
+    const user = await this.findOne({ email });
+    if (!user) throw new Error("User not found!");
 
+    console.log(`[User Model Debug] Checking password for: ${email}`);
+    
     const storedPassword = user.password;
     const salt = user.salt;
     let isMatch = false;
 
     // Check if it's a Bcrypt hash (starts with $2a$ or $2b$)
     if (storedPassword.startsWith('$2a$') || storedPassword.startsWith('$2b$')) {
+        console.log(`[User Model Debug] Verifying Bcrypt hash...`);
         // Use password + salt if salt exists, else just password (for transitional users)
         const checkValue = salt ? (password + salt) : password;
         isMatch = await bcrypt.compare(checkValue, storedPassword);
     } else {
-        // LEGACY SHA256 CHECK
-        const { createHash } = require('crypto');
-        const userProvidedHash = createHash('sha256')
-            .update(password + salt)
-            .digest('hex');
-            
-        isMatch = (storedPassword === userProvidedHash);
+        console.log(`[User Model Debug] Verifying Legacy SHA256 hash...`);
+        const crypto = require('crypto');
+        
+        // Strategy A: password + salt
+        const hashA = crypto.createHash('sha256').update(password + salt).digest('hex');
+        // Strategy B: salt + password
+        const hashB = crypto.createHash('sha256').update(salt + password).digest('hex');
+        // Strategy C: HMAC
+        const hashC = crypto.createHmac('sha256', salt).update(password).digest('hex');
+
+        if (storedPassword === hashA) {
+            console.log(`[User Model Debug] Match found (Strategy A: pass + salt)`);
+            isMatch = true;
+        } else if (storedPassword === hashB) {
+            console.log(`[User Model Debug] Match found (Strategy B: salt + pass)`);
+            isMatch = true;
+        } else if (storedPassword === hashC) {
+            console.log(`[User Model Debug] Match found (Strategy C: HMAC)`);
+            isMatch = true;
+        }
         
         // AUTO-MIGRATE TO BCRYPT ON SUCCESSFUL LOGIN
         if (isMatch) {
-            console.log(`[Security] Migrating user ${email} from legacy SHA256 to Bcrypt...`);
-            user.password = password; // pre-save hook will hash it with Bcrypt
+            console.log(`[Security] Migrating user ${email} from legacy SHA256 to modern Bcrypt...`);
+            user.password = password; // pre-save hook will hash it with modern Bcrypt + Salt
             await user.save();
         }
     }
 
     if (!isMatch) {
+        console.log(`[User Model Debug] Password mismatch.`);
         throw new Error('incorrect password');
     }
 
+    console.log(`[User Model Debug] Password matched. Generating token...`);
     const token = createTokenForUser(user);
     return token;
 });

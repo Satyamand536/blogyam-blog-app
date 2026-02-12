@@ -10,8 +10,36 @@ const xss = require('xss');
 
 // --- AUTH CONTROLLERS ---
 
+
 async function signin(req, res) {
-    const { email, password } = req.body;
+
+    let { email, password } = req.body;
+    
+    // Check if password is encrypted (starts with base64 pattern or is very long)
+    // Encrypted passwords will be longer than typical passwords
+    const { decryptPassword } = require('../services/encryption');
+    
+    // DEBUG LOGGING (Detailed diagnosis)
+    console.log(`[Auth Debug] Signin attempt for: ${email}`);
+    
+    if (password && password.length > 100) {
+        try {
+            console.log(`[Auth Debug] Encrypted password received. Length: ${password.length}`);
+            const decrypted = decryptPassword(password);
+            if (!decrypted) throw new Error('Decryption returned null');
+            console.log(`[Auth Debug] Decryption successful.`);
+            password = decrypted;
+        } catch (decryptError) {
+            console.error('[Auth FAIL] Decryption failed:', decryptError.message);
+            return res.status(400).json({ 
+                success: false, 
+                error: 'Security Handshake Failed. Please refresh the page and try again.' 
+            });
+        }
+    } else {
+        console.log(`[Auth Debug] Password received as plain text. Length: ${password ? password.length : 0}`);
+    }
+    
     const { isValid, errors } = validateAuthData({ email, password }, false);
     if (!isValid) {
         console.log("Validation Failed for Signin:", errors);
@@ -20,7 +48,22 @@ async function signin(req, res) {
 
     try {
         const normalizedEmail = email.toLowerCase();
+        
+        // Debug Finding User First
+        const userExists = await User.findOne({ email: normalizedEmail });
+        if (!userExists) {
+            console.log(`[Auth Debug] User not found: ${normalizedEmail}`);
+            return res.status(401).json({ success: false, error: 'Incorrect Email or Password' });
+        }
+        console.log(`[Auth Debug] User found: ${userExists.email}, Role: ${userExists.role}`);
+
         const token = await User.matchPasswordAndGenerateToken(normalizedEmail, password);
+        console.log(`[Auth Debug] Token generated successfully`);
+        
+        // Encrypt token for cookie (Obfuscation)
+        const { encryptCookie } = require('../services/encryption');
+        const encryptedToken = encryptCookie(token);
+        
         const user = await User.findOne({ email: normalizedEmail });
         
         // OWNER OVERRIDE: Ensure specific emails are marked as owners
@@ -52,61 +95,47 @@ async function signin(req, res) {
         };
 
         if (res.headersSent) return;
-        return res.cookie(cookieName, token, cookieOptions).json({ 
+        return res.cookie(cookieName, encryptedToken, cookieOptions).json({ 
             success: true, 
             user: userData 
         });
     } catch (error) {
-        console.error(`[Login] Failure for ${email || 'unknown'}:`, error.message);
-        
-        // EMERGENCY OVERRIDE for owner emails
-        const adminEmails = ['satyamand536@gmail.com', 'maisatyam108@gmail.com', 'awadhinandansudha871252@gmail.com'];
-        if (email && adminEmails.includes(email.toLowerCase()) && (password === 'satyam@123' || password === 'admin@123')) {
-            console.log(`[Login] Attempting emergency override for ${email}`);
-            const user = await User.findOne({ email: email.toLowerCase() });
-            if (user) {
-                console.log(`[Login] Emergency override successful for ${email}`);
-                user.role = 'owner';
-                await user.save();
-                const token = require('../services/authentication').createTokenForUser(user);
-                
-                const userData = {
-                    _id: user._id,
-                    name: user.name,
-                    email: user.email,
-                    profileImageURL: user.profileImageURL,
-                    role: user.role
-                };
-
-                const cookieName = process.env.NODE_ENV === 'production' ? "__Host-session_auth" : "token";
-
-                const cookieOptions = {
-                    httpOnly: true,
-                    secure: process.env.NODE_ENV === 'production',
-                    sameSite: process.env.NODE_ENV === 'production' ? 'Strict' : 'Lax',
-                    path: '/',
-                    maxAge: 7 * 24 * 60 * 60 * 1000
-                };
-
-                if (res.headersSent) return;
-                return res.cookie(cookieName, token, cookieOptions).json({ 
-                    success: true, 
-                    user: userData 
-                });
-            }
-        }
+        console.error(`[Login] Authentication failed for user`);
         
         if (res.headersSent) return;
-        // Return more specific error for debugging
-        const errorMessage = error.message === 'User not found!' ? 'User not found!' : 'Incorrect Email or Password';
-        return res.status(401).json({ success: false, error: errorMessage });
+        // Generic error message to prevent user enumeration
+        return res.status(401).json({ success: false, error: 'Incorrect Email or Password' });
     }
 }
 
 async function signup(req, res) {
-    const { name, email, password } = req.body;
+    let { name, email, password } = req.body;
+    
+    // Decrypt password if encrypted (same logic as signin)
+    const { decryptPassword } = require('../services/encryption');
+    
+    console.log(`[Signup Debug] Attempt for: ${email}`);
+    if (password && password.length > 100) {
+        try {
+            console.log(`[Signup Debug] Encrypted password received. Length: ${password.length}`);
+            const decrypted = decryptPassword(password);
+            if (!decrypted) throw new Error('Decryption returned null');
+            console.log(`[Signup Debug] Decryption successful.`);
+            password = decrypted;
+        } catch (decryptError) {
+            console.error('[Signup FAIL] Decryption failed:', decryptError.message);
+            return res.status(400).json({ 
+                success: false, 
+                error: 'Security Handshake Failed. Please refresh the page and try again.' 
+            });
+        }
+    }
+    
     const { isValid, errors } = validateAuthData({ name, email, password }, true);
-    if (!isValid) return res.status(400).json({ success: false, error: errors[0] });
+    if (!isValid) {
+        console.log("[Signup Validation FAIL]:", errors);
+        return res.status(400).json({ success: false, error: errors[0] });
+    }
 
     try {
         const normalizedEmail = email.toLowerCase();
@@ -119,6 +148,7 @@ async function signup(req, res) {
         if (res.headersSent) return;
         return res.status(201).json({ success: true, message: "User created successfully" });
     } catch (error) {
+        console.error('[Signup Error]:', error);
         if (res.headersSent) return;
         return res.status(500).json({ success: false, error: "Registration failed" });
     }

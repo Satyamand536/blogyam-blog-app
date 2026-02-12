@@ -228,10 +228,10 @@ export default function CreateBlog() {
 
                 {/* Mobile Preview Area */}
                 {(file || (existingBanner && !removeBanner)) && (
-                    <div className="md:hidden w-full max-h-[40vh] rounded-2xl overflow-hidden border border-[var(--border-color)] shadow-inner relative group/mobile-preview">
+                    <div className="md:hidden w-full min-h-[200px] max-h-[450px] rounded-2xl overflow-hidden border border-[var(--border-color)] shadow-inner relative group/mobile-preview bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
                         <img 
                             src={file ? URL.createObjectURL(file) : getImageUrl(existingBanner)} 
-                            className="w-full h-full object-cover object-center" 
+                            className="w-full h-full object-contain" 
                             alt="Mobile Preview"
                         />
                         <button 
@@ -240,7 +240,7 @@ export default function CreateBlog() {
                                 if (file) setFile(null);
                                 else setRemoveBanner(true);
                             }}
-                            className="absolute top-4 right-4 p-3 bg-red-600/90 text-white rounded-full shadow-lg backdrop-blur-sm"
+                            className="absolute top-4 right-4 p-3 bg-red-600/90 text-white rounded-full shadow-lg backdrop-blur-sm z-10"
                         >
                             <Trash2 size={20} />
                         </button>

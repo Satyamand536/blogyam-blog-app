@@ -151,6 +151,53 @@
     @apply border-black bg-white;
   }
 
+  /* Force Autofill Text Color to Black (Fixes White-on-White) */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover, 
+  input:-webkit-autofill:focus, 
+  input:-webkit-autofill:active {
+    -webkit-text-fill-color: black !important;
+    transition: background-color 5000s ease-in-out 0s;
+  }
+  
+  /* Force dark mode autofill to be white if needed, but given the white bg in light mode, we prioritize black */
+  [data-theme="dark"] input:-webkit-autofill,
+  [data-theme="dark"] input:-webkit-autofill:hover, 
+  [data-theme="dark"] input:-webkit-autofill:focus, 
+  [data-theme="dark"] input:-webkit-autofill:active {
+      -webkit-text-fill-color: white !important;
+  }
+
+  /* --- CRITICAL FIX: FORCE INPUT TEXT COLORS --- */
+  /* Normal manual typing and focused states */
+  html:not(.dark) input.force-text-visibility,
+  html:not([data-theme="dark"]) input.force-text-visibility,
+  #root input:not([type="submit"]):not([type="button"]):not(.dark *),
+  .glass-card input:not([type="submit"]) {
+      color: #000000 !important;
+      background-color: #ffffff !important;
+      -webkit-text-fill-color: #000000 !important;
+      caret-color: #000000 !important;
+      opacity: 1 !important;
+  }
+
+  /* Placeholder visibility */
+  html:not(.dark) input::placeholder,
+  html:not([data-theme="dark"]) input::placeholder {
+      color: #6b7280 !important; /* gray-500 */
+      opacity: 1 !important;
+  }
+
+  /* Maintain White for Dark Mode */
+  html.dark input:not([type="submit"]):not([type="button"]), 
+  html.dark textarea,
+  html[data-theme="dark"] input:not([type="submit"]):not([type="button"]), 
+  html[data-theme="dark"] textarea {
+      color: #ffffff !important;
+      -webkit-text-fill-color: #ffffff !important;
+      caret-color: #ffffff !important;
+  }
+
 /* Custom Quill Font Sizes */
 .ql-editor .ql-size-12px { font-size: 12px; }
 .ql-editor .ql-size-14px { font-size: 14px; }

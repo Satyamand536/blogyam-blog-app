@@ -31,7 +31,11 @@ export const AuthProvider = ({ children }) => {
 
     const login = async (email, password) => {
         try {
-            const { data } = await api.post('/signin', { email, password });
+            // Encrypt password before sending
+            const { encryptPassword } = await import('../utils/encryption.js');
+            const encryptedPassword = await encryptPassword(password);
+            
+            const { data } = await api.post('/signin', { email, password: encryptedPassword });
             if (data.success) {
                 if (data.user) {
                     setUser(data.user);
@@ -54,7 +58,11 @@ export const AuthProvider = ({ children }) => {
 
     const signup = async (name, email, password) => {
         try {
-            const { data } = await api.post('/signup', { name, email, password });
+            // Encrypt password before sending
+            const { encryptPassword } = await import('../utils/encryption.js');
+            const encryptedPassword = await encryptPassword(password);
+            
+            const { data } = await api.post('/signup', { name, email, password: encryptedPassword });
             return { success: data.success };
         } catch (error) {
             let errorMsg = "Signup failed. Please try again.";

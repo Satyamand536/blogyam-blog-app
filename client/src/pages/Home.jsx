@@ -148,7 +148,7 @@ export default function Home() {
                                     <img 
                                         src={getImageUrl(bestOfWeek.coverImageURL)} 
                                         alt={bestOfWeek.title} 
-                                        className="absolute inset-0 w-full h-full object-cover object-center transform group-hover:scale-105 transition-transform duration-1000"
+                                        className="absolute inset-0 w-full h-full object-contain object-center transform group-hover:scale-105 transition-transform duration-1000"
                                     />
                                     <div className="absolute top-6 left-6 z-20">
                                         <div className="px-5 py-2 bg-orange-600 text-white font-black text-xs rounded-full uppercase tracking-widest shadow-xl flex items-center gap-2 animate-pulse">
@@ -214,7 +214,7 @@ export default function Home() {
                                         <img 
                                             src={getImageUrl(blog.coverImageURL)} 
                                             alt={blog.title}
-                                            className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
+                                            className="w-full h-full object-contain transition-transform duration-1000 group-hover:scale-110"
                                         />
                                         <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent flex flex-col justify-end p-8">
                                             <span className="px-3 py-1 bg-white/10 backdrop-blur-md border border-white/20 text-white rounded-full text-[10px] font-black uppercase tracking-widest self-start mb-4">

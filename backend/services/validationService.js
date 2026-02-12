@@ -3,7 +3,7 @@ const REGEX = {
     EMAIL: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
     
     // Min 8 chars, 1 Upper, 1 Lower, 1 Number, 1 Special
-    PASSWORD: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).{8,}$/,
+    PASSWORD: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[~`@#$%^&*()_\-+={}\[\]|\\:;"'<>,.?/]).{8,}$/,
     
     // Min 3 chars, contains at least one space (First and Last name)
     FULL_NAME: /^[a-zA-Z]{1,}\s+[a-zA-Z]{1,}.*$/

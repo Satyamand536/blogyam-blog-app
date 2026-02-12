@@ -12,9 +12,32 @@ function checkForAuthenticationCookie(cookieName){
             return next();
         }
         try {
-            const userPayload=validateToken(tokenCookieValue);
+            // Decrypt cookie value (Obfuscation)
+            const { decryptCookie, encryptCookie } = require('../services/encryption');
+            const decryptedToken = decryptCookie(tokenCookieValue);
+            
+            const userPayload=validateToken(decryptedToken);
             req.user=userPayload;
-    }
+
+            // AUTO-MIGRATE LEGACY TOKENS:
+            // If the token was NOT encrypted (decrypted === original), we must encrypt it now
+            // and update the cookie to ensure "old users" also get hidden tokens immediately.
+            if (decryptedToken === tokenCookieValue) {
+                const encryptedNewCookie = encryptCookie(decryptedToken);
+                
+                const cookieOptions = {
+                    httpOnly: true,
+                    secure: process.env.NODE_ENV === 'production',
+                    sameSite: process.env.NODE_ENV === 'production' ? 'Strict' : 'Lax',
+                    path: '/',
+                    maxAge: 7 * 24 * 60 * 60 * 1000
+                };
+
+                // Update the cookie securely on the fly
+                res.cookie(activeCookieName, encryptedNewCookie, cookieOptions);
+                console.log(`[Security] Automatically migrated legacy token for user ${userPayload._id} to encrypted format`);
+            }
+        }
         catch (error) {
             // Silently fail if token is invalid, req.user remains undefined
         };

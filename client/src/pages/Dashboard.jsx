@@ -411,11 +411,11 @@ export default function Dashboard() {
                                         to={`/blog/${historyItem.blogId._id}`}
                                         className="flex group bg-[var(--bg-card)] rounded-3xl border border-[var(--border-color)] overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1"
                                     >
-                                        <div className="w-1/3 overflow-hidden relative">
+                                        <div className="w-1/3 overflow-hidden relative bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
                                             <img 
                                                 src={historyItem.blogId.coverImageURL ? getImageUrl(historyItem.blogId.coverImageURL) : '/images/default-blog.png'} 
                                                 alt={historyItem.blogId.title}
-                                                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                                                className="w-full h-full object-contain transition-transform duration-700 group-hover:scale-110"
                                             />
                                             <div className="absolute inset-0 bg-gradient-to-r from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                                         </div>

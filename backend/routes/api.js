@@ -42,6 +42,12 @@ const { signupRateLimiter } = require('../middlewares/rateLimit');
 const { storage } = require('../utils/cloudinary');
 const upload = multer({ storage: storage });
 
+// Public Key Route for Password Encryption
+router.get('/auth/public-key', (req, res) => {
+    const { publicKey } = require('../services/encryption');
+    res.json({ success: true, publicKey });
+});
+
 // Auth Routes
 router.post('/signin', signin);
 router.post('/signup', signupRateLimiter, signup);
