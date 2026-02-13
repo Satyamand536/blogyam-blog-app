@@ -21,10 +21,10 @@ export default function Hero() {
                     <div className="text-left animate-slide-up order-1">
                         {/* Heading - Compact with tight spacing */}
                         <h1 className="font-black leading-tight mb-4 transition-colors duration-500">
-                            <span className="block text-5xl sm:text-6xl lg:text-7xl mb-1 text-black dark:text-white">
+                            <span className="block text-5xl sm:text-6xl lg:text-7xl mb-1 transition-colors duration-500" style={{ color: theme === 'light' ? '#000000' : '#ffffff' }}>
                                 Amplify Your
                             </span>
-                            <span className="block text-5xl sm:text-6xl lg:text-7xl mb-1 text-black dark:text-white">
+                            <span className="block text-5xl sm:text-6xl lg:text-7xl mb-1 transition-colors duration-500" style={{ color: theme === 'light' ? '#000000' : '#ffffff' }}>
                                 Mind.
                             </span>
                             <span className="block text-5xl sm:text-6xl lg:text-7xl" style={{ color: theme === 'light' ? '#ff8c42' : '#a78bfa' }}>
