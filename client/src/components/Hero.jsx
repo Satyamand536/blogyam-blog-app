@@ -36,7 +36,7 @@ export default function Hero() {
                         </h1>
                         
                         {/* Description paragraph - Highly Visible */}
-                        <p className="mt-4 text-base sm:text-lg lg:text-xl text-black dark:text-gray-100 max-w-lg leading-relaxed transition-colors duration-500 font-bold" style={{ color: theme === 'light' ? '#000000' : undefined }}>
+                        <p className="mt-4 text-base sm:text-lg lg:text-xl text-black dark:text-gray-100 max-w-lg leading-relaxed transition-colors duration-500 font-bold" style={{ color: theme === 'light' ? '#000000' : '#ffffff' }}>
                            See the latest blogs, publish blogs, generate custom memes, and explore daily quotes on a platform designed for clarity. Use our AI Assistant to decode complex text instantly and shape your weekdays to your vibe.
                         </p>
                         
