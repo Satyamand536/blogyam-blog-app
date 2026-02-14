@@ -169,13 +169,16 @@
   }
 
   /* --- CRITICAL FIX: FORCE INPUT TEXT COLORS --- */
-  /* Normal manual typing and focused states */
+  /* Normal manual typing and focused states - APPLIES TO ALL THEMES FOR SPECIFIC CLASS */
+  input.force-text-visibility,
+  html.dark input.force-text-visibility,
+  html[data-theme="dark"] input.force-text-visibility,
   html:not(.dark) input.force-text-visibility,
   html:not([data-theme="dark"]) input.force-text-visibility,
   #root input:not([type="submit"]):not([type="button"]):not(.dark *),
   .glass-card input:not([type="submit"]) {
       color: #000000 !important;
-      background-color: #ffffff !important;
+      background-color: #ffffff !important; /* Force white background for contrast */
       -webkit-text-fill-color: #000000 !important;
       caret-color: #000000 !important;
       opacity: 1 !important;
@@ -183,16 +186,18 @@
 
   /* Placeholder visibility */
   html:not(.dark) input::placeholder,
-  html:not([data-theme="dark"]) input::placeholder {
+  html:not([data-theme="dark"]) input::placeholder,
+  html.dark input.force-text-visibility::placeholder,
+  html[data-theme="dark"] input.force-text-visibility::placeholder {
       color: #6b7280 !important; /* gray-500 */
       opacity: 1 !important;
   }
 
-  /* Maintain White for Dark Mode */
-  html.dark input:not([type="submit"]):not([type="button"]), 
-  html.dark textarea,
-  html[data-theme="dark"] input:not([type="submit"]):not([type="button"]), 
-  html[data-theme="dark"] textarea {
+  /* Maintain White for Dark Mode - EXCLUDING forced inputs */
+  html.dark input:not([type="submit"]):not([type="button"]):not(.force-text-visibility), 
+  html.dark textarea:not(.force-text-visibility),
+  html[data-theme="dark"] input:not([type="submit"]):not([type="button"]):not(.force-text-visibility), 
+  html[data-theme="dark"] textarea:not(.force-text-visibility) {
       color: #ffffff !important;
       -webkit-text-fill-color: #ffffff !important;
       caret-color: #ffffff !important;

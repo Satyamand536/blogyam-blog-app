@@ -62,7 +62,7 @@ export default function Signup() {
                             required
                             value={name}
                             onChange={(e) => setName(e.target.value)}
-                            className="w-full pl-12 pr-4 py-4 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl !text-black dark:!text-white placeholder-gray-400 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all duration-300 shadow-sm force-text-visibility"
+                            className="w-full pl-12 pr-4 py-4 bg-white dark:bg-gray-100 border border-gray-200 dark:border-white/10 rounded-2xl !text-black dark:!text-black placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all duration-300 shadow-sm force-text-visibility"
                             style={{ color: 'inherit' }}
                             placeholder="Full Name"
                         />
@@ -75,7 +75,7 @@ export default function Signup() {
                             required
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
-                            className="w-full pl-12 pr-4 py-4 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl !text-black dark:!text-white placeholder-gray-400 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all duration-300 shadow-sm force-text-visibility"
+                            className="w-full pl-12 pr-4 py-4 bg-white dark:bg-gray-100 border border-gray-200 dark:border-white/10 rounded-2xl !text-black dark:!text-black placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all duration-300 shadow-sm force-text-visibility"
                             style={{ color: 'inherit' }}
                             placeholder="Email"
                         />
@@ -88,7 +88,7 @@ export default function Signup() {
                             required
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                            className="w-full pl-12 pr-4 py-4 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl !text-black dark:!text-white placeholder-gray-400 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all duration-300 shadow-sm force-text-visibility"
+                            className="w-full pl-12 pr-4 py-4 bg-white dark:bg-gray-100 border border-gray-200 dark:border-white/10 rounded-2xl !text-black dark:!text-black placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all duration-300 shadow-sm force-text-visibility"
                             style={{ color: 'inherit' }}
                             placeholder="Password"
                         />
