@@ -52,6 +52,8 @@ router.get('/auth/public-key', (req, res) => {
 router.post('/signin', signin);
 router.post('/signup', signupRateLimiter, signup);
 router.post('/logout', logout);
+router.get('/auth/check-email', require('../controllers/apiController').checkEmail);
+router.get('/auth/check-login', getMe);
 
 // Public Routes
 router.get('/blogs', getAllBlogs);

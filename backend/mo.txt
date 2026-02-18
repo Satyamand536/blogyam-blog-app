@@ -1,0 +1,267 @@
+to be used in hash password before saving in user.js
+
+userSchema.statics.matchPasswordAndGenerateToken = async function (email, password) {
+  const user = await this.findOne({ email });
+  if (!user) throw new Error("User not found!");
+
+  const salt = user.salt;
+  const hashedPassword = user.password;
+
+  const userProvidedHash = createHmac("sha256", salt)
+    .update(password)
+    .digest("hex");
+
+  if (hashedPassword !== userProvidedHash) throw new Error("Incorrect password");
+
+  return createTokenForUser(user);
+};
+
+const User = mongoose.model("user", userSchema);
+module.exports = User;
+
+
+to be used in user route:
+
+const express = require("express");
+const router = express.Router();
+const User = require("../models/user");
+const { validateToken } = require("../services/authentication");
+
+// ----------------------------
+// VALIDATION REGEX
+// ----------------------------
+const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+
+const passwordRegex =
+  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
+// ----------------------------
+// EMAIL CHECK
+// ----------------------------
+router.get("/check-email", async (req, res) => {
+  try {
+    const { email } = req.query;
+
+    if (!email) return res.status(400).json({ error: "Email required" });
+
+    if (!emailRegex.test(email))
+      return res.status(400).json({ error: "Invalid email format" });
+
+    const user = await User.findOne({ email: email.toLowerCase() });
+    res.json({ exists: !!user });
+  } catch (err) {
+    console.error("Email check error:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+// ----------------------------
+// SIGNUP ROUTE
+// ----------------------------
+router.post("/signup", async (req, res) => {
+  try {
+    const { fullName, email, password } = req.body;
+
+    if (!fullName || !email || !password)
+      return res.status(400).json({ error: "All fields required" });
+
+    if (fullName.trim().length < 3)
+      return res
+        .status(400)
+        .json({ error: "Full name must be at least 3 characters" });
+
+    if (!emailRegex.test(email))
+      return res.status(400).json({ error: "Invalid email format" });
+
+    if (!passwordRegex.test(password)) {
+      return res.status(400).json({
+        error:
+          "Password must be 8+ chars, include uppercase, lowercase, number & special char",
+      });
+    }
+
+    const normalizedEmail = email.toLowerCase();
+    const normalizedPassword = password.toLowerCase();
+
+    // ⛔ BLOCKED PATTERNS (per user request)
+    if (normalizedEmail.includes("testuser") || fullName.toLowerCase().includes("testuser")) {
+      return res.status(400).json({ error: "Registration with 'testuser' patterns is not allowed." });
+    }
+    if (normalizedPassword === "password@123") {
+      return res.status(400).json({ error: "This password is too common and not allowed." });
+    }
+
+    const existingUser = await User.findOne({ email: normalizedEmail });
+    if (existingUser)
+      return res.status(409).json({ error: "User already exists" });
+
+    const newUser = new User({
+      fullName,
+      email: normalizedEmail,
+      password,
+    });
+
+    await newUser.save();
+
+    return res.status(201).json({ message: "User registered successfully" });
+  } catch (err) {
+    console.error("Signup error:", err);
+    return res.status(500).json({ error: "Server error" });
+  }
+});
+
+// ----------------------------
+// SIGNIN
+// ----------------------------
+router.post("/signin", async (req, res) => {
+  const { email, password } = req.body;
+
+  if (!email || !password)
+    return res.status(400).json({ error: "Email and password required" });
+
+  try {
+    const user = await User.findOne({ email: email.toLowerCase() });
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    const token = await User.matchPasswordAndGenerateToken(
+      email.toLowerCase(),
+      password
+    );
+
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+    });
+
+    return res.json({
+      message: "Signin successful",
+      user: { 
+        _id: user._id, 
+        fullName: user.fullName, 
+        email: user.email,
+        role: user.role,
+        current_stage: user.current_stage,
+        readiness_score: user.readiness_score,
+        profile: user.profile,
+        resume_url: user.resume_url
+      },
+    });
+  } catch (err) {
+    if (err.message === "User not found!" || err.message === "User not found") {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    if (err.message === "Incorrect password") {
+      // No need to log known password errors as full server errors
+      return res.status(401).json({ error: "Incorrect password" });
+    }
+
+    console.error("Signin unexpected error:", err);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// ----------------------------
+// CHECK LOGIN
+// ----------------------------
+router.get("/check-login", async (req, res) => {
+  try {
+    const token = req.cookies.token;
+    if (!token) return res.json({ loggedIn: false });
+
+    const decoded = validateToken(token);
+    const user = await User.findById(decoded._id).select("fullName email role current_stage readiness_score profile resume_url");
+
+    if (!user) return res.json({ loggedIn: false });
+
+    return res.json({
+      loggedIn: true,
+      user: { 
+        _id: user._id,
+        fullName: user.fullName, 
+        email: user.email,
+        role: user.role,
+        current_stage: user.current_stage,
+        readiness_score: user.readiness_score,
+        profile: user.profile,
+        resume_url: user.resume_url
+      },
+    });
+  } catch (err) {
+    console.error("Check login error:", err);
+    return res.status(401).json({ loggedIn: false });
+  }
+});
+
+// ----------------------------
+// LOGOUT
+// ----------------------------
+router.post("/logout", (req, res) => {
+  res.clearCookie("token");
+  return res.json({ message: "Logged out successfully" });
+});
+
+module.exports = router;
+
+
+to be used in authentication:
+
+const JWT = require("jsonwebtoken");
+
+const secret = process.env.JWT_SECRET || "$perumanu@123";
+
+function createTokenForUser(user) {
+  const payload = {
+    _id: user._id,
+    name: user.fullName || user.name,
+    email: user.email,
+    profileImageURL: user.profileImageURL,
+    role: user.role,
+  };
+  
+  const token = JWT.sign(payload, secret );
+  return token;
+}
+
+function validateToken(token) {
+  // Validate safely, throw if invalid
+  const payload = JWT.verify(token, secret);
+  return payload;
+}
+
+module.exports = {
+  createTokenForUser,
+  validateToken,
+};
+
+
+auth.js:middleware
+
+// backend/middlewares/auth.js
+const jwt = require('jsonwebtoken');
+const User = require('./models/user');
+
+function checkForAuthenticationCookie(cookieName) {
+  return async (req, res, next) => {
+    const tokenCookieValue = req.cookies[cookieName];
+    if (!tokenCookieValue) {
+      // No token, continue without user
+      return next();
+    }
+
+    try {
+      const payload = jwt.verify(tokenCookieValue, process.env.JWT_SECRET || 'default_secret');
+      const user = await User.findById(payload._id);
+      if (user) {
+        req.user = user;
+      }
+    } catch (error) {
+      // Invalid token, continue without user
+      console.error('Auth error:', error.message);
+    }
+    next();
+  };
+}
+
+module.exports = { checkForAuthenticationCookie };

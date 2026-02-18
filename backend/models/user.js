@@ -1,6 +1,7 @@
-const bcrypt = require('bcryptjs');
 const { Schema, model } = require('mongoose');
 const { createTokenForUser } = require('../services/authentication');
+const crypto = require('crypto');
+const bcrypt = require('bcryptjs'); // Keep for legacy check
 
 const userSchema = new Schema({
     name: {
@@ -17,7 +18,6 @@ const userSchema = new Schema({
     },
     salt: {
         type: String,
-        // salt is no longer needed for new bcrypt hashes, but kept for legacy check
     },
     password: {
         type: String,
@@ -95,13 +95,14 @@ userSchema.pre('save', async function (next) {
     
     if (!user.isModified('password')) return next();
     
-    // Generate a unique custom salt for this user (different from Bcrypt's internal salt)
-    const crypto = require('crypto');
-    user.salt = crypto.randomBytes(16).toString('hex');
+    // Generate a unique salt for this user
+    const salt = crypto.randomBytes(16).toString('hex');
+    const hashedPassword = crypto.createHmac("sha256", salt)
+        .update(user.password)
+        .digest("hex");
 
-    // Use Bcrypt to hash the 'password + customSalt' string
-    const bcryptSalt = await bcrypt.genSalt(10);
-    user.password = await bcrypt.hash(user.password + user.salt, bcryptSalt);
+    user.salt = salt;
+    user.password = hashedPassword;
 
     next();
 });
@@ -165,56 +166,48 @@ userSchema.static("matchPasswordAndGenerateToken", async function (email, passwo
     const user = await this.findOne({ email });
     if (!user) throw new Error("User not found!");
 
-    console.log(`[User Model Debug] Checking password for: ${email}`);
-    
-    const storedPassword = user.password;
     const salt = user.salt;
+    const hashedPassword = user.password;
     let isMatch = false;
 
-    // Check if it's a Bcrypt hash (starts with $2a$ or $2b$)
-    if (storedPassword.startsWith('$2a$') || storedPassword.startsWith('$2b$')) {
-        console.log(`[User Model Debug] Verifying Bcrypt hash...`);
-        // Use password + salt if salt exists, else just password (for transitional users)
-        const checkValue = salt ? (password + salt) : password;
-        isMatch = await bcrypt.compare(checkValue, storedPassword);
-    } else {
-        console.log(`[User Model Debug] Verifying Legacy SHA256 hash...`);
-        const crypto = require('crypto');
-        
-        // Strategy A: password + salt
-        const hashA = crypto.createHash('sha256').update(password + salt).digest('hex');
-        // Strategy B: salt + password
-        const hashB = crypto.createHash('sha256').update(salt + password).digest('hex');
-        // Strategy C: HMAC
-        const hashC = crypto.createHmac('sha256', salt).update(password).digest('hex');
+    // 1. TRY NEW HMAC-SHA256 METHOD (User provided)
+    const userProvidedHash = crypto.createHmac("sha256", salt)
+        .update(password)
+        .digest("hex");
 
-        if (storedPassword === hashA) {
-            console.log(`[User Model Debug] Match found (Strategy A: pass + salt)`);
-            isMatch = true;
-        } else if (storedPassword === hashB) {
-            console.log(`[User Model Debug] Match found (Strategy B: salt + pass)`);
-            isMatch = true;
-        } else if (storedPassword === hashC) {
-            console.log(`[User Model Debug] Match found (Strategy C: HMAC)`);
-            isMatch = true;
-        }
+    if (hashedPassword === userProvidedHash) {
+        isMatch = true;
+    } 
+    // 2. FALLBACK: Check if it's a Bcrypt hash (Legacy support for current users)
+    else if (hashedPassword.startsWith('$2a$') || hashedPassword.startsWith('$2b$')) {
+        console.log(`[Security] Checking legacy Bcrypt hash for ${email}...`);
+        // Use password + salt if salt exists from previous implementation
+        const checkValue = salt ? (password + salt) : password;
+        isMatch = await bcrypt.compare(checkValue, hashedPassword);
         
-        // AUTO-MIGRATE TO BCRYPT ON SUCCESSFUL LOGIN
         if (isMatch) {
-            console.log(`[Security] Migrating user ${email} from legacy SHA256 to modern Bcrypt...`);
-            user.password = password; // pre-save hook will hash it with modern Bcrypt + Salt
+            console.log(`[Security] Migrating user ${email} from Bcrypt to HMAC-SHA256...`);
+            user.password = password; // pre-save hook will hash it with HMAC
+            await user.save();
+        }
+    }
+    // 3. FALLBACK: Legacy SHA256 (Non-HMAC, previous iterations)
+    else {
+        console.log(`[Security] Checking legacy SHA256 formats for ${email}...`);
+        const hashA = crypto.createHash('sha256').update(password + salt).digest('hex');
+        const hashB = crypto.createHash('sha256').update(salt + password).digest('hex');
+
+        if (hashedPassword === hashA || hashedPassword === hashB) {
+            isMatch = true;
+            console.log(`[Security] Migrating user ${email} from legacy SHA256 to HMAC-SHA256...`);
+            user.password = password;
             await user.save();
         }
     }
 
-    if (!isMatch) {
-        console.log(`[User Model Debug] Password mismatch.`);
-        throw new Error('incorrect password');
-    }
+    if (!isMatch) throw new Error("Incorrect password");
 
-    console.log(`[User Model Debug] Password matched. Generating token...`);
-    const token = createTokenForUser(user);
-    return token;
+    return createTokenForUser(user);
 });
 
 const User = model('user', userSchema);

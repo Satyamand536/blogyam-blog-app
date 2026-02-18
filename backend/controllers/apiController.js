@@ -12,68 +12,49 @@ const xss = require('xss');
 
 
 async function signin(req, res) {
-
     let { email, password } = req.body;
     
-    // Check if password is encrypted (starts with base64 pattern or is very long)
-    // Encrypted passwords will be longer than typical passwords
+    // RSA Decryption (Transport Security - Hidden from Network Panel)
     const { decryptPassword } = require('../services/encryption');
-    
-    // DEBUG LOGGING (Detailed diagnosis)
-    console.log(`[Auth Debug] Signin attempt for: ${email}`);
     
     if (password && password.length > 100) {
         try {
-            console.log(`[Auth Debug] Encrypted password received. Length: ${password.length}`);
             const decrypted = decryptPassword(password);
-            if (!decrypted) throw new Error('Decryption returned null');
-            console.log(`[Auth Debug] Decryption successful.`);
+            if (!decrypted) throw new Error('Decryption failed');
             password = decrypted;
         } catch (decryptError) {
             console.error('[Auth FAIL] Decryption failed:', decryptError.message);
             return res.status(400).json({ 
                 success: false, 
-                error: 'Security Handshake Failed. Please refresh the page and try again.' 
+                error: 'Security Handshake Failed. Please refresh the page.' 
             });
         }
-    } else {
-        console.log(`[Auth Debug] Password received as plain text. Length: ${password ? password.length : 0}`);
     }
-    
-    const { isValid, errors } = validateAuthData({ email, password }, false);
-    if (!isValid) {
-        console.log("Validation Failed for Signin:", errors);
-        return res.status(400).json({ success: false, error: errors[0] });
+
+    if (!email || !password) {
+        return res.status(400).json({ success: false, error: "Email and password required" });
     }
 
     try {
         const normalizedEmail = email.toLowerCase();
         
-        // Debug Finding User First
-        const userExists = await User.findOne({ email: normalizedEmail });
-        if (!userExists) {
-            console.log(`[Auth Debug] User not found: ${normalizedEmail}`);
+        // Find user
+        const user = await User.findOne({ email: normalizedEmail });
+        if (!user) {
             return res.status(401).json({ success: false, error: 'Incorrect Email or Password' });
         }
-        console.log(`[Auth Debug] User found: ${userExists.email}, Role: ${userExists.role}`);
 
         const token = await User.matchPasswordAndGenerateToken(normalizedEmail, password);
-        console.log(`[Auth Debug] Token generated successfully`);
         
         // Encrypt token for cookie (Obfuscation)
         const { encryptCookie } = require('../services/encryption');
         const encryptedToken = encryptCookie(token);
         
-        const user = await User.findOne({ email: normalizedEmail });
-        
-        // OWNER OVERRIDE: Ensure specific emails are marked as owners
+        // OWNER OVERRIDE
         const adminEmails = ['satyamand536@gmail.com', 'maisatyam108@gmail.com', 'awadhinandansudha871252@gmail.com'];
-        if (adminEmails.includes(email.toLowerCase())) {
-            if (user && user.role !== 'owner') {
-                user.role = 'owner';
-                await user.save();
-                console.log(`[Security] User ${email} promoted to owner during signin`);
-            }
+        if (adminEmails.includes(normalizedEmail) && user.role !== 'owner') {
+            user.role = 'owner';
+            await user.save();
         }
 
         const userData = {
@@ -85,7 +66,6 @@ async function signin(req, res) {
         };
 
         const cookieName = process.env.NODE_ENV === 'production' ? "__Host-session_auth" : "token";
-        
         const cookieOptions = {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
@@ -94,16 +74,13 @@ async function signin(req, res) {
             maxAge: 7 * 24 * 60 * 60 * 1000 
         };
 
-        if (res.headersSent) return;
         return res.cookie(cookieName, encryptedToken, cookieOptions).json({ 
             success: true, 
+            message: "Signin successful",
             user: userData 
         });
     } catch (error) {
-        console.error(`[Login] Authentication failed for user`);
-        
-        if (res.headersSent) return;
-        // Generic error message to prevent user enumeration
+        console.error(`[Signin Error]:`, error.message);
         return res.status(401).json({ success: false, error: 'Incorrect Email or Password' });
     }
 }
@@ -111,45 +88,63 @@ async function signin(req, res) {
 async function signup(req, res) {
     let { name, email, password } = req.body;
     
-    // Decrypt password if encrypted (same logic as signin)
+    // RSA Decryption
     const { decryptPassword } = require('../services/encryption');
     
-    console.log(`[Signup Debug] Attempt for: ${email}`);
     if (password && password.length > 100) {
         try {
-            console.log(`[Signup Debug] Encrypted password received. Length: ${password.length}`);
             const decrypted = decryptPassword(password);
-            if (!decrypted) throw new Error('Decryption returned null');
-            console.log(`[Signup Debug] Decryption successful.`);
+            if (!decrypted) throw new Error('Decryption failed');
             password = decrypted;
         } catch (decryptError) {
             console.error('[Signup FAIL] Decryption failed:', decryptError.message);
-            return res.status(400).json({ 
-                success: false, 
-                error: 'Security Handshake Failed. Please refresh the page and try again.' 
-            });
+            return res.status(400).json({ success: false, error: 'Security Handshake Failed.' });
         }
     }
-    
-    const { isValid, errors } = validateAuthData({ name, email, password }, true);
-    if (!isValid) {
-        console.log("[Signup Validation FAIL]:", errors);
-        return res.status(400).json({ success: false, error: errors[0] });
+
+    // Validation Regex (from user snippet)
+    const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
+    if (!name || !email || !password) {
+        return res.status(400).json({ success: false, error: "All fields required" });
+    }
+
+    if (name.trim().length < 3) {
+        return res.status(400).json({ success: false, error: "Full name must be at least 3 characters" });
+    }
+
+    if (!emailRegex.test(email)) {
+        return res.status(400).json({ success: false, error: "Invalid email format" });
+    }
+
+    if (!passwordRegex.test(password)) {
+        return res.status(400).json({
+            success: false,
+            error: "Password must be 8+ chars, include uppercase, lowercase, number & special char"
+        });
+    }
+
+    const normalizedEmail = email.toLowerCase();
+    const normalizedPassword = password.toLowerCase();
+
+    // ⛔ BLOCKED PATTERNS
+    if (normalizedEmail.includes("testuser") || name.toLowerCase().includes("testuser")) {
+        return res.status(400).json({ success: false, error: "Registration with 'testuser' patterns is not allowed." });
+    }
+    if (normalizedPassword === "password@123") {
+        return res.status(400).json({ success: false, error: "This password is too common and not allowed." });
     }
 
     try {
-        const normalizedEmail = email.toLowerCase();
         const existingUser = await User.findOne({ email: normalizedEmail });
-        if (existingUser) return res.status(400).json({ success: false, error: "Email already exists" });
+        if (existingUser) return res.status(400).json({ success: false, error: "User already exists" });
 
-        // User.create triggers the pre-save hook for hashing
         const user = await User.create({ name, email: normalizedEmail, password });
         
-        if (res.headersSent) return;
-        return res.status(201).json({ success: true, message: "User created successfully" });
+        return res.status(201).json({ success: true, message: "User registered successfully" });
     } catch (error) {
         console.error('[Signup Error]:', error);
-        if (res.headersSent) return;
         return res.status(500).json({ success: false, error: "Registration failed" });
     }
 }
@@ -164,6 +159,22 @@ async function logout(req, res) {
         path: '/'
     };
     res.clearCookie(cookieName, cookieOptions).json({ success: true, message: "Logged out" });
+}
+
+async function checkEmail(req, res) {
+    try {
+        const { email } = req.query;
+        if (!email) return res.status(400).json({ success: false, error: "Email required" });
+        
+        const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+        if (!emailRegex.test(email)) return res.status(400).json({ success: false, error: "Invalid email format" });
+
+        const user = await User.findOne({ email: email.toLowerCase() });
+        res.json({ success: true, exists: !!user });
+    } catch (err) {
+        console.error("Email check error:", err);
+        res.status(500).json({ success: false, error: "Server error" });
+    }
 }
 
 // --- BLOG CONTROLLERS ---
@@ -758,6 +769,7 @@ module.exports = {
     signin,
     signup,
     logout,
+    checkEmail,
     deleteBlog,
     updateBlog,
     toggleSave,
