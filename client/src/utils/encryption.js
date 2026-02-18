@@ -16,10 +16,14 @@ function pemToArrayBuffer(pem) {
     return bytes.buffer;
 }
 
+// Backend base URL (Automatic detection for monorepo deployment)
+const rawUrl = (import.meta.env.VITE_API_URL || (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:8000')).trim();
+export const API_URL = rawUrl.replace(/\/api\/?$/, '').replace(/\/$/, '');
+
 // Fetch public key from backend
 export const getPublicKey = async () => {
     // Cache-busting to ensure we always get the latest persistent key
-    const url = `${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/api/auth/public-key?v=${Date.now()}`;
+    const url = `${API_URL}/api/auth/public-key?v=${Date.now()}`;
     
     try {
         console.log('[Encryption] Fetching SPKI public key...');
