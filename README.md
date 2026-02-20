@@ -2,6 +2,8 @@
 
 A full-stack MERN (MongoDB, Express, React, Node.js) blog application with advanced features like AI curation, meme generation, and user nominations.
 
+# Live Demo (https://blogyam-blog-app-4.onrender.com/)
+
 ## Features
 
 - **User Authentication**: Secure signup and login.
@@ -92,6 +94,4 @@ JWT_SECRET=your_jwt_secret
 4.  Push to the branch (`git push origin feature/amazing-feature`)
 5.  Open a Pull Request
 
-## License
 
-[MIT](LICENSE)
