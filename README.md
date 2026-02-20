@@ -2,7 +2,13 @@
 
 A full-stack MERN (MongoDB, Express, React, Node.js) blog application with advanced features like AI curation, meme generation, and user nominations.
 
-# Live Demo (https://blogyam-blog-app-4.onrender.com/)
+---
+
+## 🚀 Live Demo
+
+> **[Blogyam  →](https://blogyam-blog-app-4.onrender.com/)**
+
+---
 
 ## Features
 
